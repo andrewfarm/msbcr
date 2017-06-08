@@ -2,13 +2,15 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.system.MemoryStack;
 
-import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -17,7 +19,21 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("DefaultFileTemplate")
 public class HelloWorld {
 
+    private static final int POSITION_COMPONENT_COUNT = 2;
+    private static final int COLOR_COMPONENT_COUNT = 3;
+
+    private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * 4;
+
     private long window;
+
+    private float[] vertices = {
+            0.5f, 0.5f, 1f, 0f, 0f,
+            -0.5f, -0.5f, 0f, 1f, 0f,
+            0.5f, -0.5f, 0f, 0f, 1f,
+    };
+    private FloatBuffer vertexBuffer;
+
+    private DefaultShaderProgram shaderProgram;
 
     private void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -47,6 +63,12 @@ public class HelloWorld {
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
             if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+        });
+
+        glfwSetWindowSizeCallback(window, (window1, width, height) -> {
+            if (GL.getCapabilities() != null) {
+                render();
+            }
         });
 
         int[] pWidth = new int[1];
@@ -80,6 +102,13 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
+        vertexBuffer = ByteBuffer.allocateDirect(vertices.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(vertices);
+
+        shaderProgram = new DefaultShaderProgram();
+
         // Set the clear color
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
@@ -92,6 +121,20 @@ public class HelloWorld {
 
     private void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+
+        shaderProgram.useProgram();
+
+        vertexBuffer.position(0);
+        glVertexAttribPointer(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE, vertexBuffer);
+        glEnableVertexAttribArray(shaderProgram.aPositionLocation);
+
+        vertexBuffer.position(POSITION_COMPONENT_COUNT);
+        glVertexAttribPointer(shaderProgram.aColorLocation, COLOR_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE, vertexBuffer);
+        glEnableVertexAttribArray(shaderProgram.aColorLocation);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window); // swap the color buffers
 
