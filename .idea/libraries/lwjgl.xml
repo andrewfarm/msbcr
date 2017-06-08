@@ -1,0 +1,50 @@
+<component name="libraryTable">
+  <library name="lwjgl">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lwjgl/joml-1.9.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-glfw.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-jemalloc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nanovg.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nfd.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nuklear.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-openal.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-opengl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-par.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-stb.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-tinyfd.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-vulkan.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lwjgl/joml-1.9.3-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-glfw-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-jemalloc-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nanovg-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nfd-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nuklear-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-openal-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-opengl-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-par-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-stb-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-tinyfd-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-vulkan-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lwjgl/joml-1.9.3-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/joml-1.9.3-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-glfw-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-jemalloc-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nanovg-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nfd-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-nuklear-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-openal-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-opengl-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-par-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-stb-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-tinyfd-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lwjgl/lwjgl-vulkan-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
