@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -19,19 +20,24 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("DefaultFileTemplate")
 public class HelloWorld {
 
-    private static final int POSITION_COMPONENT_COUNT = 2;
-    private static final int COLOR_COMPONENT_COUNT = 3;
+    private static final int POSITION_COMPONENT_COUNT = 3;
+    private static final int NORMAL_COMPONENT_COUNT = 3;
+    private static final int TEXTURE_COMPONENT_COUNT = 2;
 
-    private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * 4;
+    private static final int STRIDE =
+            (POSITION_COMPONENT_COUNT +
+                    NORMAL_COMPONENT_COUNT +
+                    TEXTURE_COMPONENT_COUNT) * 4;
 
     private long window;
 
-    private float[] vertices = {
-            0.5f, 0.5f, 1f, 0f, 0f,
-            -0.5f, -0.5f, 0f, 1f, 0f,
-            0.5f, -0.5f, 0f, 0f, 1f,
-    };
+//    private float[] vertices = {
+//            0.5f, 0.5f, 1f, 0f, 0f,
+//            -0.5f, -0.5f, 0f, 1f, 0f,
+//            0.5f, -0.5f, 0f, 0f, 1f,
+//    };
     private FloatBuffer vertexBuffer;
+    private IntBuffer indexBuffer;
 
     private DefaultShaderProgram shaderProgram;
 
@@ -102,10 +108,18 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        vertexBuffer = ByteBuffer.allocateDirect(vertices.length * 4)
+        final float radius = 1;
+        int meridians = 16;
+        int parallels = 7;
+
+        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
                 .order(ByteOrder.nativeOrder())
-                .asFloatBuffer()
-                .put(vertices);
+                .asFloatBuffer();
+        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereIndexCount(meridians, parallels) * 4)
+                .order(ByteOrder.nativeOrder())
+                .asIntBuffer();
+
+        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, radius, meridians, parallels);
 
         shaderProgram = new DefaultShaderProgram();
 
@@ -116,6 +130,11 @@ public class HelloWorld {
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             render();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -129,12 +148,8 @@ public class HelloWorld {
                 GL_FLOAT, false, STRIDE, vertexBuffer);
         glEnableVertexAttribArray(shaderProgram.aPositionLocation);
 
-        vertexBuffer.position(POSITION_COMPONENT_COUNT);
-        glVertexAttribPointer(shaderProgram.aColorLocation, COLOR_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE, vertexBuffer);
-        glEnableVertexAttribArray(shaderProgram.aColorLocation);
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        indexBuffer.position(0);
+        glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 
