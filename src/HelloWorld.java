@@ -1,14 +1,8 @@
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.stb.STBImage;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -18,7 +12,6 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -46,6 +39,9 @@ public class HelloWorld {
     private FloatBuffer vertexBuffer;
     private IntBuffer indexBuffer;
 
+    private FloatBuffer skyboxVertexBuffer;
+    private ByteBuffer skyboxIndexBuffer;
+
     private float globeRadius = 1;
 
     private float camAzimuth = 0, camElev = 0;
@@ -60,8 +56,10 @@ public class HelloWorld {
     private Matrix4f mvpMatrix = new Matrix4f();
 
     private DefaultShaderProgram shaderProgram;
+    private StarfieldShaderProgram starfieldShaderProgram;
 
-    private int textureID;
+    private int globeTexture;
+    private int starfieldTexture;
 
     private void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -95,6 +93,7 @@ public class HelloWorld {
 
         glfwSetWindowSizeCallback(window, (window1, width, height) -> {
             if (GL.getCapabilities() != null) {
+                glViewport(0, 0, width, height);
                 updateProjectionMatrix(width, height);
                 render();
             }
@@ -171,6 +170,45 @@ public class HelloWorld {
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
+        skyboxVertexBuffer = ByteBuffer.allocateDirect(24 * STRIDE)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer()
+                .put(new float[] {
+                       -1,  1,  1,
+                        1,  1,  1,
+                       -1, -1,  1,
+                        1, -1,  1,
+                       -1,  1, -1,
+                        1,  1, -1,
+                       -1, -1, -1,
+                        1, -1, -1,});
+
+        skyboxIndexBuffer = ByteBuffer.allocateDirect(36 * 4).put(new byte[] {
+                //Front
+                1, 3, 0,
+                0, 3, 2,
+
+                //Back
+                4, 6, 5,
+                5, 6, 7,
+
+                //Left
+                0, 2, 4,
+                4, 2, 6,
+
+                //Right
+                5, 7, 1,
+                1, 7, 3,
+
+                //Top
+                5, 1, 4,
+                4, 1, 0,
+
+                //Bottom
+                6, 2, 7,
+                7, 2, 3,
+        });
+
         ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
 
 //        vertexBuffer.position(0);
@@ -181,8 +219,17 @@ public class HelloWorld {
 //        }
 
         shaderProgram = new DefaultShaderProgram();
+        starfieldShaderProgram = new StarfieldShaderProgram();
 
-        textureID = loadTexture("res/earth-max2.jpeg");
+        globeTexture = TextureLoader.loadTexture2D("res/earth-max2.jpeg");
+        starfieldTexture = TextureLoader.loadTextureCube(new String[] {
+                "res/dallasw_left.jpg",
+                "res/dallasw_right.jpg",
+                "res/dallasw_bottom.jpg",
+                "res/dallasw_top.jpg",
+                "res/dallasw_front.jpg",
+                "res/dallasw_back.jpg"
+        });
 
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
@@ -191,6 +238,8 @@ public class HelloWorld {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_CULL_FACE);
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
@@ -207,11 +256,32 @@ public class HelloWorld {
     private void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-        shaderProgram.useProgram();
         updateMvpMatrix();
+
+        //draw starfield
+
+        starfieldShaderProgram.useProgram();
+        Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
+        vpRotationMatrix.m30(0);
+        vpRotationMatrix.m31(0);
+        vpRotationMatrix.m32(0);
+        starfieldShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
+        starfieldShaderProgram.setTexture(starfieldTexture);
+
+        skyboxVertexBuffer.position(0);
+        glVertexAttribPointer(starfieldShaderProgram.aPositionLocation, 3,
+                GL_FLOAT, false, 12, skyboxVertexBuffer);
+        glEnableVertexAttribArray(starfieldShaderProgram.aPositionLocation);
+
+        skyboxIndexBuffer.position(0);
+        glDrawElements(GL_TRIANGLES, skyboxIndexBuffer);
+
+        //draw globe
+
+        shaderProgram.useProgram();
         shaderProgram.setMvpMatrix(mvpMatrix);
         shaderProgram.setModelMatrix(modelMatrix);
-        shaderProgram.setTexture(textureID);
+        shaderProgram.setTexture(globeTexture);
 
         int dataOffset = 0;
 
@@ -255,44 +325,6 @@ public class HelloWorld {
 
     private void updateMvpMatrix() {
         mvpMatrix.set(projectionMatrix).mul(viewMatrix).mul(modelMatrix);
-    }
-
-    int loadTexture(String imgPath) {
-        int[] imgWidth = new int[1];
-        int[] imgHeight = new int[1];
-        @SuppressWarnings("unused") int[] channels = new int[1];
-        System.out.println("loading image");
-        ByteBuffer buf = STBImage.stbi_load(imgPath, imgWidth, imgHeight, channels, 3);
-        System.out.println("image loaded");
-
-        //create texture object
-        final int[] textureObjectIDs = new int[1];
-        glGenTextures(textureObjectIDs);
-
-        //check for errors
-        if (textureObjectIDs[0] == 0) {
-            System.err.println("could not create texture");
-            return 0;
-        }
-
-        //bind texture to GL_TEXTURE_2D
-        glBindTexture(GL_TEXTURE_2D, textureObjectIDs[0]);
-
-        //specify texture filtering (scaling) methods
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        //load texture data into OpenGL
-        buf.position(0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth[0], imgHeight[0], 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
-
-        //generate mipmaps
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        //unbind texture from GL_TEXTURE_2D
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        return textureObjectIDs[0];
     }
 
     public static void main(String[] args) {
