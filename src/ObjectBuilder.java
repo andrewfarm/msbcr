@@ -13,18 +13,84 @@ public abstract class ObjectBuilder {
     }
 
     static int getTexturedSphereIndexCount(int meridians, int parallels) {
-        return ((parallels + 2) * 2 + 2) * (meridians + 1);
+        return ((parallels + 2) * 2 + 2) * (meridians + 1) - 2;
     }
 
     static int getTexturedFacetedSphereVertexCount(int meridians, int parallels) {
-        return meridians * (parallels + 2) * 4;
+        return (meridians + 1) * (parallels + 2) * 4;
     }
 
     static int getTexturedFacetedSphereIndexCount(int meridians, int parallels) {
-        return meridians * (parallels * 4 + 2);
+        return meridians * (parallels + 1) * 6;
     }
 
     static void buildTexturedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels) {
+        generateSphereVertices(vertexBuf, radius, meridians, parallels, 1);
+
+        int col1, col2;
+        int col1StartIndex, col2StartIndex;
+        for (col1 = 0; col1 < meridians; col1++) {
+            col2 = col1 + 1;
+            col1StartIndex = col1 * (parallels + 2);
+            col2StartIndex = col2 * (parallels + 2);
+
+            for (int row = 0; row < parallels + 2; row++) {
+                indexBuf.put(col1StartIndex + row);
+                indexBuf.put(col2StartIndex + row);
+            }
+
+            //degenerate vertices
+            if (col2 < meridians) {
+                indexBuf.put(col2StartIndex + parallels + 1);
+                indexBuf.put(col2StartIndex + parallels + 2);
+            }
+        }
+    }
+
+    static void buildTexturedFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels) {
+        generateSphereVertices(vertexBuf, radius, meridians, parallels, 4);
+
+        final int[] faceVertexIndices = new int[4];
+        int col1, col2;
+        int col1StartIndex, col2StartIndex;
+        for (col1 = 0; col1 < meridians; col1++) {
+            col2 = col1 + 1;
+            col1StartIndex = col1 * (parallels + 2);
+            col2StartIndex = col2 * (parallels + 2);
+
+            for (int row = 0; row < parallels + 1; row ++) {
+
+                faceVertexIndices[0] = (col1StartIndex + row) * 4 + 3;
+                faceVertexIndices[1] = (col2StartIndex + row) * 4 + 2;
+                faceVertexIndices[2] = (col1StartIndex + row + 1) * 4 + 1;
+                faceVertexIndices[3] = (col2StartIndex + row + 1) * 4;
+
+                Vector3f faceNormal = new Vector3f();
+                for (int faceVertexIndex : faceVertexIndices) {
+                    faceNormal.add(new Vector3f(
+                            vertexBuf.get(faceVertexIndex * 8 + 3),
+                            vertexBuf.get(faceVertexIndex * 8 + 4),
+                            vertexBuf.get(faceVertexIndex * 8 + 5))
+                            .normalize());
+                }
+                faceNormal.normalize();
+                for (int faceVertexIndex : faceVertexIndices) {
+                    vertexBuf.put(faceVertexIndex * 8 + 3, faceNormal.x);
+                    vertexBuf.put(faceVertexIndex * 8 + 4, faceNormal.y);
+                    vertexBuf.put(faceVertexIndex * 8 + 5, faceNormal.z);
+                }
+
+                indexBuf.put(faceVertexIndices[0]);
+                indexBuf.put(faceVertexIndices[1]);
+                indexBuf.put(faceVertexIndices[2]);
+                indexBuf.put(faceVertexIndices[3]);
+                indexBuf.put(faceVertexIndices[2]);
+                indexBuf.put(faceVertexIndices[1]);
+            }
+        }
+    }
+
+    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies) {
         final double azimuthInterval = 2 * Math.PI / meridians;
         final double polarAngleInterval = Math.PI / (parallels + 1);
         double azimuthFraction;
@@ -52,32 +118,11 @@ public abstract class ObjectBuilder {
                 position.set(x, y, z);
                 normal.set(x, y, z);
                 normal.normalize();
-                putVertex(vertexBuf, position, normal, 1 - (float) azimuthFraction, (float) polarAngleFraction);
+                for (int i = 0; i < copies; i++) {
+                    putVertex(vertexBuf, position, normal, 1 - (float) azimuthFraction, (float) polarAngleFraction);
+                }
             }
         }
-
-        int col1, col2;
-        int col1StartIndex, col2StartIndex;
-        for (col1 = 0; col1 < meridians; col1++) {
-            col2 = col1 + 1;
-            col1StartIndex = col1 * (parallels + 2);
-            col2StartIndex = col2 * (parallels + 2);
-
-            for (int row = 0; row < parallels + 2; row++) {
-                indexBuf.put(col1StartIndex + row);
-                indexBuf.put(col2StartIndex + row);
-            }
-
-            //degenerate vertices
-            if (col2 < meridians) {
-                indexBuf.put(col2StartIndex + parallels + 1);
-                indexBuf.put(col2StartIndex + parallels + 2);
-            }
-        }
-    }
-
-    static void builtTexturedFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels) {
-
     }
 
     private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal, float tu, float tv) {

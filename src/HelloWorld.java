@@ -163,10 +163,10 @@ public class HelloWorld {
         int meridians = 64;
         int parallels = 31;
 
-        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
+        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereVertexCount(meridians, parallels) * STRIDE)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereIndexCount(meridians, parallels) * 4)
+        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereIndexCount(meridians, parallels) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
@@ -209,14 +209,29 @@ public class HelloWorld {
                 7, 2, 3,
         });
 
-        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
+        vertexBuffer.position(0);
+        indexBuffer.position(0);
+        ObjectBuilder.buildTexturedFacetedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
 
-//        vertexBuffer.position(0);
-//        while (vertexBuffer.hasRemaining()) {
-//            System.out.println("Vertex: position(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
-//                    ") normal=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
-//                    ") texture=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ")");
-//        }
+        vertexBuffer.position(0);
+        while (vertexBuffer.hasRemaining()) {
+            System.out.println("Vertex: position(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
+                    ") normal=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
+                    ") texture=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ")");
+        }
+
+        System.out.println("vertexBuffer.limit()=" + vertexBuffer.limit());
+        indexBuffer.position(0);
+        int maxIndex = indexBuffer.get();
+        while (indexBuffer.hasRemaining()) {
+            int index = indexBuffer.get();
+            if (index > maxIndex) {
+                maxIndex = index;
+            }
+        }
+        System.out.println("max index: " + maxIndex);
+        System.out.println("indexBuffer.limit()=" + indexBuffer.limit());
+
 
         shaderProgram = new DefaultShaderProgram();
         starfieldShaderProgram = new StarfieldShaderProgram();
@@ -304,7 +319,7 @@ public class HelloWorld {
         dataOffset += TEXTURE_COMPONENT_COUNT;
 
         indexBuffer.position(0);
-        glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
+        glDrawElements(GL_TRIANGLES, indexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 
