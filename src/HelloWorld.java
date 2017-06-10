@@ -1,12 +1,14 @@
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.stb.STBImage;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -16,6 +18,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -43,8 +46,10 @@ public class HelloWorld {
     private FloatBuffer vertexBuffer;
     private IntBuffer indexBuffer;
 
+    private float globeRadius = 1;
+
     private float camAzimuth = 0, camElev = 0;
-    private float camDist = 2;
+    private float camDist = 4;
 
     private boolean dragging = false;
     private double prevX, prevY;
@@ -55,6 +60,8 @@ public class HelloWorld {
     private Matrix4f mvpMatrix = new Matrix4f();
 
     private DefaultShaderProgram shaderProgram;
+
+    private int textureID;
 
     private void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -105,13 +112,20 @@ public class HelloWorld {
         glfwSetCursorPosCallback(window, (long window, double xpos, double ypos) -> {
             if (dragging) {
 //                System.out.println("(" + prevX + ", " + prevY + ") -> (" + xpos + ", " + ypos + " )");
-                camAzimuth += (xpos - prevX) * 0.005f;
-                camElev += (ypos - prevY) * 0.005f;
+                float scale = camDist - globeRadius;
+                camAzimuth += (xpos - prevX) * scale * 0.002f;
+                camElev += (ypos - prevY) * scale * 0.002f;
                 camElev = Math.min(Math.max(camElev, (float) -Math.PI / 2), (float) Math.PI / 2);
                 updateViewMatrix();
                 prevX = xpos;
                 prevY = ypos;
             }
+        });
+
+        glfwSetScrollCallback(window, (long window, double xoffset, double yoffset) -> {
+            camDist -= yoffset * (camDist - globeRadius) * 0.005;
+            camDist = Math.min(Math.max(camDist, 1.01f), 15);
+            updateViewMatrix();
         });
 
         int[] pWidth = new int[1];
@@ -147,7 +161,6 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        final float radius = 1;
         int meridians = 64;
         int parallels = 31;
 
@@ -158,15 +171,24 @@ public class HelloWorld {
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
-        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, radius, meridians, parallels);
+        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
+
+//        vertexBuffer.position(0);
+//        while (vertexBuffer.hasRemaining()) {
+//            System.out.println("Vertex: position(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
+//                    ") normal=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
+//                    ") texture=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ")");
+//        }
 
         shaderProgram = new DefaultShaderProgram();
+
+        textureID = loadTexture("res/earth-max2.jpeg");
 
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
 
         // Set the clear color
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         glEnable(GL_DEPTH_TEST);
 
@@ -189,6 +211,7 @@ public class HelloWorld {
         updateMvpMatrix();
         shaderProgram.setMvpMatrix(mvpMatrix);
         shaderProgram.setModelMatrix(modelMatrix);
+        shaderProgram.setTexture(textureID);
 
         int dataOffset = 0;
 
@@ -204,6 +227,12 @@ public class HelloWorld {
         glEnableVertexAttribArray(shaderProgram.aNormalLocation);
         dataOffset += NORMAL_COMPONENT_COUNT;
 
+        vertexBuffer.position(dataOffset);
+        glVertexAttribPointer(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE, vertexBuffer);
+        glEnableVertexAttribArray(shaderProgram.aTextureCoordsLocation);
+        dataOffset += TEXTURE_COMPONENT_COUNT;
+
         indexBuffer.position(0);
         glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
 
@@ -216,16 +245,54 @@ public class HelloWorld {
 
     private void updateProjectionMatrix(int width, int height) {
         projectionMatrix.identity();
-        projectionMatrix.perspective(90, (float) width / (float) height, 0.1f, 100f);
+        projectionMatrix.perspective((float) Math.PI / 4, (float) width / (float) height, 0.01f, 20f);
     }
 
     private void updateViewMatrix() {
         viewMatrix.identity();
-        viewMatrix.translate(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
+        viewMatrix.translate(0, 0, -camDist).rotate(camElev, 1, 0, 0).rotate(camAzimuth, 0, 1, 0);
     }
 
     private void updateMvpMatrix() {
         mvpMatrix.set(projectionMatrix).mul(viewMatrix).mul(modelMatrix);
+    }
+
+    int loadTexture(String imgPath) {
+        int[] imgWidth = new int[1];
+        int[] imgHeight = new int[1];
+        @SuppressWarnings("unused") int[] channels = new int[1];
+        System.out.println("loading image");
+        ByteBuffer buf = STBImage.stbi_load(imgPath, imgWidth, imgHeight, channels, 3);
+        System.out.println("image loaded");
+
+        //create texture object
+        final int[] textureObjectIDs = new int[1];
+        glGenTextures(textureObjectIDs);
+
+        //check for errors
+        if (textureObjectIDs[0] == 0) {
+            System.err.println("could not create texture");
+            return 0;
+        }
+
+        //bind texture to GL_TEXTURE_2D
+        glBindTexture(GL_TEXTURE_2D, textureObjectIDs[0]);
+
+        //specify texture filtering (scaling) methods
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        //load texture data into OpenGL
+        buf.position(0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth[0], imgHeight[0], 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
+
+        //generate mipmaps
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        //unbind texture from GL_TEXTURE_2D
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return textureObjectIDs[0];
     }
 
     public static void main(String[] args) {

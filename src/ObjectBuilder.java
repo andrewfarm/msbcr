@@ -9,11 +9,11 @@ import java.nio.IntBuffer;
 public abstract class ObjectBuilder {
 
     static int getTexturedSphereVertexCount(int meridians, int parallels) {
-        return (parallels + 2) * meridians;
+        return (parallels + 2) * (meridians + 1);
     }
 
     static int getTexturedSphereIndexCount(int meridians, int parallels) {
-        return ((parallels + 2) * 2 + 2) * meridians;
+        return ((parallels + 2) * 2 + 2) * (meridians + 1);
     }
 
     static int getTexturedFacetedSphereVertexCount(int meridians, int parallels) {
@@ -35,7 +35,7 @@ public abstract class ObjectBuilder {
         float x, y, z;
         Vector3f position = new Vector3f();
         Vector3f normal = new Vector3f();
-        for (int col = 0; col < meridians; col++) {
+        for (int col = 0; col <= meridians; col++) {
             azimuthFraction = (double) col / meridians;
             azimuth = col * azimuthInterval;
             x1 = radius * (float) Math.cos(azimuth);
@@ -52,14 +52,14 @@ public abstract class ObjectBuilder {
                 position.set(x, y, z);
                 normal.set(x, y, z);
                 normal.normalize();
-                putVertex(vertexBuf, position, normal, (float) azimuthFraction, 1 - (float) polarAngleFraction);
+                putVertex(vertexBuf, position, normal, 1 - (float) azimuthFraction, (float) polarAngleFraction);
             }
         }
 
         int col1, col2;
         int col1StartIndex, col2StartIndex;
         for (col1 = 0; col1 < meridians; col1++) {
-            col2 = (col1 + 1) % meridians;
+            col2 = col1 + 1;
             col1StartIndex = col1 * (parallels + 2);
             col2StartIndex = col2 * (parallels + 2);
 
@@ -69,7 +69,7 @@ public abstract class ObjectBuilder {
             }
 
             //degenerate vertices
-            indexBuf.put((col2StartIndex == 0) ? (col2StartIndex + (parallels + 2) * meridians - 1) : (col2StartIndex - 1));
+            indexBuf.put(col2StartIndex - 1);
             indexBuf.put(col2StartIndex);
         }
     }
