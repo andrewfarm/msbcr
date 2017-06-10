@@ -112,8 +112,8 @@ public class HelloWorld {
             if (dragging) {
 //                System.out.println("(" + prevX + ", " + prevY + ") -> (" + xpos + ", " + ypos + " )");
                 float scale = camDist - globeRadius;
-                camAzimuth += (xpos - prevX) * scale * 0.002f;
-                camElev += (ypos - prevY) * scale * 0.002f;
+                camAzimuth += (xpos - prevX) * scale * 0.0015f;
+                camElev += (ypos - prevY) * scale * 0.0015f;
                 camElev = Math.min(Math.max(camElev, (float) -Math.PI / 2), (float) Math.PI / 2);
                 updateViewMatrix();
                 prevX = xpos;
@@ -163,10 +163,10 @@ public class HelloWorld {
         int meridians = 64;
         int parallels = 31;
 
-        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereVertexCount(meridians, parallels) * STRIDE)
+        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereIndexCount(meridians, parallels) * 4)
+        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereIndexCount(meridians, parallels) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
@@ -211,26 +211,26 @@ public class HelloWorld {
 
         vertexBuffer.position(0);
         indexBuffer.position(0);
-        ObjectBuilder.buildTexturedFacetedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
+        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
 
-        vertexBuffer.position(0);
-        while (vertexBuffer.hasRemaining()) {
-            System.out.println("Vertex: position(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
-                    ") normal=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
-                    ") texture=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ")");
-        }
-
-        System.out.println("vertexBuffer.limit()=" + vertexBuffer.limit());
-        indexBuffer.position(0);
-        int maxIndex = indexBuffer.get();
-        while (indexBuffer.hasRemaining()) {
-            int index = indexBuffer.get();
-            if (index > maxIndex) {
-                maxIndex = index;
-            }
-        }
-        System.out.println("max index: " + maxIndex);
-        System.out.println("indexBuffer.limit()=" + indexBuffer.limit());
+//        vertexBuffer.position(0);
+//        while (vertexBuffer.hasRemaining()) {
+//            System.out.println("Vertex: position(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
+//                    ") normal=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
+//                    ") texture=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ")");
+//        }
+//
+//        System.out.println("vertexBuffer.limit()=" + vertexBuffer.limit());
+//        indexBuffer.position(0);
+//        int maxIndex = indexBuffer.get();
+//        while (indexBuffer.hasRemaining()) {
+//            int index = indexBuffer.get();
+//            if (index > maxIndex) {
+//                maxIndex = index;
+//            }
+//        }
+//        System.out.println("max index: " + maxIndex);
+//        System.out.println("indexBuffer.limit()=" + indexBuffer.limit());
 
 
         shaderProgram = new DefaultShaderProgram();
@@ -238,12 +238,12 @@ public class HelloWorld {
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-max2.jpeg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
-                "res/dallasw_left.jpg",
-                "res/dallasw_right.jpg",
-                "res/dallasw_bottom.jpg",
-                "res/dallasw_top.jpg",
-                "res/dallasw_front.jpg",
-                "res/dallasw_back.jpg"
+                "res/sky_512_4.png",
+                "res/sky_512_3.png",
+                "res/sky_512_6.png",
+                "res/sky_512_5.png",
+                "res/sky_512_2.png",
+                "res/sky_512_1.png"
         });
 
         modelMatrix.identity();
@@ -319,7 +319,7 @@ public class HelloWorld {
         dataOffset += TEXTURE_COMPONENT_COUNT;
 
         indexBuffer.position(0);
-        glDrawElements(GL_TRIANGLES, indexBuffer);
+        glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 

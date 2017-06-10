@@ -80,6 +80,18 @@ public abstract class ObjectBuilder {
                     vertexBuf.put(faceVertexIndex * 8 + 5, faceNormal.z);
                 }
 
+//                float texU = 0, texV = 0;
+//                for (int faceVertexIndex : faceVertexIndices) {
+//                    texU += vertexBuf.get(faceVertexIndex * 8 + 6);
+//                    texV += vertexBuf.get(faceVertexIndex * 8 + 7);
+//                }
+//                texU /= faceVertexIndices.length;
+//                texV /= faceVertexIndices.length;
+//                for (int faceVertexIndex : faceVertexIndices) {
+//                    vertexBuf.put(faceVertexIndex * 8 + 6, texU);
+//                    vertexBuf.put(faceVertexIndex * 8 + 7, texV);
+//                }
+
                 indexBuf.put(faceVertexIndices[0]);
                 indexBuf.put(faceVertexIndices[1]);
                 indexBuf.put(faceVertexIndices[2]);
