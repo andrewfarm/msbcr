@@ -1,3 +1,5 @@
+import org.joml.Vector3f;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -24,7 +26,7 @@ public abstract class ObjectBuilder {
 
     static void buildTexturedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels) {
         final double azimuthInterval = 2 * Math.PI / meridians;
-        final double polarAngleInterval = 2 * Math.PI / (parallels + 1);
+        final double polarAngleInterval = Math.PI / (parallels + 1);
         double azimuthFraction;
         double azimuth;
         double polarAngleFraction;

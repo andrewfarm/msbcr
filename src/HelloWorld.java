@@ -1,5 +1,9 @@
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.Version;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 
@@ -39,6 +43,17 @@ public class HelloWorld {
     private FloatBuffer vertexBuffer;
     private IntBuffer indexBuffer;
 
+    private float camAzimuth = 0, camElev = 0;
+    private float camDist = 2;
+
+    private boolean dragging = false;
+    private double prevX, prevY;
+
+    private Matrix4f modelMatrix = new Matrix4f();
+    private Matrix4f viewMatrix = new Matrix4f();
+    private Matrix4f projectionMatrix = new Matrix4f();
+    private Matrix4f mvpMatrix = new Matrix4f();
+
     private DefaultShaderProgram shaderProgram;
 
     private void run() {
@@ -60,7 +75,7 @@ public class HelloWorld {
         }
 
         // Create the window
-        window = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(800, 600, "Hello World!", NULL, NULL);
         if (window == NULL) {
             throw new RuntimeException("failed to create GLFW window");
         }
@@ -73,7 +88,29 @@ public class HelloWorld {
 
         glfwSetWindowSizeCallback(window, (window1, width, height) -> {
             if (GL.getCapabilities() != null) {
+                updateProjectionMatrix(width, height);
                 render();
+            }
+        });
+
+        glfwSetMouseButtonCallback(window, (long window, int button, int action, int mods) -> {
+            dragging = (action == GLFW_PRESS);
+            double[] cursorX = new double[1];
+            double[] cursorY = new double[1];
+            glfwGetCursorPos(window, cursorX, cursorY);
+            prevX = cursorX[0];
+            prevY = cursorY[0];
+        });
+
+        glfwSetCursorPosCallback(window, (long window, double xpos, double ypos) -> {
+            if (dragging) {
+//                System.out.println("(" + prevX + ", " + prevY + ") -> (" + xpos + ", " + ypos + " )");
+                camAzimuth += (xpos - prevX) * 0.005f;
+                camElev += (ypos - prevY) * 0.005f;
+                camElev = Math.min(Math.max(camElev, (float) -Math.PI / 2), (float) Math.PI / 2);
+                updateViewMatrix();
+                prevX = xpos;
+                prevY = ypos;
             }
         });
 
@@ -82,6 +119,8 @@ public class HelloWorld {
 
         // Get the window size passed to glfwCreateWindow
         glfwGetWindowSize(window, pWidth, pHeight);
+
+        updateProjectionMatrix(pWidth[0], pHeight[0]);
 
         // Get the resolution of the primary monitor
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -109,8 +148,8 @@ public class HelloWorld {
         GL.createCapabilities();
 
         final float radius = 1;
-        int meridians = 16;
-        int parallels = 7;
+        int meridians = 64;
+        int parallels = 31;
 
         vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
                 .order(ByteOrder.nativeOrder())
@@ -123,8 +162,13 @@ public class HelloWorld {
 
         shaderProgram = new DefaultShaderProgram();
 
+        modelMatrix.identity();
+        viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
+
         // Set the clear color
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+        glEnable(GL_DEPTH_TEST);
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
@@ -142,11 +186,23 @@ public class HelloWorld {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
         shaderProgram.useProgram();
+        updateMvpMatrix();
+        shaderProgram.setMvpMatrix(mvpMatrix);
+        shaderProgram.setModelMatrix(modelMatrix);
 
-        vertexBuffer.position(0);
+        int dataOffset = 0;
+
+        vertexBuffer.position(dataOffset);
         glVertexAttribPointer(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
                 GL_FLOAT, false, STRIDE, vertexBuffer);
         glEnableVertexAttribArray(shaderProgram.aPositionLocation);
+        dataOffset += POSITION_COMPONENT_COUNT;
+
+        vertexBuffer.position(dataOffset);
+        glVertexAttribPointer(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE, vertexBuffer);
+        glEnableVertexAttribArray(shaderProgram.aNormalLocation);
+        dataOffset += NORMAL_COMPONENT_COUNT;
 
         indexBuffer.position(0);
         glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
@@ -156,6 +212,20 @@ public class HelloWorld {
         // Poll for window events. The key callback above will only be
         // invoked during this call.
         glfwPollEvents();
+    }
+
+    private void updateProjectionMatrix(int width, int height) {
+        projectionMatrix.identity();
+        projectionMatrix.perspective(90, (float) width / (float) height, 0.1f, 100f);
+    }
+
+    private void updateViewMatrix() {
+        viewMatrix.identity();
+        viewMatrix.translate(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
+    }
+
+    private void updateMvpMatrix() {
+        mvpMatrix.set(projectionMatrix).mul(viewMatrix).mul(modelMatrix);
     }
 
     public static void main(String[] args) {
