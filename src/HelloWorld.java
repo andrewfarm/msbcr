@@ -163,10 +163,10 @@ public class HelloWorld {
         int meridians = 64;
         int parallels = 31;
 
-        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
+        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereVertexCount(meridians, parallels) * STRIDE)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereIndexCount(meridians, parallels) * 4)
+        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereIndexCount(meridians, parallels) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
@@ -211,7 +211,7 @@ public class HelloWorld {
 
         vertexBuffer.position(0);
         indexBuffer.position(0);
-        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
+        ObjectBuilder.buildTexturedFacetedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
 
 //        vertexBuffer.position(0);
 //        while (vertexBuffer.hasRemaining()) {
@@ -238,12 +238,12 @@ public class HelloWorld {
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-max2.jpeg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
-                "res/sky_512_4.png",
-                "res/sky_512_3.png",
-                "res/sky_512_6.png",
-                "res/sky_512_5.png",
-                "res/sky_512_2.png",
-                "res/sky_512_1.png"
+                "res/starmap_8k_4.png",
+                "res/starmap_8k_3.png",
+                "res/starmap_8k_6.png",
+                "res/starmap_8k_5.png",
+                "res/starmap_8k_2.png",
+                "res/starmap_8k_1.png"
         });
 
         modelMatrix.identity();
@@ -319,7 +319,7 @@ public class HelloWorld {
         dataOffset += TEXTURE_COMPONENT_COUNT;
 
         indexBuffer.position(0);
-        glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
+        glDrawElements(GL_TRIANGLES, indexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 

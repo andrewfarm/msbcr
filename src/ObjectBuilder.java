@@ -60,10 +60,10 @@ public abstract class ObjectBuilder {
 
             for (int row = 0; row < parallels + 1; row ++) {
 
-                faceVertexIndices[0] = (col1StartIndex + row) * 4 + 3;
-                faceVertexIndices[1] = (col2StartIndex + row) * 4 + 2;
-                faceVertexIndices[2] = (col1StartIndex + row + 1) * 4 + 1;
-                faceVertexIndices[3] = (col2StartIndex + row + 1) * 4;
+                faceVertexIndices[0] = (col2StartIndex + row) * 4 + 3;
+                faceVertexIndices[1] = (col1StartIndex + row) * 4 + 2;
+                faceVertexIndices[2] = (col2StartIndex + row + 1) * 4 + 1;
+                faceVertexIndices[3] = (col1StartIndex + row + 1) * 4;
 
                 Vector3f faceNormal = new Vector3f();
                 for (int faceVertexIndex : faceVertexIndices) {
@@ -116,9 +116,9 @@ public abstract class ObjectBuilder {
         for (int col = 0; col <= meridians; col++) {
             azimuthFraction = (double) col / meridians;
             azimuth = col * azimuthInterval;
-            x1 = radius * (float) Math.cos(azimuth);
+            x1 = radius * (float) Math.sin(azimuth);
             y1 = radius;
-            z1 = radius * (float) Math.sin(azimuth);
+            z1 = radius * (float) Math.cos(azimuth);
 
             for (int row = 0; row < parallels + 2; row++) {
                 polarAngleFraction = (double) row / (parallels + 1);
@@ -131,7 +131,7 @@ public abstract class ObjectBuilder {
                 normal.set(x, y, z);
                 normal.normalize();
                 for (int i = 0; i < copies; i++) {
-                    putVertex(vertexBuf, position, normal, 1 - (float) azimuthFraction, (float) polarAngleFraction);
+                    putVertex(vertexBuf, position, normal, (float) azimuthFraction, (float) polarAngleFraction);
                 }
             }
         }
