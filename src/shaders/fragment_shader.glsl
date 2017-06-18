@@ -5,6 +5,7 @@ uniform sampler2D u_TextureUnit;
 
 varying vec3 v_Normal;
 varying vec2 v_TextureCoords;
+uniform sampler2D u_DisplacementMapUnit;
 
 void main() {
     float directionalStrength = max(dot(normalize(v_Normal), normalize(LIGHT_DIRECTION)), 0.0);
@@ -12,5 +13,4 @@ void main() {
 
     float totalLight = AMBIENT_STRENGTH + (1.0 - AMBIENT_STRENGTH) * directionalStrength;
     gl_FragColor = texColor * totalLight;
-//    gl_FragColor = vec4(texColor.r, 1.0, texColor.b, 1.0) * totalLight;
 }
