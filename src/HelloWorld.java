@@ -3,6 +3,7 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 
+import javax.xml.soap.Text;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -55,10 +56,11 @@ public class HelloWorld {
     private Matrix4f projectionMatrix = new Matrix4f();
     private Matrix4f mvpMatrix = new Matrix4f();
 
-    private DefaultShaderProgram shaderProgram;
+    private GlobeShaderProgram shaderProgram;
     private StarfieldShaderProgram starfieldShaderProgram;
 
     private int globeTexture;
+    private int displacementMap;
     private int starfieldTexture;
 
     private void run() {
@@ -160,13 +162,13 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        int meridians = 64;
-        int parallels = 31;
+        int meridians = 1024;
+        int parallels = 511;
 
-        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereVertexCount(meridians, parallels) * STRIDE)
+        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedFacetedSphereIndexCount(meridians, parallels) * 4)
+        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereIndexCount(meridians, parallels) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
@@ -211,7 +213,7 @@ public class HelloWorld {
 
         vertexBuffer.position(0);
         indexBuffer.position(0);
-        ObjectBuilder.buildTexturedFacetedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
+        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
 
 //        vertexBuffer.position(0);
 //        while (vertexBuffer.hasRemaining()) {
@@ -233,10 +235,12 @@ public class HelloWorld {
 //        System.out.println("indexBuffer.limit()=" + indexBuffer.limit());
 
 
-        shaderProgram = new DefaultShaderProgram();
+        shaderProgram = new GlobeShaderProgram();
         starfieldShaderProgram = new StarfieldShaderProgram();
 
-        globeTexture = TextureLoader.loadTexture2D("res/earth-max2.jpeg");
+        globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
+//        globeTexture = TextureLoader.loadTexture2D("res/elevation.jpg");
+        displacementMap = TextureLoader.loadTexture2D("res/elevation.jpg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
                 "res/starmap_8k_3.png",
@@ -296,6 +300,7 @@ public class HelloWorld {
         shaderProgram.useProgram();
         shaderProgram.setMvpMatrix(mvpMatrix);
         shaderProgram.setModelMatrix(modelMatrix);
+        shaderProgram.setDisplacementMap(displacementMap);
         shaderProgram.setTexture(globeTexture);
 
         int dataOffset = 0;
@@ -319,7 +324,7 @@ public class HelloWorld {
         dataOffset += TEXTURE_COMPONENT_COUNT;
 
         indexBuffer.position(0);
-        glDrawElements(GL_TRIANGLES, indexBuffer);
+        glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 

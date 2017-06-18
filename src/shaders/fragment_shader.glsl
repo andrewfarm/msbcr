@@ -12,4 +12,5 @@ void main() {
 
     float totalLight = AMBIENT_STRENGTH + (1.0 - AMBIENT_STRENGTH) * directionalStrength;
     gl_FragColor = texColor * totalLight;
+//    gl_FragColor = vec4(texColor.r, 1.0, texColor.b, 1.0) * totalLight;
 }

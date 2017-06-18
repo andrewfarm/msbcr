@@ -35,13 +35,13 @@ public abstract class ObjectBuilder {
             col2StartIndex = col2 * (parallels + 2);
 
             for (int row = 0; row < parallels + 2; row++) {
-                indexBuf.put(col1StartIndex + row);
                 indexBuf.put(col2StartIndex + row);
+                indexBuf.put(col1StartIndex + row);
             }
 
             //degenerate vertices
             if (col2 < meridians) {
-                indexBuf.put(col2StartIndex + parallels + 1);
+                indexBuf.put(col1StartIndex + parallels + 1);
                 indexBuf.put(col2StartIndex + parallels + 2);
             }
         }
