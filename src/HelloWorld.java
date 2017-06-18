@@ -3,7 +3,6 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 
-import javax.xml.soap.Text;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -27,6 +26,10 @@ public class HelloWorld {
 
     private static final int STRIDE =
             (POSITION_COMPONENT_COUNT +
+                    NORMAL_COMPONENT_COUNT) * 4;
+
+    private static final int STRIDE_TEXTURED =
+            (POSITION_COMPONENT_COUNT +
                     NORMAL_COMPONENT_COUNT +
                     TEXTURE_COMPONENT_COUNT) * 4;
 
@@ -37,16 +40,22 @@ public class HelloWorld {
 //            -0.5f, -0.5f, 0f, 1f, 0f,
 //            0.5f, -0.5f, 0f, 0f, 1f,
 //    };
-    private FloatBuffer vertexBuffer;
-    private IntBuffer indexBuffer;
+    private FloatBuffer globeVertexBuffer;
+    private IntBuffer globeIndexBuffer;
+
+    private FloatBuffer oceanVertexBuffer;
+    private IntBuffer oceanIndexBuffer;
 
     private FloatBuffer skyboxVertexBuffer;
     private ByteBuffer skyboxIndexBuffer;
 
     private float globeRadius = 1;
 
+    private float lightX = -1, lightY = 0, lightZ = 0;
+
     private float camAzimuth = 0, camElev = 0;
     private float camDist = 4;
+    private float globeAzimuth = 0;
 
     private boolean dragging = false;
     private double prevX, prevY;
@@ -56,7 +65,8 @@ public class HelloWorld {
     private Matrix4f projectionMatrix = new Matrix4f();
     private Matrix4f mvpMatrix = new Matrix4f();
 
-    private GlobeShaderProgram shaderProgram;
+    private GlobeShaderProgram globeShaderProgram;
+    private OceanShaderProgram oceanShaderProgram;
     private StarfieldShaderProgram starfieldShaderProgram;
 
     private int globeTexture;
@@ -165,14 +175,21 @@ public class HelloWorld {
         int meridians = 1024;
         int parallels = 511;
 
-        vertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereVertexCount(meridians, parallels) * STRIDE)
+        globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        indexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getTexturedSphereIndexCount(meridians, parallels) * 4)
+        globeIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(meridians, parallels) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
-        skyboxVertexBuffer = ByteBuffer.allocateDirect(24 * STRIDE)
+        oceanVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+        oceanIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(meridians, parallels) * 4)
+                .order(ByteOrder.nativeOrder())
+                .asIntBuffer();
+
+        skyboxVertexBuffer = ByteBuffer.allocateDirect(24 * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()
                 .put(new float[] {
@@ -211,35 +228,19 @@ public class HelloWorld {
                 7, 2, 3,
         });
 
-        vertexBuffer.position(0);
-        indexBuffer.position(0);
-        ObjectBuilder.buildTexturedSphere(vertexBuffer, indexBuffer, globeRadius, meridians, parallels);
+        globeVertexBuffer.position(0);
+        globeIndexBuffer.position(0);
+        ObjectBuilder.buildSphere(globeVertexBuffer, globeIndexBuffer, globeRadius, meridians, parallels, true);
 
-//        vertexBuffer.position(0);
-//        while (vertexBuffer.hasRemaining()) {
-//            System.out.println("Vertex: position(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
-//                    ") normal=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ", " + vertexBuffer.get() +
-//                    ") texture=(" + vertexBuffer.get() + ", " + vertexBuffer.get() + ")");
-//        }
-//
-//        System.out.println("vertexBuffer.limit()=" + vertexBuffer.limit());
-//        indexBuffer.position(0);
-//        int maxIndex = indexBuffer.get();
-//        while (indexBuffer.hasRemaining()) {
-//            int index = indexBuffer.get();
-//            if (index > maxIndex) {
-//                maxIndex = index;
-//            }
-//        }
-//        System.out.println("max index: " + maxIndex);
-//        System.out.println("indexBuffer.limit()=" + indexBuffer.limit());
+        oceanVertexBuffer.position(0);
+        oceanIndexBuffer.position(0);
+        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, globeRadius, 64, 31, false);
 
-
-        shaderProgram = new GlobeShaderProgram();
+        globeShaderProgram = new GlobeShaderProgram();
+        oceanShaderProgram = new OceanShaderProgram();
         starfieldShaderProgram = new StarfieldShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
-//        globeTexture = TextureLoader.loadTexture2D("res/elevation.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.jpg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
@@ -259,6 +260,8 @@ public class HelloWorld {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
@@ -275,6 +278,10 @@ public class HelloWorld {
     private void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
+//        globeAzimuth += 0.01f;
+//        updateModelMatrix();
+//        camAzimuth -= 0.01f;
+//        updateViewMatrix();
         updateMvpMatrix();
 
         //draw starfield
@@ -297,34 +304,61 @@ public class HelloWorld {
 
         //draw globe
 
-        shaderProgram.useProgram();
-        shaderProgram.setMvpMatrix(mvpMatrix);
-        shaderProgram.setModelMatrix(modelMatrix);
-        shaderProgram.setDisplacementMap(displacementMap);
-        shaderProgram.setTexture(globeTexture);
+        globeShaderProgram.useProgram();
+        globeShaderProgram.setMvpMatrix(mvpMatrix);
+        globeShaderProgram.setModelMatrix(modelMatrix);
+        globeShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        globeShaderProgram.setDisplacementMap(displacementMap);
+        globeShaderProgram.setTexture(globeTexture);
 
         int dataOffset = 0;
 
-        vertexBuffer.position(dataOffset);
-        glVertexAttribPointer(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE, vertexBuffer);
-        glEnableVertexAttribArray(shaderProgram.aPositionLocation);
+        globeVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(globeShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
+        glEnableVertexAttribArray(globeShaderProgram.aPositionLocation);
         dataOffset += POSITION_COMPONENT_COUNT;
 
-        vertexBuffer.position(dataOffset);
-        glVertexAttribPointer(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE, vertexBuffer);
-        glEnableVertexAttribArray(shaderProgram.aNormalLocation);
+        globeVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(globeShaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
+        glEnableVertexAttribArray(globeShaderProgram.aNormalLocation);
         dataOffset += NORMAL_COMPONENT_COUNT;
 
-        vertexBuffer.position(dataOffset);
-        glVertexAttribPointer(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE, vertexBuffer);
-        glEnableVertexAttribArray(shaderProgram.aTextureCoordsLocation);
-        dataOffset += TEXTURE_COMPONENT_COUNT;
+        globeVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(globeShaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
+        glEnableVertexAttribArray(globeShaderProgram.aTextureCoordsLocation);
 
-        indexBuffer.position(0);
-        glDrawElements(GL_TRIANGLE_STRIP, indexBuffer);
+        globeIndexBuffer.position(0);
+        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
+
+        //draw ocean
+
+        oceanShaderProgram.useProgram();
+        oceanShaderProgram.setMvpMatrix(mvpMatrix);
+        oceanShaderProgram.setModelMatrix(modelMatrix);
+        oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        oceanShaderProgram.setCamPos(
+                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
+                (float) (camDist * Math.sin(camElev)),
+                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
+
+        dataOffset = 0;
+
+        oceanVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(oceanShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE, oceanVertexBuffer);
+        glEnableVertexAttribArray(oceanShaderProgram.aPositionLocation);
+        dataOffset += POSITION_COMPONENT_COUNT;
+
+        oceanVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(oceanShaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE, oceanVertexBuffer);
+        glEnableVertexAttribArray(oceanShaderProgram.aNormalLocation);
+
+        oceanIndexBuffer.position(0);
+        glDrawElements(GL_TRIANGLE_STRIP, oceanIndexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 
@@ -341,6 +375,11 @@ public class HelloWorld {
     private void updateViewMatrix() {
         viewMatrix.identity();
         viewMatrix.translate(0, 0, -camDist).rotate(camElev, 1, 0, 0).rotate(camAzimuth, 0, 1, 0);
+    }
+
+    private void updateModelMatrix() {
+        modelMatrix.identity();
+        modelMatrix.rotate(globeAzimuth, 0, 1, 0);
     }
 
     private void updateMvpMatrix() {

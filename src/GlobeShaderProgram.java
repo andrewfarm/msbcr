@@ -12,6 +12,7 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     private static final String U_MVP_MATRIX = "u_MvpMatrix";
     private static final String U_MODEL_MATRIX = "u_ModelMatrix";
+    private static final String U_LIGHT_DIRECTION = "u_LightDirection";
     private static final String U_TEXTURE_UNIT = "u_TextureUnit";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
     private static final String A_POSITION = "a_Position";
@@ -20,6 +21,7 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     public final int uMvpMatrixLocation;
     public final int uModelMatrixLocation;
+    public final int uLightDirectionLocation;
     public final int uTextureUnitLocation;
     public final int uDisplacementMapUnit;
     public final int aPositionLocation;
@@ -27,11 +29,12 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int aTextureCoordsLocation;
 
     GlobeShaderProgram() {
-        super(TextResourceReader.readFile("src/shaders/vertex_shader.glsl"),
-                TextResourceReader.readFile("src/shaders/fragment_shader.glsl"));
+        super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
+                TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
+        uLightDirectionLocation = glGetUniformLocation(programID, U_LIGHT_DIRECTION);
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);
         uDisplacementMapUnit = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
@@ -45,6 +48,10 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     void setModelMatrix(Matrix4f m) {
         glUniformMatrix4fv(uModelMatrixLocation, false, m.get(new float[16]));
+    }
+
+    void setLightDirection(float x, float y, float z) {
+        glUniform3f(uLightDirectionLocation, x, y, z);
     }
 
     void setDisplacementMap(int displacementMapID) {

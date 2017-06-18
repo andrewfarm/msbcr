@@ -8,24 +8,24 @@ import java.nio.IntBuffer;
  */
 public abstract class ObjectBuilder {
 
-    static int getTexturedSphereVertexCount(int meridians, int parallels) {
+    static int getSphereVertexCount(int meridians, int parallels) {
         return (parallels + 2) * (meridians + 1);
     }
 
-    static int getTexturedSphereIndexCount(int meridians, int parallels) {
+    static int getSphereIndexCount(int meridians, int parallels) {
         return ((parallels + 2) * 2 + 2) * (meridians + 1) - 2;
     }
 
-    static int getTexturedFacetedSphereVertexCount(int meridians, int parallels) {
-        return (meridians + 1) * (parallels + 2) * 4;
+    static int getFacetedSphereVertexCount(int meridians, int parallels) {
+        return getSphereVertexCount(meridians, parallels) * 4;
     }
 
-    static int getTexturedFacetedSphereIndexCount(int meridians, int parallels) {
+    static int getFacetedSphereIndexCount(int meridians, int parallels) {
         return meridians * (parallels + 1) * 6;
     }
 
-    static void buildTexturedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels) {
-        generateSphereVertices(vertexBuf, radius, meridians, parallels, 1);
+    static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
+        generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, textured);
 
         int col1, col2;
         int col1StartIndex, col2StartIndex;
@@ -47,8 +47,8 @@ public abstract class ObjectBuilder {
         }
     }
 
-    static void buildTexturedFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels) {
-        generateSphereVertices(vertexBuf, radius, meridians, parallels, 4);
+    static void buildFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
+        generateSphereVertices(vertexBuf, radius, meridians, parallels, 4, textured);
 
         final int[] faceVertexIndices = new int[4];
         int col1, col2;
@@ -102,7 +102,7 @@ public abstract class ObjectBuilder {
         }
     }
 
-    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies) {
+    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies, boolean textured) {
         final double azimuthInterval = 2 * Math.PI / meridians;
         final double polarAngleInterval = Math.PI / (parallels + 1);
         double azimuthFraction;
@@ -130,20 +130,30 @@ public abstract class ObjectBuilder {
                 position.set(x, y, z);
                 normal.set(x, y, z);
                 normal.normalize();
-                for (int i = 0; i < copies; i++) {
-                    putVertex(vertexBuf, position, normal, (float) azimuthFraction, (float) polarAngleFraction);
+                if (textured) {
+                    for (int i = 0; i < copies; i++) {
+                        putVertex(vertexBuf, position, normal, (float) azimuthFraction, (float) polarAngleFraction);
+                    }
+                } else {
+                    for (int i = 0; i < copies; i++) {
+                        putVertex(vertexBuf, position, normal);
+                    }
                 }
             }
         }
     }
 
-    private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal, float tu, float tv) {
+    private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal) {
         vertexBuf.put(position.x);
         vertexBuf.put(position.y);
         vertexBuf.put(position.z);
         vertexBuf.put(normal.x);
         vertexBuf.put(normal.y);
         vertexBuf.put(normal.z);
+    }
+
+    private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal, float tu, float tv) {
+        putVertex(vertexBuf, position, normal);
         vertexBuf.put(tu);
         vertexBuf.put(tv);
     }
