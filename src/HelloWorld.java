@@ -268,7 +268,7 @@ public class HelloWorld {
                 "res/starmap_8k_1.png"
         });
 
-//        shadowMapID = TextureLoader.createShadowMap(1024, 1024);//TODO
+        shadowMapID = TextureLoader.createShadowMap(1024, 1024);//TODO
 
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);

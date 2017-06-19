@@ -114,32 +114,37 @@ public abstract class TextureLoader {
         return textureObjectIDs[0];
     }
 
-//    static int createShadowMap(int width, int height) {
-//        int[] frameBufferIDs = new int[1];
-//        glGenFramebuffers(frameBufferIDs);
-//        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferIDs[0]);
-//
-//        int[] depthTextureIDs = new int[1];
-//        glGenTextures(depthTextureIDs);
-//        glBindTexture(GL_TEXTURE_2D, depthTextureIDs[0]);
-//
-//        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0,
-//                GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//
-//        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureIDs[0], 0);
-//
-//        glDrawBuffer(GL_NONE); // No color buffer is drawn to.
-//
-//        // Always check that our framebuffer is ok
-//        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-//            System.err.println("error creating framebuffer for shadow map");
-//            return 0;
-//        }
-//
-//        return frameBufferIDs[0];
-//    }
+    static int createShadowMap(int width, int height) {
+        System.out.println("creating shadow map");
+        int[] frameBufferIDs = new int[1];
+        glGenFramebuffers(frameBufferIDs);
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferIDs[0]);
+
+        int[] depthTextureIDs = new int[1];
+        glGenTextures(depthTextureIDs);
+        glBindTexture(GL_TEXTURE_2D, depthTextureIDs[0]);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0,
+                GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureIDs[0], 0);
+
+        glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+        glReadBuffer(GL_NONE);
+
+        // Always check that our framebuffer is ok
+        int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if(status == GL_FRAMEBUFFER_COMPLETE) {
+            System.out.println("shadow map creation successful");
+        } else {
+            System.err.println("error creating framebuffer for shadow map (status: " + status + ")");
+            return 0;
+        }
+
+        return frameBufferIDs[0];
+    }
 }
