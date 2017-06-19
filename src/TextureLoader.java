@@ -6,8 +6,11 @@ import java.nio.ByteBuffer;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.lwjgl.opengl.GL14.GL_DEPTH_COMPONENT16;
+import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL32.glFramebufferTexture;
 
 /**
  * Created by Andrew on 6/10/17.
@@ -110,4 +113,33 @@ public abstract class TextureLoader {
 
         return textureObjectIDs[0];
     }
+
+//    static int createShadowMap(int width, int height) {
+//        int[] frameBufferIDs = new int[1];
+//        glGenFramebuffers(frameBufferIDs);
+//        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferIDs[0]);
+//
+//        int[] depthTextureIDs = new int[1];
+//        glGenTextures(depthTextureIDs);
+//        glBindTexture(GL_TEXTURE_2D, depthTextureIDs[0]);
+//
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0,
+//                GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//
+//        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureIDs[0], 0);
+//
+//        glDrawBuffer(GL_NONE); // No color buffer is drawn to.
+//
+//        // Always check that our framebuffer is ok
+//        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+//            System.err.println("error creating framebuffer for shadow map");
+//            return 0;
+//        }
+//
+//        return frameBufferIDs[0];
+//    }
 }
