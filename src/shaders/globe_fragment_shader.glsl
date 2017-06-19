@@ -1,4 +1,4 @@
-#define AMBIENT_STRENGTH 0.2
+#define AMBIENT_STRENGTH 0.1
 
 uniform vec3 u_LightDirection; //must be normalized!
 uniform sampler2D u_TextureUnit;

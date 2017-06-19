@@ -122,9 +122,8 @@ public class HelloWorld {
 
         glfwSetCursorPosCallback(window, (long window, double xpos, double ypos) -> {
             if (dragging) {
-//                System.out.println("(" + prevX + ", " + prevY + ") -> (" + xpos + ", " + ypos + " )");
                 float scale = camDist - globeRadius;
-                camAzimuth += (xpos - prevX) * scale * 0.0015f;
+                camAzimuth -= (xpos - prevX) * scale * 0.0015f;
                 camElev += (ypos - prevY) * scale * 0.0015f;
                 camElev = Math.min(Math.max(camElev, (float) -Math.PI / 2), (float) Math.PI / 2);
                 updateViewMatrix();
@@ -234,7 +233,7 @@ public class HelloWorld {
 
         oceanVertexBuffer.position(0);
         oceanIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, globeRadius, 64, 31, false);
+        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, globeRadius, meridians, parallels, false);
 
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
@@ -278,10 +277,10 @@ public class HelloWorld {
     private void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-//        globeAzimuth += 0.01f;
-//        updateModelMatrix();
-//        camAzimuth -= 0.01f;
-//        updateViewMatrix();
+        globeAzimuth += 0.005f;
+        updateModelMatrix();
+        camAzimuth += 0.005f;
+        updateViewMatrix();
         updateMvpMatrix();
 
         //draw starfield
@@ -374,7 +373,7 @@ public class HelloWorld {
 
     private void updateViewMatrix() {
         viewMatrix.identity();
-        viewMatrix.translate(0, 0, -camDist).rotate(camElev, 1, 0, 0).rotate(camAzimuth, 0, 1, 0);
+        viewMatrix.translate(0, 0, -camDist).rotate(camElev, 1, 0, 0).rotate(-camAzimuth, 0, 1, 0);
     }
 
     private void updateModelMatrix() {
