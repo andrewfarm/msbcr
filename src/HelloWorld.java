@@ -71,7 +71,7 @@ public class HelloWorld {
             new Vector3f(lightX, lightY, lightZ).normalize().mul(2),
             new Vector3f(0, 0, 0),
             new Vector3f(0, 1, 0));
-    private Matrix4f depthProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 0, 10);
+    private Matrix4f depthProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 1.5f, 2.5f);
     private Matrix4f depthBiasMatrix = new Matrix4f(
             0.5f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f, 0.0f,
@@ -273,7 +273,7 @@ public class HelloWorld {
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
 
-        depthBiasMvpMatrix.set(depthBiasMatrix).mul(depthProjectionMatrix).mul(depthViewMatrix).mul(modelMatrix);
+        updateDepthBiasMvpMatrix();
 
         // Set the clear color
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -304,6 +304,7 @@ public class HelloWorld {
         camAzimuth += 0.005f;
         updateViewMatrix();
         updateMvpMatrix();
+        updateDepthBiasMvpMatrix();
 
         //draw starfield
 
@@ -327,11 +328,21 @@ public class HelloWorld {
 
         shadowMapShaderProgram.useProgram();
         shadowMapShaderProgram.setDepthBiasMvpMatrix(depthBiasMvpMatrix);
+        shadowMapShaderProgram.setDisplacementMap(displacementMap);
 
-        globeVertexBuffer.position(0);
+        int dataOffset = 0;
+
+        globeVertexBuffer.position(dataOffset);
         glVertexAttribPointer(shadowMapShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
                 GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
         glEnableVertexAttribArray(shadowMapShaderProgram.aPositionLocation);
+        dataOffset += POSITION_COMPONENT_COUNT;
+        dataOffset += NORMAL_COMPONENT_COUNT;
+
+        globeVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(shadowMapShaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT,
+                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
+        glEnableVertexAttribArray(shadowMapShaderProgram.aTextureCoordsLocation);
 
         globeIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
@@ -345,7 +356,7 @@ public class HelloWorld {
         globeShaderProgram.setDisplacementMap(displacementMap);
         globeShaderProgram.setTexture(globeTexture);
 
-        int dataOffset = 0;
+        dataOffset = 0;
 
         globeVertexBuffer.position(dataOffset);
         glVertexAttribPointer(globeShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
@@ -414,6 +425,10 @@ public class HelloWorld {
     private void updateModelMatrix() {
         modelMatrix.identity();
         modelMatrix.rotate(globeAzimuth, 0, 1, 0);
+    }
+
+    private void updateDepthBiasMvpMatrix() {
+        depthBiasMvpMatrix.set(depthBiasMatrix).mul(depthProjectionMatrix).mul(depthViewMatrix).mul(modelMatrix);
     }
 
     private void updateMvpMatrix() {

@@ -23,7 +23,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int uModelMatrixLocation;
     public final int uLightDirectionLocation;
     public final int uTextureUnitLocation;
-    public final int uDisplacementMapUnit;
+    public final int uDisplacementMapUnitLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
@@ -36,7 +36,7 @@ public class GlobeShaderProgram extends ShaderProgram {
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
         uLightDirectionLocation = glGetUniformLocation(programID, U_LIGHT_DIRECTION);
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);
-        uDisplacementMapUnit = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
+        uDisplacementMapUnitLocation = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -57,7 +57,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     void setDisplacementMap(int displacementMapID) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, displacementMapID);
-        glUniform1i(uTextureUnitLocation, 0);
+        glUniform1i(uDisplacementMapUnitLocation, 0);
     }
 
     void setTexture(int textureID) {
