@@ -1,5 +1,3 @@
-#version 120
-
 uniform mat4 u_VpMatrix;
 
 attribute vec3 a_Position;

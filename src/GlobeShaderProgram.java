@@ -17,6 +17,8 @@ public class GlobeShaderProgram extends ShaderProgram {
     private static final String U_TEXTURE_UNIT = "u_TextureUnit";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
     private static final String U_SHADOW_MAP_UNIT = "u_ShadowMapUnit";
+    private static final String U_SEA_LEVEL = "u_SeaLevel";
+    private static final String U_TERRAIN_SCALE = "u_TerrainScale";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
@@ -28,6 +30,8 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int uTextureUnitLocation;
     public final int uDisplacementMapUnitLocation;
     public final int uShadowMapUnitLocation;
+    public final int uSeaLevelLocation;
+    public final int uTerrainScaleLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
@@ -43,6 +47,8 @@ public class GlobeShaderProgram extends ShaderProgram {
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);
         uDisplacementMapUnitLocation = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
         uShadowMapUnitLocation = glGetUniformLocation(programID, U_SHADOW_MAP_UNIT);
+        uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEL);
+        uTerrainScaleLocation = glGetUniformLocation(programID, U_TERRAIN_SCALE);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -80,5 +86,13 @@ public class GlobeShaderProgram extends ShaderProgram {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, shadowMapID);
         glUniform1i(uShadowMapUnitLocation, 2);
+    }
+
+    void setSeaLevel(float seaLevel) {
+        glUniform1f(uSeaLevelLocation, seaLevel);
+    }
+
+    void setTerrainScale(float terrainScale) {
+        glUniform1f(uTerrainScaleLocation, terrainScale);
     }
 }

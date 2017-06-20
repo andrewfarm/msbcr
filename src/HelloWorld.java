@@ -56,7 +56,9 @@ public class HelloWorld {
     private FloatBuffer skyboxVertexBuffer;
     private ByteBuffer skyboxIndexBuffer;
 
-    private float globeRadius = 1;
+    private static final float GLOBE_RADIUS = 1;
+    private static final float SEA_LEVEL = 0.5f;
+    private static final float TERRAIN_SCALE = 0.75f;
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 
@@ -185,7 +187,7 @@ public class HelloWorld {
 
         glfwSetCursorPosCallback(window, (long window, double xpos, double ypos) -> {
             if (dragging) {
-                float scale = camDist - globeRadius;
+                float scale = camDist - GLOBE_RADIUS;
                 camAzimuth -= (xpos - prevX) * scale * 0.0015f;
                 camElev += (ypos - prevY) * scale * 0.0015f;
                 camElev = Math.min(Math.max(camElev, (float) -Math.PI / 2), (float) Math.PI / 2);
@@ -196,9 +198,9 @@ public class HelloWorld {
         });
 
         glfwSetScrollCallback(window, (long window, double xoffset, double yoffset) -> {
-            camDist -= yoffset * (camDist - globeRadius) * 0.005;
+            camDist -= yoffset * (camDist - GLOBE_RADIUS) * 0.005;
             camDist = Math.min(Math.max(camDist, 1.01f), 15);
-            camLookElev = (float) (1.2 * Math.pow(10, -(camDist - globeRadius)));
+            camLookElev = (float) (1.2 * Math.pow(10, -(camDist - GLOBE_RADIUS)));
             updateViewMatrix();
         });
 
@@ -293,11 +295,11 @@ public class HelloWorld {
 
         globeVertexBuffer.position(0);
         globeIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(globeVertexBuffer, globeIndexBuffer, globeRadius, meridians, parallels, true);
+        ObjectBuilder.buildSphere(globeVertexBuffer, globeIndexBuffer, GLOBE_RADIUS, meridians, parallels, true);
 
         oceanVertexBuffer.position(0);
         oceanIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, globeRadius, meridians, parallels, false);
+        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, GLOBE_RADIUS, meridians, parallels, false);
 
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
@@ -396,6 +398,8 @@ public class HelloWorld {
         shadowMapShaderProgram.useProgram();
         shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
         shadowMapShaderProgram.setDisplacementMap(displacementMap);
+        shadowMapShaderProgram.setSeaLevel(SEA_LEVEL);
+        shadowMapShaderProgram.setTerrainScale(TERRAIN_SCALE);
 
         int dataOffset = 0;
 
@@ -430,6 +434,8 @@ public class HelloWorld {
         globeShaderProgram.setDisplacementMap(displacementMap);
         globeShaderProgram.setTexture(globeTexture);
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
+        globeShaderProgram.setSeaLevel(SEA_LEVEL);
+        globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
 
         glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
 

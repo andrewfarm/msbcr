@@ -13,11 +13,15 @@ public class ShadowMapShaderProgram extends ShaderProgram {
 
     private static final String U_LIGHT_MVP_MATRIX = "u_LightMvpMatrix";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
+    private static final String U_SEA_LEVEL = "u_SeaLevel";
+    private static final String U_TERRAIN_SCALE = "u_TerrainScale";
     private static final String A_POSITION = "a_Position";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
 
     public final int uLightMvpMatrixLocation;
     public final int uDisplacementMapUnitLocation;
+    public final int uSeaLevelLocation;
+    public final int uTerrainScaleLocation;
     public final int aPositionLocation;
     public final int aTextureCoordsLocation;
 
@@ -27,6 +31,8 @@ public class ShadowMapShaderProgram extends ShaderProgram {
 
         uLightMvpMatrixLocation = glGetUniformLocation(programID, U_LIGHT_MVP_MATRIX);
         uDisplacementMapUnitLocation = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
+        uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEL);
+        uTerrainScaleLocation = glGetUniformLocation(programID, U_TERRAIN_SCALE);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
     }
@@ -39,5 +45,13 @@ public class ShadowMapShaderProgram extends ShaderProgram {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, displacementMapID);
         glUniform1i(uDisplacementMapUnitLocation, 0);
+    }
+
+    void setSeaLevel(float seaLevel) {
+        glUniform1f(uSeaLevelLocation, seaLevel);
+    }
+
+    void setTerrainScale(float terrainScale) {
+        glUniform1f(uTerrainScaleLocation, terrainScale);
     }
 }
