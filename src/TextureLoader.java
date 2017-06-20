@@ -2,6 +2,7 @@ import org.lwjgl.stb.STBImage;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -16,6 +17,16 @@ import static org.lwjgl.opengl.GL32.glFramebufferTexture;
  * Created by Andrew on 6/10/17.
  */
 public abstract class TextureLoader {
+
+    static class ShadowMap {
+        int frameBufferID;
+        int depthTextureID;
+
+        ShadowMap(int frameBufferID, int depthTextureID) {
+            this.frameBufferID = frameBufferID;
+            this.depthTextureID = depthTextureID;
+        }
+    }
 
     static int loadTexture2D(String imgPath) {
         int[] imgWidth = new int[1];
@@ -114,11 +125,10 @@ public abstract class TextureLoader {
         return textureObjectIDs[0];
     }
 
-    static int createShadowMap(int width, int height) {
+    static Optional<ShadowMap> createShadowMap(int width, int height) {
         System.out.println("creating shadow map");
         int[] frameBufferIDs = new int[1];
         glGenFramebuffers(frameBufferIDs);
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferIDs[0]);
 
         int[] depthTextureIDs = new int[1];
         glGenTextures(depthTextureIDs);
@@ -131,10 +141,11 @@ public abstract class TextureLoader {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBufferIDs[0]);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureIDs[0], 0);
-
         glDrawBuffer(GL_NONE); // No color buffer is drawn to.
         glReadBuffer(GL_NONE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Always check that our framebuffer is ok
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -142,9 +153,9 @@ public abstract class TextureLoader {
             System.out.println("shadow map creation successful");
         } else {
             System.err.println("error creating framebuffer for shadow map (status: " + status + ")");
-            return 0;
+            return Optional.empty();
         }
 
-        return frameBufferIDs[0];
+        return Optional.of(new ShadowMap(frameBufferIDs[0], depthTextureIDs[0]));
     }
 }

@@ -8,11 +8,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -67,17 +70,17 @@ public class HelloWorld {
     private Matrix4f projectionMatrix = new Matrix4f();
     private Matrix4f mvpMatrix = new Matrix4f();
 
-    private Matrix4f depthViewMatrix = new Matrix4f().lookAt(
+    private Matrix4f lightViewMatrix = new Matrix4f().lookAt(
             new Vector3f(lightX, lightY, lightZ).normalize().mul(2),
             new Vector3f(0, 0, 0),
             new Vector3f(0, 1, 0));
-    private Matrix4f depthProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 1.5f, 2.5f);
-    private Matrix4f depthBiasMatrix = new Matrix4f(
-            0.5f, 0.0f, 0.0f, 0.0f,
-            0.0f, 0.5f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.5f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f);
-    private Matrix4f depthBiasMvpMatrix = new Matrix4f();
+    private Matrix4f lightProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 0, 4);
+    private Matrix4f lightBiasMatrix = new Matrix4f(
+            0.5f, 0.0f, 0.0f, 0.5f,
+            0.0f, 0.5f, 0.0f, 0.5f,
+            0.0f, 0.0f, 0.5f, 0.5f,
+            0.0f, 0.0f, 0.0f, 1.0f).identity();
+    private Matrix4f lightBiasMvpMatrix = new Matrix4f();
 
     private GlobeShaderProgram globeShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
@@ -88,7 +91,8 @@ public class HelloWorld {
     private int displacementMap;
     private int starfieldTexture;
 
-    private int shadowMapID;
+    private int shadowMapFramebuffer;
+    private int shadowMapDepthTexture;
 
     private void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
@@ -268,7 +272,11 @@ public class HelloWorld {
                 "res/starmap_8k_1.png"
         });
 
-        shadowMapID = TextureLoader.createShadowMap(1024, 1024);//TODO
+        Optional<TextureLoader.ShadowMap> shadowMap = TextureLoader.createShadowMap(1024, 1024);
+        shadowMap.ifPresent(shadowMap1 -> {
+            shadowMapFramebuffer = shadowMap1.frameBufferID;
+            shadowMapDepthTexture = shadowMap1.depthTextureID;
+        });
 
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
@@ -324,13 +332,18 @@ public class HelloWorld {
         skyboxIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLES, skyboxIndexBuffer);
 
-        //set up shadow map for globe
+        //render to shadow map
+
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
 
         shadowMapShaderProgram.useProgram();
-        shadowMapShaderProgram.setDepthBiasMvpMatrix(depthBiasMvpMatrix);
+        shadowMapShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
         shadowMapShaderProgram.setDisplacementMap(displacementMap);
 
         int dataOffset = 0;
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, 1024, 1024);
 
         globeVertexBuffer.position(dataOffset);
         glVertexAttribPointer(shadowMapShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
@@ -347,14 +360,20 @@ public class HelloWorld {
         globeIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         //draw globe
 
         globeShaderProgram.useProgram();
         globeShaderProgram.setMvpMatrix(mvpMatrix);
         globeShaderProgram.setModelMatrix(modelMatrix);
+        globeShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
         globeShaderProgram.setLightDirection(lightX, lightY, lightZ);
         globeShaderProgram.setDisplacementMap(displacementMap);
         globeShaderProgram.setTexture(globeTexture);
+        globeShaderProgram.setShadowMap(shadowMapDepthTexture);
+
+        glViewport(0, 0, 1600, 1200);
 
         dataOffset = 0;
 
@@ -376,7 +395,7 @@ public class HelloWorld {
         glEnableVertexAttribArray(globeShaderProgram.aTextureCoordsLocation);
 
         globeIndexBuffer.position(0);
-//        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
+        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
 
         //draw ocean
 
@@ -428,7 +447,7 @@ public class HelloWorld {
     }
 
     private void updateDepthBiasMvpMatrix() {
-        depthBiasMvpMatrix.set(depthBiasMatrix).mul(depthProjectionMatrix).mul(depthViewMatrix).mul(modelMatrix);
+        lightBiasMvpMatrix.set(lightBiasMatrix).mul(lightProjectionMatrix).mul(lightViewMatrix).mul(modelMatrix);
     }
 
     private void updateMvpMatrix() {

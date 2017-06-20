@@ -1,3 +1,5 @@
+varying vec4 v_Position; //TODO
+
 void main() {
-    gl_FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
+    //OpenGL writes to the depth buffer automatically
 }

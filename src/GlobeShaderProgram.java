@@ -12,18 +12,22 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     private static final String U_MVP_MATRIX = "u_MvpMatrix";
     private static final String U_MODEL_MATRIX = "u_ModelMatrix";
+    private static final String U_LIGHT_BIAS_MVP_MATRIX = "u_LightBiasMvpMatrix";
     private static final String U_LIGHT_DIRECTION = "u_LightDirection";
     private static final String U_TEXTURE_UNIT = "u_TextureUnit";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
+    private static final String U_SHADOW_MAP_UNIT = "u_ShadowMapUnit";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
 
     public final int uMvpMatrixLocation;
     public final int uModelMatrixLocation;
+    public final int uLightBiasMvpMatrixLocation;
     public final int uLightDirectionLocation;
     public final int uTextureUnitLocation;
     public final int uDisplacementMapUnitLocation;
+    public final int uShadowMapUnitLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
@@ -34,9 +38,11 @@ public class GlobeShaderProgram extends ShaderProgram {
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
+        uLightBiasMvpMatrixLocation = glGetUniformLocation(programID, U_LIGHT_BIAS_MVP_MATRIX);
         uLightDirectionLocation = glGetUniformLocation(programID, U_LIGHT_DIRECTION);
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);
         uDisplacementMapUnitLocation = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
+        uShadowMapUnitLocation = glGetUniformLocation(programID, U_SHADOW_MAP_UNIT);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -48,6 +54,10 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     void setModelMatrix(Matrix4f m) {
         glUniformMatrix4fv(uModelMatrixLocation, false, m.get(new float[16]));
+    }
+
+    void setLightBiasMvpMatrix(Matrix4f m) {
+        glUniformMatrix4fv(uLightBiasMvpMatrixLocation, false, m.get(new float[16]));
     }
 
     void setLightDirection(float x, float y, float z) {
@@ -64,5 +74,11 @@ public class GlobeShaderProgram extends ShaderProgram {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textureID);
         glUniform1i(uTextureUnitLocation, 1);
+    }
+
+    void setShadowMap(int shadowMapID) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, shadowMapID);
+        glUniform1i(uShadowMapUnitLocation, 2);
     }
 }
