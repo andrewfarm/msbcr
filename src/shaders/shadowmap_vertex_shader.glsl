@@ -6,7 +6,7 @@ attribute vec2 a_TextureCoords;
 varying vec4 v_Position; //TODO
 
 void main() {
-    float displacement = (texture2D(u_DisplacementMapUnit, a_TextureCoords).r - 0.6314) * 0.25;
+    float displacement = (texture2D(u_DisplacementMapUnit, a_TextureCoords).r - 0.5/*0.6314*/) * 1.0;
     vec3 displacedPosition = a_Position + (normalize(a_Position) * displacement);
     gl_Position = u_LightMvpMatrix * vec4(displacedPosition, 1.0);
     v_Position = gl_Position;

@@ -12,7 +12,7 @@ varying vec3 v_Normal;
 varying vec2 v_TextureCoords;
 
 void main() {
-    float displacement = (texture2D(u_DisplacementMapUnit, a_TextureCoords).r - 0.6314) * 0.25;
+    float displacement = (texture2D(u_DisplacementMapUnit, a_TextureCoords).r - 0.5/*0.6314*/) * 1.0;
     vec3 displacedPosition = a_Position + (normalize(a_Position) * displacement);
     v_Normal = (u_ModelMatrix * vec4(a_Normal, 1.0)).xyz;
     v_TextureCoords = a_TextureCoords;

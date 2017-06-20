@@ -92,8 +92,8 @@ public class HelloWorld {
     private int displacementMap;
     private int starfieldTexture;
 
-    private int shadowMapWidth = 4096;
-    private int shadowMapHeight = 4096;
+    private int shadowMapWidth = 8192;
+    private int shadowMapHeight = 8192;
 
     private int shadowMapFramebuffer;
     private int shadowMapDepthTexture;
@@ -266,7 +266,7 @@ public class HelloWorld {
         shadowMapShaderProgram = new ShadowMapShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
-        displacementMap = TextureLoader.loadTexture2D("res/elevation.jpg");
+        displacementMap = TextureLoader.loadTexture2D("res/elevation2.png");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
                 "res/starmap_8k_3.png",
@@ -428,7 +428,7 @@ public class HelloWorld {
         glEnableVertexAttribArray(oceanShaderProgram.aNormalLocation);
 
         oceanIndexBuffer.position(0);
-//        glDrawElements(GL_TRIANGLE_STRIP, oceanIndexBuffer);
+        glDrawElements(GL_TRIANGLE_STRIP, oceanIndexBuffer);
 
         glfwSwapBuffers(window); // swap the color buffers
 
