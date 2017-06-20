@@ -60,6 +60,9 @@ public class HelloWorld {
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 
+    private static final float LOOK_SPEED = 0.02f;
+    private boolean up, down, left, right;
+    private float camLookAzimuth = 0, camLookElev = 0;
     private float camAzimuth = 0, camElev = 0;
     private float camDist = 4;
     private float globeAzimuth = 0;
@@ -95,8 +98,8 @@ public class HelloWorld {
     private int displacementMap;
     private int starfieldTexture;
 
-    private int shadowMapWidth = 8192;
-    private int shadowMapHeight = 8192;
+    private int shadowMapWidth = 4096;
+    private int shadowMapHeight = 4096;
 
     private int shadowMapFramebuffer;
     private int shadowMapDepthTexture;
@@ -127,8 +130,39 @@ public class HelloWorld {
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
+            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE ) {
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+            } else if (action == GLFW_PRESS) {
+                switch (key) {
+                    case GLFW_KEY_UP:
+                        up = true;
+                        break;
+                    case GLFW_KEY_DOWN:
+                        down = true;
+                        break;
+                    case GLFW_KEY_LEFT:
+                        left = true;
+                        break;
+                    case GLFW_KEY_RIGHT:
+                        right = true;
+                        break;
+                }
+            } else if (action == GLFW_RELEASE) {
+                switch (key) {
+                    case GLFW_KEY_UP:
+                        up = false;
+                        break;
+                    case GLFW_KEY_DOWN:
+                        down = false;
+                        break;
+                    case GLFW_KEY_LEFT:
+                        left = false;
+                        break;
+                    case GLFW_KEY_RIGHT:
+                        right = false;
+                        break;
+                }
+            }
         });
 
         glfwSetWindowSizeCallback(window, (window1, width, height) -> {
@@ -158,6 +192,8 @@ public class HelloWorld {
                 updateViewMatrix();
                 prevX = xpos;
                 prevY = ypos;
+            } else {
+
             }
         });
 
@@ -315,6 +351,19 @@ public class HelloWorld {
     private void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
+        if (up) {
+            camLookElev += LOOK_SPEED;
+        }
+        if (down) {
+            camLookElev -= LOOK_SPEED;
+        }
+        if (left) {
+            camLookAzimuth += LOOK_SPEED;
+        }
+        if (right) {
+            camLookAzimuth -= LOOK_SPEED;
+        }
+
         globeAzimuth += 0.005f;
         updateModelMatrix();
         camAzimuth += 0.005f;
@@ -448,7 +497,12 @@ public class HelloWorld {
 
     private void updateViewMatrix() {
         viewMatrix.identity();
-        viewMatrix.translate(0, 0, -camDist).rotate(camElev, 1, 0, 0).rotate(-camAzimuth, 0, 1, 0);
+        viewMatrix
+                .rotate(-camLookElev, 1, 0, 0)
+                .rotate(-camLookAzimuth, 0, 1, 0)
+                .translate(0, 0, -camDist)
+                .rotate(camElev, 1, 0, 0)
+                .rotate(-camAzimuth, 0, 1, 0);
     }
 
     private void updateModelMatrix() {
