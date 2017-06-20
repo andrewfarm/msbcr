@@ -192,8 +192,6 @@ public class HelloWorld {
                 updateViewMatrix();
                 prevX = xpos;
                 prevY = ypos;
-            } else {
-
             }
         });
 
