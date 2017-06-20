@@ -76,10 +76,11 @@ public class HelloWorld {
             new Vector3f(0, 1, 0));
     private Matrix4f lightProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 0, 4);
     private Matrix4f lightBiasMatrix = new Matrix4f(
-            0.5f, 0.0f, 0.0f, 0.5f,
-            0.0f, 0.5f, 0.0f, 0.5f,
-            0.0f, 0.0f, 0.5f, 0.5f,
-            0.0f, 0.0f, 0.0f, 1.0f).identity();
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f);
+    private Matrix4f lightMvpMatrix = new Matrix4f();
     private Matrix4f lightBiasMvpMatrix = new Matrix4f();
 
     private GlobeShaderProgram globeShaderProgram;
@@ -281,7 +282,7 @@ public class HelloWorld {
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
 
-        updateDepthBiasMvpMatrix();
+        updateLightMatrices();
 
         // Set the clear color
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -312,7 +313,7 @@ public class HelloWorld {
         camAzimuth += 0.005f;
         updateViewMatrix();
         updateMvpMatrix();
-        updateDepthBiasMvpMatrix();
+        updateLightMatrices();
 
         //draw starfield
 
@@ -337,7 +338,7 @@ public class HelloWorld {
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
 
         shadowMapShaderProgram.useProgram();
-        shadowMapShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
+        shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
         shadowMapShaderProgram.setDisplacementMap(displacementMap);
 
         int dataOffset = 0;
@@ -446,8 +447,9 @@ public class HelloWorld {
         modelMatrix.rotate(globeAzimuth, 0, 1, 0);
     }
 
-    private void updateDepthBiasMvpMatrix() {
-        lightBiasMvpMatrix.set(lightBiasMatrix).mul(lightProjectionMatrix).mul(lightViewMatrix).mul(modelMatrix);
+    private void updateLightMatrices() {
+        lightMvpMatrix.set(lightProjectionMatrix).mul(lightViewMatrix).mul(modelMatrix);
+        lightBiasMvpMatrix.set(lightBiasMatrix).mul(lightMvpMatrix);
     }
 
     private void updateMvpMatrix() {

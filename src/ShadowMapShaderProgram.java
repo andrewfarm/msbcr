@@ -11,12 +11,12 @@ import static org.lwjgl.opengl.GL20.*;
  */
 public class ShadowMapShaderProgram extends ShaderProgram {
 
-    private static final String U_LIGHT_BIAS_MVP_MATRIX = "u_LightBiasMvpMatrix";
+    private static final String U_LIGHT_MVP_MATRIX = "u_LightMvpMatrix";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
     private static final String A_POSITION = "a_Position";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
 
-    public final int uLightBiasMvpMatrixLocation;
+    public final int uLightMvpMatrixLocation;
     public final int uDisplacementMapUnitLocation;
     public final int aPositionLocation;
     public final int aTextureCoordsLocation;
@@ -25,14 +25,14 @@ public class ShadowMapShaderProgram extends ShaderProgram {
         super(TextResourceReader.readFile("src/shaders/shadowmap_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/shadowmap_fragment_shader.glsl"));
 
-        uLightBiasMvpMatrixLocation = glGetUniformLocation(programID, U_LIGHT_BIAS_MVP_MATRIX);
+        uLightMvpMatrixLocation = glGetUniformLocation(programID, U_LIGHT_MVP_MATRIX);
         uDisplacementMapUnitLocation = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
     }
 
-    void setLightBiasMvpMatrix(Matrix4f m) {
-        glUniformMatrix4fv(uLightBiasMvpMatrixLocation, false, m.get(new float[16]));
+    void setLightMvpMatrix(Matrix4f m) {
+        glUniformMatrix4fv(uLightMvpMatrixLocation, false, m.get(new float[16]));
     }
 
     void setDisplacementMap(int displacementMapID) {

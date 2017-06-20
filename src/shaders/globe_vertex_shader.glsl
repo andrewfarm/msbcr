@@ -17,6 +17,5 @@ void main() {
     v_Normal = (u_ModelMatrix * vec4(a_Normal, 1.0)).xyz;
     v_TextureCoords = a_TextureCoords;
     v_PositionInLightSpace = u_LightBiasMvpMatrix * vec4(displacedPosition, 1.0);
-    v_PositionInLightSpace = v_PositionInLightSpace * 0.5 + 0.5;
     gl_Position = u_MvpMatrix * vec4(displacedPosition, 1.0);
 }
