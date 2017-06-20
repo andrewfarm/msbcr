@@ -92,6 +92,9 @@ public class HelloWorld {
     private int displacementMap;
     private int starfieldTexture;
 
+    private int shadowMapWidth = 4096;
+    private int shadowMapHeight = 4096;
+
     private int shadowMapFramebuffer;
     private int shadowMapDepthTexture;
 
@@ -273,7 +276,7 @@ public class HelloWorld {
                 "res/starmap_8k_1.png"
         });
 
-        Optional<TextureLoader.ShadowMap> shadowMap = TextureLoader.createShadowMap(1024, 1024);
+        Optional<TextureLoader.ShadowMap> shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
         shadowMap.ifPresent(shadowMap1 -> {
             shadowMapFramebuffer = shadowMap1.frameBufferID;
             shadowMapDepthTexture = shadowMap1.depthTextureID;
@@ -336,6 +339,7 @@ public class HelloWorld {
         //render to shadow map
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
+        glCullFace(GL_FRONT);
 
         shadowMapShaderProgram.useProgram();
         shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
@@ -344,7 +348,7 @@ public class HelloWorld {
         int dataOffset = 0;
 
         glClear(GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, 1024, 1024);
+        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
 
         globeVertexBuffer.position(dataOffset);
         glVertexAttribPointer(shadowMapShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
@@ -362,6 +366,7 @@ public class HelloWorld {
         glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCullFace(GL_BACK);
 
         //draw globe
 

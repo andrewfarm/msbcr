@@ -1,5 +1,7 @@
 #define AMBIENT_STRENGTH 0.1
 
+#define SHADOW_BIAS 0.001
+
 uniform vec3 u_LightDirection; //must be normalized!
 uniform sampler2D u_TextureUnit;
 uniform sampler2D u_ShadowMapUnit;
@@ -17,8 +19,8 @@ void main() {
     gl_FragColor = vec4((texColor/* * totalLight*/).rgb, 1.0);//TODO
 //    gl_FragColor = vec4(gl_FragColor.r * v_PositionInLightSpace.xyz, 1.0);
 
-//    if (texture2D(u_ShadowMapUnit, v_PositionInLightSpace.xy).z < v_PositionInLightSpace.z) {
-//        gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
-//    }
+    if (texture2D(u_ShadowMapUnit, v_PositionInLightSpace.xy).z < v_PositionInLightSpace.z + SHADOW_BIAS) {
+        gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    }
 //    gl_FragColor = vec4(v_PositionInLightSpace.xyz, 1.0);
 }
