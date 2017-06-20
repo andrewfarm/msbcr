@@ -39,6 +39,9 @@ public class HelloWorld {
 
     private long window;
 
+    private int windowWidth = 800;
+    private int windowHeight = 600;
+
 //    private float[] vertices = {
 //            0.5f, 0.5f, 1f, 0f, 0f,
 //            -0.5f, -0.5f, 0f, 1f, 0f,
@@ -117,7 +120,7 @@ public class HelloWorld {
         }
 
         // Create the window
-        window = glfwCreateWindow(800, 600, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(windowWidth, windowHeight, "Hello World!", NULL, NULL);
         if (window == NULL) {
             throw new RuntimeException("failed to create GLFW window");
         }
@@ -129,8 +132,9 @@ public class HelloWorld {
         });
 
         glfwSetWindowSizeCallback(window, (window1, width, height) -> {
+            windowWidth = width;
+            windowHeight = height;
             if (GL.getCapabilities() != null) {
-                glViewport(0, 0, width, height);
                 updateProjectionMatrix(width, height);
                 render();
             }
@@ -379,7 +383,7 @@ public class HelloWorld {
         globeShaderProgram.setTexture(globeTexture);
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
 
-        glViewport(0, 0, 1600, 1200);
+        glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
 
         dataOffset = 0;
 
