@@ -1,4 +1,4 @@
-#version 120 //required for sub-matrix constructors, e.g. mat3(mat4)
+#version 120
 
 uniform mat4 u_MvpMatrix;
 uniform mat4 u_ModelMatrix;
@@ -10,6 +10,7 @@ uniform float u_TerrainScale;
 attribute vec3 a_Position;
 attribute vec3 a_Normal;
 attribute vec2 a_TextureCoords;
+uniform sampler2D u_NormalMapUnit;
 
 varying vec4 v_PositionInLightSpace;
 varying vec3 v_Normal;

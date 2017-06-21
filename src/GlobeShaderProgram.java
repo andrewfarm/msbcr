@@ -16,6 +16,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     private static final String U_LIGHT_DIRECTION = "u_LightDirection";
     private static final String U_TEXTURE_UNIT = "u_TextureUnit";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
+    private static final String U_NORMAL_MAP_UNIT = "u_NormalMapUnit";
     private static final String U_SHADOW_MAP_UNIT = "u_ShadowMapUnit";
     private static final String U_SEA_LEVEL = "u_SeaLevel";
     private static final String U_TERRAIN_SCALE = "u_TerrainScale";
@@ -29,6 +30,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int uLightDirectionLocation;
     public final int uTextureUnitLocation;
     public final int uDisplacementMapUnitLocation;
+    public final int uNormalMapUnitLocation;
     public final int uShadowMapUnitLocation;
     public final int uSeaLevelLocation;
     public final int uTerrainScaleLocation;
@@ -46,6 +48,7 @@ public class GlobeShaderProgram extends ShaderProgram {
         uLightDirectionLocation = glGetUniformLocation(programID, U_LIGHT_DIRECTION);
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);
         uDisplacementMapUnitLocation = glGetUniformLocation(programID, U_DISPLACEMENT_MAP_UNIT);
+        uNormalMapUnitLocation = glGetUniformLocation(programID, U_NORMAL_MAP_UNIT);
         uShadowMapUnitLocation = glGetUniformLocation(programID, U_SHADOW_MAP_UNIT);
         uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEL);
         uTerrainScaleLocation = glGetUniformLocation(programID, U_TERRAIN_SCALE);
@@ -70,22 +73,28 @@ public class GlobeShaderProgram extends ShaderProgram {
         glUniform3f(uLightDirectionLocation, x, y, z);
     }
 
-    void setDisplacementMap(int displacementMapID) {
+    void setTexture(int textureID) {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, displacementMapID);
-        glUniform1i(uDisplacementMapUnitLocation, 0);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glUniform1i(uTextureUnitLocation, 0);
     }
 
-    void setTexture(int textureID) {
+    void setDisplacementMap(int displacementMapID) {
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glUniform1i(uTextureUnitLocation, 1);
+        glBindTexture(GL_TEXTURE_2D, displacementMapID);
+        glUniform1i(uDisplacementMapUnitLocation, 1);
+    }
+
+    void setNormalMap(int normalMapID) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, normalMapID);
+        glUniform1i(uNormalMapUnitLocation, 2);
     }
 
     void setShadowMap(int shadowMapID) {
-        glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, shadowMapID);
-        glUniform1i(uShadowMapUnitLocation, 2);
+        glUniform1i(uShadowMapUnitLocation, 3);
     }
 
     void setSeaLevel(float seaLevel) {

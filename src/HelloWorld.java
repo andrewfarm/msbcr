@@ -98,6 +98,7 @@ public class HelloWorld {
 
     private int globeTexture;
     private int displacementMap;
+    private int normalMap;
     private int starfieldTexture;
 
     private int shadowMapWidth = 4096;
@@ -308,6 +309,7 @@ public class HelloWorld {
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation2.png");
+        normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
                 "res/starmap_8k_3.png",
@@ -433,6 +435,7 @@ public class HelloWorld {
         globeShaderProgram.setLightDirection(lightX, lightY, lightZ);
         globeShaderProgram.setDisplacementMap(displacementMap);
         globeShaderProgram.setTexture(globeTexture);
+        globeShaderProgram.setNormalMap(normalMap);
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
