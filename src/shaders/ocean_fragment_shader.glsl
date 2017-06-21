@@ -22,6 +22,6 @@ void main() {
     float alphaScale = 1.0 - dot(normalizedNormal, lookVector);
     float alpha = (HORIZON_ALPHA - NADIR_ALPHA) * alphaScale + NADIR_ALPHA;
 
-    gl_FragColor = vec4(vec3(0.0, 0.15, 0.6) * totalFlatLight, alpha) +
+    gl_FragColor = vec4(vec3(0.0, 0.2, 0.5) * totalFlatLight, alpha) +
         vec4(1.0) * 0.4 * specularStrength;
 }

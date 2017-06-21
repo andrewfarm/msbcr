@@ -58,7 +58,7 @@ public class HelloWorld {
 
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
-    private static final float TERRAIN_SCALE = 0.75f;
+    private static final float TERRAIN_SCALE = 0.5f;
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 

@@ -7,14 +7,20 @@
 
 uniform vec3 u_LightDirection; //must be normalized!
 uniform sampler2D u_TextureUnit;
+uniform sampler2D u_NormalMapUnit;
 uniform sampler2D u_ShadowMapUnit;
 
 varying vec4 v_PositionInLightSpace;
 varying vec3 v_Normal;
+varying vec3 v_Tangent;
+varying vec3 v_Bitangent;
 varying vec2 v_TextureCoords;
 
 void main() {
-    vec3 normalizedNormal = normalize(v_Normal);
+    vec3 normalMapSample = texture2D(u_NormalMapUnit, v_TextureCoords).xyz;
+    mat3 tbnMatrix = mat3(normalize(v_Tangent), normalize(v_Bitangent), normalize(v_Normal));
+    vec3 normalizedNormal = normalize(tbnMatrix * normalMapSample);
+
     vec4 texColor = texture2D(u_TextureUnit, v_TextureCoords);
 
     float totalLight = AMBIENT_STRENGTH;
