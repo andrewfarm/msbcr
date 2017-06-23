@@ -1,4 +1,4 @@
-#define AMBIENT_STRENGTH 0.1
+#define AMBIENT_STRENGTH 0.2
 
 #define NADIR_ALPHA 0.2
 #define HORIZON_ALPHA 1.0

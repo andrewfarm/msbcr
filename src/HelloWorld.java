@@ -57,8 +57,8 @@ public class HelloWorld {
     private ByteBuffer skyboxIndexBuffer;
 
     private static final float GLOBE_RADIUS = 1;
-    private static final float SEA_LEVEL = 0f;
-    private static final float TERRAIN_SCALE = 0.075f;
+    private static final float SEA_LEVEL = 0.5f;
+    private static final float TERRAIN_SCALE = 0.75f;
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 
@@ -101,8 +101,8 @@ public class HelloWorld {
     private int normalMap;
     private int starfieldTexture;
 
-    private int shadowMapWidth = 2048;
-    private int shadowMapHeight = 2048;
+    private int shadowMapWidth = 4096;
+    private int shadowMapHeight = 4096;
 
     private int shadowMapFramebuffer;
     private int shadowMapDepthTexture;
@@ -239,7 +239,7 @@ public class HelloWorld {
         GL.createCapabilities();
 
         int meridians = 2048;
-        int parallels = 1024;
+        int parallels = 511;
 
         globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())
@@ -308,7 +308,7 @@ public class HelloWorld {
         shadowMapShaderProgram = new ShadowMapShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
-        displacementMap = TextureLoader.loadTexture2D("res/elevation-usgs.png");
+        displacementMap = TextureLoader.loadTexture2D("res/elevation2.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
@@ -395,7 +395,7 @@ public class HelloWorld {
         //render to shadow map
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
-        glCullFace(GL_FRONT);
+//        glCullFace(GL_FRONT);
 
         shadowMapShaderProgram.useProgram();
         shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
@@ -421,10 +421,10 @@ public class HelloWorld {
         glEnableVertexAttribArray(shadowMapShaderProgram.aTextureCoordsLocation);
 
         globeIndexBuffer.position(0);
-//        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
+        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glCullFace(GL_BACK);
+//        glCullFace(GL_BACK);
 
         //draw globe
 
