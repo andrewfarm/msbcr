@@ -3,7 +3,7 @@
 #define NADIR_ALPHA 0.2
 #define HORIZON_ALPHA 1.0
 
-uniform vec3 u_LightDirection; //must be normalized!
+uniform vec3 u_LightDirection;
 uniform vec3 u_CamPos;
 
 varying vec3 v_Position;

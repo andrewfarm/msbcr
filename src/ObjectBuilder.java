@@ -24,10 +24,6 @@ public abstract class ObjectBuilder {
         return meridians * (parallels + 1) * 6;
     }
 
-    static int getAtmosphereRingVertexCount(int segments) {
-        return 2 * (segments + 1);
-    }
-
     static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
         generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, textured);
 
@@ -103,25 +99,6 @@ public abstract class ObjectBuilder {
                 indexBuf.put(faceVertexIndices[2]);
                 indexBuf.put(faceVertexIndices[1]);
             }
-        }
-    }
-
-    static void buildAtmosphereRing(FloatBuffer vertexBuf, float insideRadius, float outsideRadius, int segments) {
-        final double angleInterval = 2 * Math.PI / segments;
-        double angle;
-        float sin, cos;
-        for (int i = 0; i <= segments; i++) {
-            angle = i * angleInterval;
-            sin = (float) Math.sin(angle);
-            cos = (float) Math.cos(angle);
-
-            vertexBuf.put(insideRadius * cos);
-            vertexBuf.put(insideRadius * sin);
-            vertexBuf.put(1.0f); //alpha
-
-            vertexBuf.put(outsideRadius * cos);
-            vertexBuf.put(outsideRadius * sin);
-            vertexBuf.put(0.0f); //alpha
         }
     }
 
