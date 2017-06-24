@@ -42,11 +42,6 @@ public class HelloWorld {
     private int windowWidth = 800;
     private int windowHeight = 600;
 
-//    private float[] vertices = {
-//            0.5f, 0.5f, 1f, 0f, 0f,
-//            -0.5f, -0.5f, 0f, 1f, 0f,
-//            0.5f, -0.5f, 0f, 0f, 1f,
-//    };
     private FloatBuffer globeVertexBuffer;
     private IntBuffer globeIndexBuffer;
 
@@ -55,6 +50,10 @@ public class HelloWorld {
 
     private FloatBuffer skyboxVertexBuffer;
     private ByteBuffer skyboxIndexBuffer;
+
+    private FloatBuffer atmosphereRingVertexBuffer;
+
+    private static final int ATMOSPHERE_RING_SEGMENTS = 64;
 
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
@@ -95,6 +94,7 @@ public class HelloWorld {
     private OceanShaderProgram oceanShaderProgram;
     private StarfieldShaderProgram starfieldShaderProgram;
     private ShadowMapShaderProgram shadowMapShaderProgram;
+    private AtmosphereRingShaderProgram atmosphereRingShaderProgram;
 
     private int globeTexture;
     private int displacementMap;
@@ -255,6 +255,11 @@ public class HelloWorld {
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
+        atmosphereRingVertexBuffer = ByteBuffer.allocateDirect(
+                ObjectBuilder.getAtmosphereRingVertexCount(ATMOSPHERE_RING_SEGMENTS) * 12)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
+
         skyboxVertexBuffer = ByteBuffer.allocateDirect(24 * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()
@@ -302,10 +307,15 @@ public class HelloWorld {
         oceanIndexBuffer.position(0);
         ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, GLOBE_RADIUS, meridians, parallels, false);
 
+        atmosphereRingVertexBuffer.position(0);
+        ObjectBuilder.buildAtmosphereRing(atmosphereRingVertexBuffer, GLOBE_RADIUS, GLOBE_RADIUS + 0.1f,
+                ATMOSPHERE_RING_SEGMENTS);
+
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
         starfieldShaderProgram = new StarfieldShaderProgram();
         shadowMapShaderProgram = new ShadowMapShaderProgram();
+        atmosphereRingShaderProgram = new AtmosphereRingShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -392,10 +402,31 @@ public class HelloWorld {
         skyboxIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLES, skyboxIndexBuffer);
 
+        //draw atmosphere ring
+
+        atmosphereRingShaderProgram.useProgram();
+        Matrix4f atmosphereRingViewMatrix = new Matrix4f()
+                .rotate(-camLookElev, 1, 0, 0)
+                .rotate(-camLookAzimuth, 0, 1, 0)
+                .translate(0, 0, -camDist);
+        Matrix4f atmosphereRingMvpMatrix = new Matrix4f(projectionMatrix).mul(atmosphereRingViewMatrix);
+        atmosphereRingShaderProgram.setAtmosphereMvpMatrix(atmosphereRingMvpMatrix);
+
+        atmosphereRingVertexBuffer.position(0);
+        glVertexAttribPointer(atmosphereRingShaderProgram.aPositionLocation, 2,
+                GL_FLOAT, false, 12, atmosphereRingVertexBuffer);
+        glEnableVertexAttribArray(atmosphereRingShaderProgram.aPositionLocation);
+
+        atmosphereRingVertexBuffer.position(2);
+        glVertexAttribPointer(atmosphereRingShaderProgram.aAlphaLocation, 1,
+                GL_FLOAT, false, 12, atmosphereRingVertexBuffer);
+        glEnableVertexAttribArray(atmosphereRingShaderProgram.aAlphaLocation);
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, ObjectBuilder.getAtmosphereRingVertexCount(ATMOSPHERE_RING_SEGMENTS));
+
         //render to shadow map
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
-//        glCullFace(GL_FRONT);
 
         shadowMapShaderProgram.useProgram();
         shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
@@ -424,7 +455,6 @@ public class HelloWorld {
         glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//        glCullFace(GL_BACK);
 
         //draw globe
 
