@@ -308,7 +308,7 @@ public class HelloWorld {
         shadowMapShaderProgram = new ShadowMapShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
-        displacementMap = TextureLoader.loadTexture2D("res/elevation2.png");
+        displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
