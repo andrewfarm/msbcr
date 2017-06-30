@@ -238,7 +238,7 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        int meridians = 2048;
+        int meridians = 1024;
         int parallels = 511;
 
         globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE_TEXTURED)

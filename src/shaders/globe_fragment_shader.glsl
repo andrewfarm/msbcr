@@ -1,6 +1,6 @@
 #version 120
 
-#define AMBIENT_STRENGTH 0.2
+#define AMBIENT_STRENGTH 0.1
 
 #define SHADOW_BIAS_COEF 0.0005
 #define SHADOW_BIAS_MAX 0.002
