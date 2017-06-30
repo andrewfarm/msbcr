@@ -239,7 +239,7 @@ public class HelloWorld {
         GL.createCapabilities();
 
         int meridians = 1024;
-        int parallels = 511;
+        int parallels = 512;
 
         globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())

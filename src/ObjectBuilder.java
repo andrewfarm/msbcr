@@ -9,11 +9,11 @@ import java.nio.IntBuffer;
 public abstract class ObjectBuilder {
 
     static int getSphereVertexCount(int meridians, int parallels) {
-        return (parallels + 2) * (meridians + 1);
+        return (parallels + 1) * (meridians + 1);
     }
 
     static int getSphereIndexCount(int meridians, int parallels) {
-        return ((parallels + 2) * 2 + 2) * (meridians + 1) - 2;
+        return ((parallels + 1) * 2 + 2) * (meridians + 1) - 2;
     }
 
     static int getFacetedSphereVertexCount(int meridians, int parallels) {
@@ -31,10 +31,10 @@ public abstract class ObjectBuilder {
         int col1StartIndex, col2StartIndex;
         for (col1 = 0; col1 < meridians; col1++) {
             col2 = col1 + 1;
-            col1StartIndex = col1 * (parallels + 2);
-            col2StartIndex = col2 * (parallels + 2);
+            col1StartIndex = col1 * (parallels + 1);
+            col2StartIndex = col2 * (parallels + 1);
 
-            for (int row = 0; row < parallels + 2; row++) {
+            for (int row = 0; row < parallels + 1; row++) {
                 indexBuf.put(col2StartIndex + row);
                 indexBuf.put(col1StartIndex + row);
             }
@@ -55,8 +55,8 @@ public abstract class ObjectBuilder {
         int col1StartIndex, col2StartIndex;
         for (col1 = 0; col1 < meridians; col1++) {
             col2 = col1 + 1;
-            col1StartIndex = col1 * (parallels + 2);
-            col2StartIndex = col2 * (parallels + 2);
+            col1StartIndex = col1 * (parallels + 1);
+            col2StartIndex = col2 * (parallels + 1);
 
             for (int row = 0; row < parallels + 1; row ++) {
 
@@ -104,7 +104,7 @@ public abstract class ObjectBuilder {
 
     private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies, boolean textured) {
         final double azimuthInterval = 2 * Math.PI / meridians;
-        final double polarAngleInterval = Math.PI / (parallels + 1);
+        final double polarAngleInterval = Math.PI / parallels;
         double azimuthFraction;
         double azimuth;
         double polarAngleFraction;
@@ -120,8 +120,8 @@ public abstract class ObjectBuilder {
             y1 = radius;
             z1 = radius * (float) Math.cos(azimuth);
 
-            for (int row = 0; row < parallels + 2; row++) {
-                polarAngleFraction = (double) row / (parallels + 1);
+            for (int row = 0; row <= parallels; row++) {
+                polarAngleFraction = (double) row / parallels;
                 polarAngle = row * polarAngleInterval;
                 float sin = (float) Math.sin(polarAngle);
                 x = x1 * sin;
