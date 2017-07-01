@@ -1,5 +1,6 @@
+package com.andrewofarm.msbcr.programs;
+
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -22,7 +23,7 @@ public class OceanShaderProgram extends ShaderProgram {
     public final int aPositionLocation;
     public final int aNormalLocation;
 
-    OceanShaderProgram() {
+    public OceanShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/ocean_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/ocean_fragment_shader.glsl"));
 
@@ -34,19 +35,19 @@ public class OceanShaderProgram extends ShaderProgram {
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
     }
     
-    void setMvpMatrix(Matrix4f m) {
+    public void setMvpMatrix(Matrix4f m) {
         glUniformMatrix4fv(uMvpMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setModelMatrix(Matrix4f m) {
+    public void setModelMatrix(Matrix4f m) {
         glUniformMatrix4fv(uModelMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setLightDirection(float x, float y, float z) {
+    public void setLightDirection(float x, float y, float z) {
         glUniform3f(uLightDirectionLocation, x, y, z);
     }
 
-    void setCamPos(float x, float y, float z) {
+    public void setCamPos(float x, float y, float z) {
         glUniform3f(uCamPosLocation, x, y, z);
     }
 }

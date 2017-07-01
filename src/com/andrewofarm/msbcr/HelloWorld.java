@@ -1,3 +1,11 @@
+package com.andrewofarm.msbcr;
+
+import com.andrewofarm.msbcr.objects.Globe;
+import com.andrewofarm.msbcr.objects.ObjectBuilder;
+import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
+import com.andrewofarm.msbcr.programs.OceanShaderProgram;
+import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
+import com.andrewofarm.msbcr.programs.StarfieldShaderProgram;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.Version;
@@ -94,6 +102,8 @@ public class HelloWorld {
             0.5f, 0.5f, 0.5f, 1.0f);
     private Matrix4f lightMvpMatrix = new Matrix4f();
     private Matrix4f lightBiasMvpMatrix = new Matrix4f();
+
+    private Globe globe = new Globe(1.0f, 1024, 512);
 
     private GlobeShaderProgram globeShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
@@ -253,7 +263,7 @@ public class HelloWorld {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
-
+/*
         int meridians = 1024;
         int parallels = 512;
 
@@ -317,7 +327,7 @@ public class HelloWorld {
         oceanVertexBuffer.position(0);
         oceanIndexBuffer.position(0);
         ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, GLOBE_RADIUS, meridians, parallels, false);
-
+*/
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
         starfieldShaderProgram = new StarfieldShaderProgram();
@@ -397,7 +407,7 @@ public class HelloWorld {
         updateLightMatrices();
 
         //draw starfield
-
+/*
         starfieldShaderProgram.useProgram();
         Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
         vpRotationMatrix.m30(0);
@@ -512,6 +522,38 @@ public class HelloWorld {
 
         oceanIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLE_STRIP, oceanIndexBuffer);
+*/
+
+        //render to shadow map
+
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+
+        shadowMapShaderProgram.useProgram();
+        shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
+        shadowMapShaderProgram.setDisplacementMap(displacementMap);
+        shadowMapShaderProgram.setSeaLevel(SEA_LEVEL);
+        shadowMapShaderProgram.setTerrainScale(TERRAIN_SCALE);
+        globe.draw(shadowMapShaderProgram);
+
+        //draw globe
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
+
+        globeShaderProgram.useProgram();
+        globeShaderProgram.setMvpMatrix(mvpMatrix);
+        globeShaderProgram.setModelMatrix(modelMatrix);
+        globeShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
+        globeShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        globeShaderProgram.setDisplacementMap(displacementMap);
+        globeShaderProgram.setTexture(globeTexture);
+        globeShaderProgram.setNormalMap(normalMap);
+        globeShaderProgram.setShadowMap(shadowMapDepthTexture);
+        globeShaderProgram.setSeaLevel(SEA_LEVEL);
+        globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
+        globe.draw(globeShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
 

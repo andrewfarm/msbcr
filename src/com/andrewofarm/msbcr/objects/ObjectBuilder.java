@@ -1,3 +1,5 @@
+package com.andrewofarm.msbcr.objects;
+
 import org.joml.Vector3f;
 
 import java.nio.FloatBuffer;

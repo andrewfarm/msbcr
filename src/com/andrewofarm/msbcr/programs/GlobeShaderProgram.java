@@ -1,3 +1,5 @@
+package com.andrewofarm.msbcr.programs;
+
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -38,7 +40,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
 
-    GlobeShaderProgram() {
+    public GlobeShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
 
@@ -57,51 +59,51 @@ public class GlobeShaderProgram extends ShaderProgram {
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
     }
 
-    void setMvpMatrix(Matrix4f m) {
+    public void setMvpMatrix(Matrix4f m) {
         glUniformMatrix4fv(uMvpMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setModelMatrix(Matrix4f m) {
+    public void setModelMatrix(Matrix4f m) {
         glUniformMatrix4fv(uModelMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setLightBiasMvpMatrix(Matrix4f m) {
+    public void setLightBiasMvpMatrix(Matrix4f m) {
         glUniformMatrix4fv(uLightBiasMvpMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setLightDirection(float x, float y, float z) {
+    public void setLightDirection(float x, float y, float z) {
         glUniform3f(uLightDirectionLocation, x, y, z);
     }
 
-    void setTexture(int textureID) {
+    public void setTexture(int textureID) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
         glUniform1i(uTextureUnitLocation, 0);
     }
 
-    void setDisplacementMap(int displacementMapID) {
+    public void setDisplacementMap(int displacementMapID) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, displacementMapID);
         glUniform1i(uDisplacementMapUnitLocation, 1);
     }
 
-    void setNormalMap(int normalMapID) {
+    public void setNormalMap(int normalMapID) {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, normalMapID);
         glUniform1i(uNormalMapUnitLocation, 2);
     }
 
-    void setShadowMap(int shadowMapID) {
+    public void setShadowMap(int shadowMapID) {
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, shadowMapID);
         glUniform1i(uShadowMapUnitLocation, 3);
     }
 
-    void setSeaLevel(float seaLevel) {
+    public void setSeaLevel(float seaLevel) {
         glUniform1f(uSeaLevelLocation, seaLevel);
     }
 
-    void setTerrainScale(float terrainScale) {
+    public void setTerrainScale(float terrainScale) {
         glUniform1f(uTerrainScaleLocation, terrainScale);
     }
 }

@@ -1,3 +1,5 @@
+package com.andrewofarm.msbcr.programs;
+
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -25,7 +27,7 @@ public class ShadowMapShaderProgram extends ShaderProgram {
     public final int aPositionLocation;
     public final int aTextureCoordsLocation;
 
-    ShadowMapShaderProgram() {
+    public ShadowMapShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/shadowmap_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/shadowmap_fragment_shader.glsl"));
 
@@ -37,21 +39,21 @@ public class ShadowMapShaderProgram extends ShaderProgram {
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
     }
 
-    void setLightMvpMatrix(Matrix4f m) {
+    public void setLightMvpMatrix(Matrix4f m) {
         glUniformMatrix4fv(uLightMvpMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setDisplacementMap(int displacementMapID) {
+    public void setDisplacementMap(int displacementMapID) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, displacementMapID);
         glUniform1i(uDisplacementMapUnitLocation, 0);
     }
 
-    void setSeaLevel(float seaLevel) {
+    public void setSeaLevel(float seaLevel) {
         glUniform1f(uSeaLevelLocation, seaLevel);
     }
 
-    void setTerrainScale(float terrainScale) {
+    public void setTerrainScale(float terrainScale) {
         glUniform1f(uTerrainScaleLocation, terrainScale);
     }
 }
