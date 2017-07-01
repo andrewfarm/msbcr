@@ -56,6 +56,9 @@ public class HelloWorld {
     private FloatBuffer skyboxVertexBuffer;
     private ByteBuffer skyboxIndexBuffer;
 
+    private int ringsVertices;
+    private FloatBuffer ringsVertexBuffer;
+
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
     private static final float TERRAIN_SCALE = 0.75f;
@@ -95,11 +98,13 @@ public class HelloWorld {
     private OceanShaderProgram oceanShaderProgram;
     private StarfieldShaderProgram starfieldShaderProgram;
     private ShadowMapShaderProgram shadowMapShaderProgram;
+    private RingsShaderProgram ringsShaderProgram;
 
     private int globeTexture;
     private int displacementMap;
     private int normalMap;
     private int starfieldTexture;
+    private int ringsTexture;
 
     private int shadowMapWidth = 4096;
     private int shadowMapHeight = 4096;
@@ -238,22 +243,28 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        int meridians = 1024;
-        int parallels = 512;
+        final int MERIDIANS = 1024;
+        final int PARALLELS = 512;
 
-        globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE_TEXTURED)
+        globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(MERIDIANS, PARALLELS) * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        globeIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(meridians, parallels) * 4)
+        globeIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(MERIDIANS, PARALLELS) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
 
-        oceanVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(meridians, parallels) * STRIDE)
+        oceanVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(MERIDIANS, PARALLELS) * STRIDE)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
-        oceanIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(meridians, parallels) * 4)
+        oceanIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(MERIDIANS, PARALLELS) * 4)
                 .order(ByteOrder.nativeOrder())
                 .asIntBuffer();
+
+        final int RING_SEGMENTS = 256;
+        ringsVertices = ObjectBuilder.getRingVertexCount(RING_SEGMENTS);
+        ringsVertexBuffer = ByteBuffer.allocateDirect(ringsVertices * 20)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
 
         skyboxVertexBuffer = ByteBuffer.allocateDirect(24 * STRIDE_TEXTURED)
                 .order(ByteOrder.nativeOrder())
@@ -296,20 +307,25 @@ public class HelloWorld {
 
         globeVertexBuffer.position(0);
         globeIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(globeVertexBuffer, globeIndexBuffer, GLOBE_RADIUS, meridians, parallels, true);
+        ObjectBuilder.buildSphere(globeVertexBuffer, globeIndexBuffer, GLOBE_RADIUS, MERIDIANS, PARALLELS, true);
 
         oceanVertexBuffer.position(0);
         oceanIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, GLOBE_RADIUS, meridians, parallels, false);
+        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, GLOBE_RADIUS, MERIDIANS, PARALLELS, false);
+
+        ringsVertexBuffer.position(0);
+        ObjectBuilder.buildTexturedRing(ringsVertexBuffer, GLOBE_RADIUS * 1.5f, GLOBE_RADIUS * 3.0f, RING_SEGMENTS);
 
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
         starfieldShaderProgram = new StarfieldShaderProgram();
         shadowMapShaderProgram = new ShadowMapShaderProgram();
+        ringsShaderProgram = new RingsShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
+        ringsTexture = TextureLoader.loadTexture2D("res/rings.jpg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
                 "res/starmap_8k_3.png",
@@ -490,6 +506,29 @@ public class HelloWorld {
 
         oceanIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLE_STRIP, oceanIndexBuffer);
+
+        //draw rings
+
+        ringsShaderProgram.useProgram();
+        ringsShaderProgram.setMvpMatrix(mvpMatrix);
+        ringsShaderProgram.setTexture(ringsTexture);
+
+        dataOffset = 0;
+
+        ringsVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(ringsShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
+                GL_FLOAT, false, 20, ringsVertexBuffer);
+        glEnableVertexAttribArray(ringsShaderProgram.aPositionLocation);
+        dataOffset += POSITION_COMPONENT_COUNT;
+
+        ringsVertexBuffer.position(dataOffset);
+        glVertexAttribPointer(ringsShaderProgram.aTexCoordsLocation, TEXTURE_COMPONENT_COUNT,
+                GL_FLOAT, false, 20, ringsVertexBuffer);
+        glEnableVertexAttribArray(ringsShaderProgram.aTexCoordsLocation);
+
+        glDisable(GL_CULL_FACE);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, ringsVertices);
+        glEnable(GL_CULL_FACE);
 
         glfwSwapBuffers(window); // swap the color buffers
 

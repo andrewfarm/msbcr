@@ -24,6 +24,10 @@ public abstract class ObjectBuilder {
         return meridians * (parallels + 1) * 6;
     }
 
+    static int getRingVertexCount(int segments) {
+        return (segments + 1) * 2;
+    }
+
     static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
         generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, textured);
 
@@ -140,6 +144,29 @@ public abstract class ObjectBuilder {
                     }
                 }
             }
+        }
+    }
+
+    static void buildTexturedRing(FloatBuffer vertexBuf, float innerRadius, float outerRadius, int segments) {
+        final double angleInterval = 2 * Math.PI / segments;
+        double angle;
+        float sin, cos;
+        for (int i = 0; i <= segments; i++) {
+            angle = i * angleInterval;
+            sin = (float) Math.sin(angle);
+            cos = (float) Math.cos(angle);
+
+            vertexBuf.put(cos * innerRadius);
+            vertexBuf.put(0.0f);
+            vertexBuf.put(sin * innerRadius);
+            vertexBuf.put(0.0f);
+            vertexBuf.put(0.0f);
+
+            vertexBuf.put(cos * outerRadius);
+            vertexBuf.put(0.0f);
+            vertexBuf.put(sin * outerRadius);
+            vertexBuf.put(1.0f);
+            vertexBuf.put(0.0f);
         }
     }
 

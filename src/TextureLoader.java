@@ -32,7 +32,7 @@ public abstract class TextureLoader {
         int[] imgWidth = new int[1];
         int[] imgHeight = new int[1];
         @SuppressWarnings("unused") int[] channels = new int[1];
-        System.out.println("loading image");
+        System.out.println("loading " + imgPath);
         ByteBuffer buf = STBImage.stbi_load(imgPath, imgWidth, imgHeight, channels, 3);
 
         if (buf == null) {
@@ -93,7 +93,7 @@ public abstract class TextureLoader {
         int[] imgHeight = new int[1];
         @SuppressWarnings("unused") int[] channels = new int[1];
         for (int i = 0; i < 6; i++) {
-            System.out.println("loading image");
+            System.out.println("loading " + imgPaths[i]);
             bufs[i] = STBImage.stbi_load(imgPaths[i], imgWidth, imgHeight, channels, 3);
 
             if (bufs[i] == null) {
