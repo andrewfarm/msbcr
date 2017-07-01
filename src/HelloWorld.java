@@ -72,6 +72,10 @@ public class HelloWorld {
     private boolean dragging = false;
     private double prevX, prevY;
 
+    private static float timePassage = 0.005f;
+    private static final float TIME_MOD = 1.1f;
+    private boolean speedUp, slowDown;
+
     private Matrix4f modelMatrix = new Matrix4f();
 
     private Matrix4f viewMatrix = new Matrix4f();
@@ -149,6 +153,12 @@ public class HelloWorld {
                     case GLFW_KEY_RIGHT:
                         right = true;
                         break;
+                    case GLFW_KEY_EQUAL:
+                        speedUp = true;
+                        break;
+                    case GLFW_KEY_MINUS:
+                        slowDown = true;
+                        break;
                 }
             } else if (action == GLFW_RELEASE) {
                 switch (key) {
@@ -163,6 +173,12 @@ public class HelloWorld {
                         break;
                     case GLFW_KEY_RIGHT:
                         right = false;
+                        break;
+                    case GLFW_KEY_EQUAL:
+                        speedUp = false;
+                        break;
+                    case GLFW_KEY_MINUS:
+                        slowDown = false;
                         break;
                 }
             }
@@ -366,10 +382,16 @@ public class HelloWorld {
         if (right) {
             camLookAzimuth -= LOOK_SPEED;
         }
+        if (speedUp) {
+            timePassage *= TIME_MOD;
+        }
+        if (slowDown) {
+            timePassage /= TIME_MOD;
+        }
 
-        globeAzimuth += 0.005f;
+        globeAzimuth += timePassage;
         updateModelMatrix();
-        camAzimuth += 0.005f;
+        camAzimuth += timePassage;
         updateViewMatrix();
         updateMvpMatrix();
         updateLightMatrices();
