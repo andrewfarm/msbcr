@@ -1,9 +1,9 @@
 #version 120
 
-uniform sampler2D u_TextureUnit;
+uniform sampler1D u_TextureUnit;
 
-varying vec2 v_TexCoords;
+varying float v_TexCoords;
 
 void main() {
-    gl_FragColor = texture2D(u_TextureUnit, v_TexCoords);
+    gl_FragColor = texture1D(u_TextureUnit, v_TexCoords);
 }

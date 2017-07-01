@@ -3,9 +3,9 @@
 uniform mat4 u_MvpMatrix;
 
 attribute vec3 a_Position;
-attribute vec2 a_TexCoords;
+attribute float a_TexCoords;
 
-varying vec2 v_TexCoords;
+varying float v_TexCoords;
 
 void main() {
     v_TexCoords = a_TexCoords;

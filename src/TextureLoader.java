@@ -29,6 +29,14 @@ public abstract class TextureLoader {
     }
 
     static int loadTexture2D(String imgPath) {
+        return loadTexture(imgPath, true);
+    }
+
+    static int loadTexture1D(String imgPath) {
+        return loadTexture(imgPath, false);
+    }
+
+    private static int loadTexture(String imgPath, boolean is2D) {
         int[] imgWidth = new int[1];
         int[] imgHeight = new int[1];
         @SuppressWarnings("unused") int[] channels = new int[1];
@@ -56,22 +64,28 @@ public abstract class TextureLoader {
             return 0;
         }
 
-        //bind texture to GL_TEXTURE_2D
-        glBindTexture(GL_TEXTURE_2D, textureObjectIDs[0]);
+        final int TARGET = is2D ? GL_TEXTURE_2D : GL_TEXTURE_1D;
+
+        //bind texture to TARGET
+        glBindTexture(TARGET, textureObjectIDs[0]);
 
         //specify texture filtering (scaling) methods
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(TARGET, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(TARGET, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         //load texture data into OpenGL
         buf.position(0);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth[0], imgHeight[0], 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
+        if (is2D) {
+            glTexImage2D(TARGET, 0, GL_RGB, imgWidth[0], imgHeight[0], 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
+        } else {
+            glTexImage1D(TARGET, 0, GL_RGB, imgWidth[0], 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
+        }
 
         //generate mipmaps
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glGenerateMipmap(TARGET);
 
-        //unbind texture from GL_TEXTURE_2D
-        glBindTexture(GL_TEXTURE_2D, 0);
+        //unbind texture from TARGET
+        glBindTexture(TARGET, 0);
 
         return textureObjectIDs[0];
     }

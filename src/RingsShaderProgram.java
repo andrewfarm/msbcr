@@ -1,6 +1,6 @@
 import org.joml.Matrix4f;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_1D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -37,7 +37,7 @@ public class RingsShaderProgram extends ShaderProgram {
 
     void setTexture(int textureID) {
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+        glBindTexture(GL_TEXTURE_1D, textureID);
         glUniform1i(uTextureUnitLocation, 0);
     }
 }

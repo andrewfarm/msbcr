@@ -160,13 +160,11 @@ public abstract class ObjectBuilder {
             vertexBuf.put(0.0f);
             vertexBuf.put(sin * innerRadius);
             vertexBuf.put(0.0f);
-            vertexBuf.put(0.0f);
 
             vertexBuf.put(cos * outerRadius);
             vertexBuf.put(0.0f);
             vertexBuf.put(sin * outerRadius);
             vertexBuf.put(1.0f);
-            vertexBuf.put(0.0f);
         }
     }
 

@@ -262,7 +262,7 @@ public class HelloWorld {
 
         final int RING_SEGMENTS = 256;
         ringsVertices = ObjectBuilder.getRingVertexCount(RING_SEGMENTS);
-        ringsVertexBuffer = ByteBuffer.allocateDirect(ringsVertices * 20)
+        ringsVertexBuffer = ByteBuffer.allocateDirect(ringsVertices * 16)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
 
@@ -325,7 +325,6 @@ public class HelloWorld {
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
-        ringsTexture = TextureLoader.loadTexture2D("res/rings.jpg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
                 "res/starmap_8k_3.png",
@@ -334,6 +333,7 @@ public class HelloWorld {
                 "res/starmap_8k_2.png",
                 "res/starmap_8k_1.png"
         });
+        ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
 
         Optional<TextureLoader.ShadowMap> shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
         shadowMap.ifPresent(shadowMap1 -> {
@@ -517,13 +517,13 @@ public class HelloWorld {
 
         ringsVertexBuffer.position(dataOffset);
         glVertexAttribPointer(ringsShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
-                GL_FLOAT, false, 20, ringsVertexBuffer);
+                GL_FLOAT, false, 16, ringsVertexBuffer);
         glEnableVertexAttribArray(ringsShaderProgram.aPositionLocation);
         dataOffset += POSITION_COMPONENT_COUNT;
 
         ringsVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(ringsShaderProgram.aTexCoordsLocation, TEXTURE_COMPONENT_COUNT,
-                GL_FLOAT, false, 20, ringsVertexBuffer);
+        glVertexAttribPointer(ringsShaderProgram.aTexCoordsLocation, 1,
+                GL_FLOAT, false, 16, ringsVertexBuffer);
         glEnableVertexAttribArray(ringsShaderProgram.aTexCoordsLocation);
 
         glDisable(GL_CULL_FACE);
