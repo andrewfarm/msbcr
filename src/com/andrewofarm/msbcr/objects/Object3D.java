@@ -79,6 +79,10 @@ public abstract class Object3D {
         return newNativeOrderedBuffer(elements * BYTES_PER_INT).asIntBuffer();
     }
 
+    protected ByteBuffer newByteBuffer(int elements) {
+        return ByteBuffer.allocateDirect(elements);
+    }
+
     private ByteBuffer newNativeOrderedBuffer(int capacity) {
         return ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
     }

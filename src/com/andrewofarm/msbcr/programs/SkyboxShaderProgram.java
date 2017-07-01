@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL20.*;
 /**
  * Created by Andrew on 6/10/17.
  */
-public class StarfieldShaderProgram extends ShaderProgram {
+public class SkyboxShaderProgram extends ShaderProgram {
 
     private static final String U_VP_MATRIX = "u_VpMatrix";
     private static final String U_TEXTURE_UNIT = "u_TextureUnit";
@@ -21,7 +21,7 @@ public class StarfieldShaderProgram extends ShaderProgram {
     public final int uTextureUnitLocation;
     public final int aPositionLocation;
 
-    public StarfieldShaderProgram() {
+    public SkyboxShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/starfield_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/starfield_fragment_shader.glsl"));
 

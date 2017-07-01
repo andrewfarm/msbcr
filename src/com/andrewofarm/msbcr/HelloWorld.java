@@ -1,11 +1,12 @@
 package com.andrewofarm.msbcr;
 
 import com.andrewofarm.msbcr.objects.Globe;
-import com.andrewofarm.msbcr.objects.ObjectBuilder;
+import com.andrewofarm.msbcr.objects.Ocean;
+import com.andrewofarm.msbcr.objects.Skybox;
 import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
 import com.andrewofarm.msbcr.programs.OceanShaderProgram;
 import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
-import com.andrewofarm.msbcr.programs.StarfieldShaderProgram;
+import com.andrewofarm.msbcr.programs.SkyboxShaderProgram;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.Version;
@@ -13,14 +14,12 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -103,11 +102,16 @@ public class HelloWorld {
     private Matrix4f lightMvpMatrix = new Matrix4f();
     private Matrix4f lightBiasMvpMatrix = new Matrix4f();
 
-    private Globe globe = new Globe(1.0f, 1024, 512);
+    private static final int MERIDIANS = 1024;
+    private static final int PARALLELS = 512;
+
+    private Skybox skybox = new Skybox();
+    private Globe globe = new Globe(1.0f, MERIDIANS, PARALLELS);
+    private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
     private GlobeShaderProgram globeShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
-    private StarfieldShaderProgram starfieldShaderProgram;
+    private SkyboxShaderProgram skyboxShaderProgram;
     private ShadowMapShaderProgram shadowMapShaderProgram;
 
     private int globeTexture;
@@ -330,7 +334,7 @@ public class HelloWorld {
 */
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
-        starfieldShaderProgram = new StarfieldShaderProgram();
+        skyboxShaderProgram = new SkyboxShaderProgram();
         shadowMapShaderProgram = new ShadowMapShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
@@ -408,18 +412,18 @@ public class HelloWorld {
 
         //draw starfield
 /*
-        starfieldShaderProgram.useProgram();
+        skyboxShaderProgram.useProgram();
         Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
         vpRotationMatrix.m30(0);
         vpRotationMatrix.m31(0);
         vpRotationMatrix.m32(0);
-        starfieldShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
-        starfieldShaderProgram.setTexture(starfieldTexture);
+        skyboxShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
+        skyboxShaderProgram.setTexture(starfieldTexture);
 
         skyboxVertexBuffer.position(0);
-        glVertexAttribPointer(starfieldShaderProgram.aPositionLocation, 3,
+        glVertexAttribPointer(skyboxShaderProgram.aPositionLocation, 3,
                 GL_FLOAT, false, 12, skyboxVertexBuffer);
-        glEnableVertexAttribArray(starfieldShaderProgram.aPositionLocation);
+        glEnableVertexAttribArray(skyboxShaderProgram.aPositionLocation);
 
         skyboxIndexBuffer.position(0);
         glDrawElements(GL_TRIANGLES, skyboxIndexBuffer);
@@ -537,10 +541,21 @@ public class HelloWorld {
         shadowMapShaderProgram.setTerrainScale(TERRAIN_SCALE);
         globe.draw(shadowMapShaderProgram);
 
-        //draw globe
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
+
+        //draw starfield
+
+        skyboxShaderProgram.useProgram();
+        Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
+        vpRotationMatrix.m30(0);
+        vpRotationMatrix.m31(0);
+        vpRotationMatrix.m32(0);
+        skyboxShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
+        skyboxShaderProgram.setTexture(starfieldTexture);
+        skybox.draw(skyboxShaderProgram);
+
+        //draw globe
 
         globeShaderProgram.useProgram();
         globeShaderProgram.setMvpMatrix(mvpMatrix);
@@ -554,6 +569,18 @@ public class HelloWorld {
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
         globe.draw(globeShaderProgram);
+
+        //draw ocean
+
+        oceanShaderProgram.useProgram();
+        oceanShaderProgram.setMvpMatrix(mvpMatrix);
+        oceanShaderProgram.setModelMatrix(modelMatrix);
+        oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        oceanShaderProgram.setCamPos(
+                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
+                (float) (camDist * Math.sin(camElev)),
+                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
+        ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
 
