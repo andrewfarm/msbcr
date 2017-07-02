@@ -27,7 +27,7 @@ public abstract class ObjectBuilder {
         return meridians * (parallels + 1) * 6;
     }
 
-    static int getRingVertexCount(int segments) {
+    static int getRingsVertexCount(int segments) {
         return (segments + 1) * 2;
     }
 
@@ -159,7 +159,7 @@ public abstract class ObjectBuilder {
         }
     }
 
-    static void buildTexturedRing(FloatBuffer vertexBuf, float innerRadius, float outerRadius, int segments) {
+    static void buildTexturedRings(FloatBuffer vertexBuf, float innerRadius, float outerRadius, int segments) {
         final double angleInterval = 2 * Math.PI / segments;
         double angle;
         float sin, cos;

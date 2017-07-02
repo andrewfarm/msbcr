@@ -2,11 +2,9 @@ package com.andrewofarm.msbcr;
 
 import com.andrewofarm.msbcr.objects.Globe;
 import com.andrewofarm.msbcr.objects.Ocean;
+import com.andrewofarm.msbcr.objects.Rings;
 import com.andrewofarm.msbcr.objects.Skybox;
-import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
-import com.andrewofarm.msbcr.programs.OceanShaderProgram;
-import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
-import com.andrewofarm.msbcr.programs.SkyboxShaderProgram;
+import com.andrewofarm.msbcr.programs.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.Version;
@@ -48,15 +46,6 @@ public class HelloWorld {
 
     private int windowWidth = 800;
     private int windowHeight = 600;
-
-    private FloatBuffer globeVertexBuffer;
-    private IntBuffer globeIndexBuffer;
-
-    private FloatBuffer oceanVertexBuffer;
-    private IntBuffer oceanIndexBuffer;
-
-    private FloatBuffer skyboxVertexBuffer;
-    private ByteBuffer skyboxIndexBuffer;
 
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
@@ -102,17 +91,20 @@ public class HelloWorld {
 
     private Skybox skybox = new Skybox();
     private Globe globe = new Globe(1.0f, MERIDIANS, PARALLELS);
+    private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
-    private GlobeShaderProgram globeShaderProgram;
-    private OceanShaderProgram oceanShaderProgram;
-    private SkyboxShaderProgram skyboxShaderProgram;
     private ShadowMapShaderProgram shadowMapShaderProgram;
+    private SkyboxShaderProgram skyboxShaderProgram;
+    private GlobeShaderProgram globeShaderProgram;
+    private RingsShaderProgram ringsShaderProgram;
+    private OceanShaderProgram oceanShaderProgram;
 
+    private int starfieldTexture;
     private int globeTexture;
     private int displacementMap;
     private int normalMap;
-    private int starfieldTexture;
+    private int ringsTexture;
 
     private int shadowMapWidth = 4096;
     private int shadowMapHeight = 4096;
@@ -264,10 +256,11 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        globeShaderProgram = new GlobeShaderProgram();
-        oceanShaderProgram = new OceanShaderProgram();
-        skyboxShaderProgram = new SkyboxShaderProgram();
         shadowMapShaderProgram = new ShadowMapShaderProgram();
+        skyboxShaderProgram = new SkyboxShaderProgram();
+        globeShaderProgram = new GlobeShaderProgram();
+        ringsShaderProgram = new RingsShaderProgram();
+        oceanShaderProgram = new OceanShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -280,12 +273,13 @@ public class HelloWorld {
                 "res/starmap_8k_2.png",
                 "res/starmap_8k_1.png"
         });
+        ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
 
-        Optional<TextureLoader.ShadowMap> shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
-        shadowMap.ifPresent(shadowMap1 -> {
-            shadowMapFramebuffer = shadowMap1.frameBufferID;
-            shadowMapDepthTexture = shadowMap1.depthTextureID;
-        });
+        TextureLoader.ShadowMap shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
+        if (shadowMap != null) {
+            shadowMapFramebuffer = shadowMap.frameBufferID;
+            shadowMapDepthTexture = shadowMap.depthTextureID;
+        }
 
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
@@ -389,6 +383,14 @@ public class HelloWorld {
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
         globe.draw(globeShaderProgram);
+
+        //daw rings
+
+        glDisable(GL_CULL_FACE);
+        ringsShaderProgram.useProgram();
+        ringsShaderProgram.setMvpMatrix(mvpMatrix);
+        ringsShaderProgram.setTexture(ringsTexture);
+        rings.draw(ringsShaderProgram);
 
         //draw ocean
 

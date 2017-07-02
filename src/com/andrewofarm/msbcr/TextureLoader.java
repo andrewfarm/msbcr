@@ -141,7 +141,7 @@ public abstract class TextureLoader {
         return textureObjectIDs[0];
     }
 
-    static Optional<ShadowMap> createShadowMap(int width, int height) {
+    static ShadowMap createShadowMap(int width, int height) {
         System.out.println("creating shadow map");
         int[] frameBufferIDs = new int[1];
         glGenFramebuffers(frameBufferIDs);
@@ -169,9 +169,9 @@ public abstract class TextureLoader {
             System.out.println("shadow map creation successful");
         } else {
             System.err.println("error creating framebuffer for shadow map (status: " + status + ")");
-            return Optional.empty();
+            return null;
         }
 
-        return Optional.of(new ShadowMap(frameBufferIDs[0], depthTextureIDs[0]));
+        return new ShadowMap(frameBufferIDs[0], depthTextureIDs[0]);
     }
 }

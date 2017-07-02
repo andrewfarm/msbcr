@@ -22,7 +22,7 @@ public class RingsShaderProgram extends ShaderProgram {
     public final int aPositionLocation;
     public final int aTexCoordsLocation;
 
-    RingsShaderProgram() {
+    public RingsShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/rings_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/rings_fragment_shader.glsl"));
 
@@ -32,11 +32,11 @@ public class RingsShaderProgram extends ShaderProgram {
         aTexCoordsLocation = glGetAttribLocation(programID, A_TEX_COORDS);
     }
 
-    void setMvpMatrix(Matrix4f m) {
+    public void setMvpMatrix(Matrix4f m) {
         glUniformMatrix4fv(uMvpMatrixLocation, false, m.get(new float[16]));
     }
 
-    void setTexture(int textureID) {
+    public void setTexture(int textureID) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_1D, textureID);
         glUniform1i(uTextureUnitLocation, 0);
