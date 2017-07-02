@@ -29,18 +29,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("DefaultFileTemplate")
 public class HelloWorld {
 
-    private static final int POSITION_COMPONENT_COUNT = 3;
-    private static final int NORMAL_COMPONENT_COUNT = 3;
-    private static final int TEXTURE_COMPONENT_COUNT = 2;
-
-    private static final int STRIDE =
-            (POSITION_COMPONENT_COUNT +
-                    NORMAL_COMPONENT_COUNT) * 4;
-
-    private static final int STRIDE_TEXTURED =
-            (POSITION_COMPONENT_COUNT +
-                    NORMAL_COMPONENT_COUNT +
-                    TEXTURE_COMPONENT_COUNT) * 4;
+    private static boolean drawRings = true;
 
     private long window;
 
@@ -259,7 +248,7 @@ public class HelloWorld {
         shadowMapShaderProgram = new ShadowMapShaderProgram();
         skyboxShaderProgram = new SkyboxShaderProgram();
         globeShaderProgram = new GlobeShaderProgram();
-        ringsShaderProgram = new RingsShaderProgram();
+        if (drawRings) ringsShaderProgram = new RingsShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
@@ -273,7 +262,7 @@ public class HelloWorld {
                 "res/starmap_8k_2.png",
                 "res/starmap_8k_1.png"
         });
-        ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
+        if (drawRings) ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
 
         TextureLoader.ShadowMap shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
         if (shadowMap != null) {
@@ -386,14 +375,17 @@ public class HelloWorld {
 
         //daw rings
 
-        glDisable(GL_CULL_FACE);
-        ringsShaderProgram.useProgram();
-        ringsShaderProgram.setMvpMatrix(mvpMatrix);
-        ringsShaderProgram.setTexture(ringsTexture);
-        rings.draw(ringsShaderProgram);
+        if (drawRings) {
+            glDisable(GL_CULL_FACE);
+            ringsShaderProgram.useProgram();
+            ringsShaderProgram.setMvpMatrix(mvpMatrix);
+            ringsShaderProgram.setTexture(ringsTexture);
+            rings.draw(ringsShaderProgram);
+        }
 
         //draw ocean
 
+        glDisable(GL_CULL_FACE);
         oceanShaderProgram.useProgram();
         oceanShaderProgram.setMvpMatrix(mvpMatrix);
         oceanShaderProgram.setModelMatrix(modelMatrix);
