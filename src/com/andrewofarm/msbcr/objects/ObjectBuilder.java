@@ -1,5 +1,8 @@
+package com.andrewofarm.msbcr.objects;
+
 import org.joml.Vector3f;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -27,6 +30,15 @@ public abstract class ObjectBuilder {
     static int getRingVertexCount(int segments) {
         return (segments + 1) * 2;
     }
+
+    static int getSkyboxVertexCount() {
+        return 24;
+    }
+
+    static int getSkyboxIndexCount() {
+        return 36;
+    }
+
 
     static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
         generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, textured);
@@ -166,6 +178,45 @@ public abstract class ObjectBuilder {
             vertexBuf.put(sin * outerRadius);
             vertexBuf.put(1.0f);
         }
+    }
+
+    static void buildSkybox(FloatBuffer vertexBuf, ByteBuffer indexBuf) {
+        vertexBuf.put(new float[] {
+                -1,  1,  1,
+                1,  1,  1,
+                -1, -1,  1,
+                1, -1,  1,
+                -1,  1, -1,
+                1,  1, -1,
+                -1, -1, -1,
+                1, -1, -1,
+        });
+
+        indexBuf.put(new byte[] {
+                //Front
+                1, 3, 0,
+                0, 3, 2,
+
+                //Back
+                4, 6, 5,
+                5, 6, 7,
+
+                //Left
+                0, 2, 4,
+                4, 2, 6,
+
+                //Right
+                5, 7, 1,
+                1, 7, 3,
+
+                //Top
+                5, 1, 4,
+                4, 1, 0,
+
+                //Bottom
+                6, 2, 7,
+                7, 2, 3,
+        });
     }
 
     private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal) {

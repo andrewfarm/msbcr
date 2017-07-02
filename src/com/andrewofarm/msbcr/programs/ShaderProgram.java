@@ -1,3 +1,5 @@
+package com.andrewofarm.msbcr.programs;
+
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL20.*;
 

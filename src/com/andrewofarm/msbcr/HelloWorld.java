@@ -1,3 +1,12 @@
+package com.andrewofarm.msbcr;
+
+import com.andrewofarm.msbcr.objects.Globe;
+import com.andrewofarm.msbcr.objects.Ocean;
+import com.andrewofarm.msbcr.objects.Skybox;
+import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
+import com.andrewofarm.msbcr.programs.OceanShaderProgram;
+import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
+import com.andrewofarm.msbcr.programs.SkyboxShaderProgram;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.Version;
@@ -5,14 +14,12 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -42,11 +49,6 @@ public class HelloWorld {
     private int windowWidth = 800;
     private int windowHeight = 600;
 
-//    private float[] vertices = {
-//            0.5f, 0.5f, 1f, 0f, 0f,
-//            -0.5f, -0.5f, 0f, 1f, 0f,
-//            0.5f, -0.5f, 0f, 0f, 1f,
-//    };
     private FloatBuffer globeVertexBuffer;
     private IntBuffer globeIndexBuffer;
 
@@ -55,9 +57,6 @@ public class HelloWorld {
 
     private FloatBuffer skyboxVertexBuffer;
     private ByteBuffer skyboxIndexBuffer;
-
-    private int ringsVertices;
-    private FloatBuffer ringsVertexBuffer;
 
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
@@ -74,6 +73,10 @@ public class HelloWorld {
 
     private boolean dragging = false;
     private double prevX, prevY;
+
+    private static float timePassage = 0.005f;
+    private static final float TIME_MOD = 1.1f;
+    private boolean speedUp, slowDown;
 
     private Matrix4f modelMatrix = new Matrix4f();
 
@@ -94,17 +97,22 @@ public class HelloWorld {
     private Matrix4f lightMvpMatrix = new Matrix4f();
     private Matrix4f lightBiasMvpMatrix = new Matrix4f();
 
+    private static final int MERIDIANS = 1024;
+    private static final int PARALLELS = 512;
+
+    private Skybox skybox = new Skybox();
+    private Globe globe = new Globe(1.0f, MERIDIANS, PARALLELS);
+    private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
+
     private GlobeShaderProgram globeShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
-    private StarfieldShaderProgram starfieldShaderProgram;
+    private SkyboxShaderProgram skyboxShaderProgram;
     private ShadowMapShaderProgram shadowMapShaderProgram;
-    private RingsShaderProgram ringsShaderProgram;
 
     private int globeTexture;
     private int displacementMap;
     private int normalMap;
     private int starfieldTexture;
-    private int ringsTexture;
 
     private int shadowMapWidth = 4096;
     private int shadowMapHeight = 4096;
@@ -115,11 +123,12 @@ public class HelloWorld {
     private void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
-        init();
+        initWindow();
+        initScene();
         loop();
     }
 
-    private void init() {
+    private void initWindow() {
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
         GLFWErrorCallback.createPrint(System.err).set();
@@ -154,6 +163,12 @@ public class HelloWorld {
                     case GLFW_KEY_RIGHT:
                         right = true;
                         break;
+                    case GLFW_KEY_EQUAL:
+                        speedUp = true;
+                        break;
+                    case GLFW_KEY_MINUS:
+                        slowDown = true;
+                        break;
                 }
             } else if (action == GLFW_RELEASE) {
                 switch (key) {
@@ -168,6 +183,12 @@ public class HelloWorld {
                         break;
                     case GLFW_KEY_RIGHT:
                         right = false;
+                        break;
+                    case GLFW_KEY_EQUAL:
+                        speedUp = false;
+                        break;
+                    case GLFW_KEY_MINUS:
+                        slowDown = false;
                         break;
                 }
             }
@@ -235,7 +256,7 @@ public class HelloWorld {
         glfwShowWindow(window);
     }
 
-    private void loop() {
+    private void initScene() {
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,
@@ -243,84 +264,10 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        final int MERIDIANS = 1024;
-        final int PARALLELS = 512;
-
-        globeVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(MERIDIANS, PARALLELS) * STRIDE_TEXTURED)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        globeIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(MERIDIANS, PARALLELS) * 4)
-                .order(ByteOrder.nativeOrder())
-                .asIntBuffer();
-
-        oceanVertexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereVertexCount(MERIDIANS, PARALLELS) * STRIDE)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-        oceanIndexBuffer = ByteBuffer.allocateDirect(ObjectBuilder.getSphereIndexCount(MERIDIANS, PARALLELS) * 4)
-                .order(ByteOrder.nativeOrder())
-                .asIntBuffer();
-
-        final int RING_SEGMENTS = 256;
-        ringsVertices = ObjectBuilder.getRingVertexCount(RING_SEGMENTS);
-        ringsVertexBuffer = ByteBuffer.allocateDirect(ringsVertices * 16)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-
-        skyboxVertexBuffer = ByteBuffer.allocateDirect(24 * STRIDE_TEXTURED)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer()
-                .put(new float[] {
-                       -1,  1,  1,
-                        1,  1,  1,
-                       -1, -1,  1,
-                        1, -1,  1,
-                       -1,  1, -1,
-                        1,  1, -1,
-                       -1, -1, -1,
-                        1, -1, -1,});
-
-        skyboxIndexBuffer = ByteBuffer.allocateDirect(36 * 4).put(new byte[] {
-                //Front
-                1, 3, 0,
-                0, 3, 2,
-
-                //Back
-                4, 6, 5,
-                5, 6, 7,
-
-                //Left
-                0, 2, 4,
-                4, 2, 6,
-
-                //Right
-                5, 7, 1,
-                1, 7, 3,
-
-                //Top
-                5, 1, 4,
-                4, 1, 0,
-
-                //Bottom
-                6, 2, 7,
-                7, 2, 3,
-        });
-
-        globeVertexBuffer.position(0);
-        globeIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(globeVertexBuffer, globeIndexBuffer, GLOBE_RADIUS, MERIDIANS, PARALLELS, true);
-
-        oceanVertexBuffer.position(0);
-        oceanIndexBuffer.position(0);
-        ObjectBuilder.buildSphere(oceanVertexBuffer, oceanIndexBuffer, GLOBE_RADIUS, MERIDIANS, PARALLELS, false);
-
-        ringsVertexBuffer.position(0);
-        ObjectBuilder.buildTexturedRing(ringsVertexBuffer, GLOBE_RADIUS * 1.5f, GLOBE_RADIUS * 3.0f, RING_SEGMENTS);
-
         globeShaderProgram = new GlobeShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
-        starfieldShaderProgram = new StarfieldShaderProgram();
+        skyboxShaderProgram = new SkyboxShaderProgram();
         shadowMapShaderProgram = new ShadowMapShaderProgram();
-        ringsShaderProgram = new RingsShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -333,7 +280,6 @@ public class HelloWorld {
                 "res/starmap_8k_2.png",
                 "res/starmap_8k_1.png"
         });
-        ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
 
         Optional<TextureLoader.ShadowMap> shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
         shadowMap.ifPresent(shadowMap1 -> {
@@ -354,22 +300,24 @@ public class HelloWorld {
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
+    private void loop() {
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
-        while ( !glfwWindowShouldClose(window) ) {
+        while (!glfwWindowShouldClose(window)) {
+            update();
             render();
             try {
                 Thread.sleep(20);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            glfwPollEvents();
         }
     }
 
-    private void render() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
+    private void update() {
         if (up) {
             camLookElev += LOOK_SPEED;
         }
@@ -382,65 +330,50 @@ public class HelloWorld {
         if (right) {
             camLookAzimuth -= LOOK_SPEED;
         }
+        if (speedUp) {
+            timePassage *= TIME_MOD;
+        }
+        if (slowDown) {
+            timePassage /= TIME_MOD;
+        }
 
-        globeAzimuth += 0.005f;
+        globeAzimuth += timePassage;
         updateModelMatrix();
-        camAzimuth += 0.005f;
+        camAzimuth += timePassage;
         updateViewMatrix();
         updateMvpMatrix();
         updateLightMatrices();
+    }
 
-        //draw starfield
-
-        starfieldShaderProgram.useProgram();
-        Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
-        vpRotationMatrix.m30(0);
-        vpRotationMatrix.m31(0);
-        vpRotationMatrix.m32(0);
-        starfieldShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
-        starfieldShaderProgram.setTexture(starfieldTexture);
-
-        skyboxVertexBuffer.position(0);
-        glVertexAttribPointer(starfieldShaderProgram.aPositionLocation, 3,
-                GL_FLOAT, false, 12, skyboxVertexBuffer);
-        glEnableVertexAttribArray(starfieldShaderProgram.aPositionLocation);
-
-        skyboxIndexBuffer.position(0);
-        glDrawElements(GL_TRIANGLES, skyboxIndexBuffer);
+    private void render() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
         //render to shadow map
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
-//        glCullFace(GL_FRONT);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
 
         shadowMapShaderProgram.useProgram();
         shadowMapShaderProgram.setLightMvpMatrix(lightMvpMatrix);
         shadowMapShaderProgram.setDisplacementMap(displacementMap);
         shadowMapShaderProgram.setSeaLevel(SEA_LEVEL);
         shadowMapShaderProgram.setTerrainScale(TERRAIN_SCALE);
-
-        int dataOffset = 0;
-
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, shadowMapWidth, shadowMapHeight);
-
-        globeVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(shadowMapShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
-        glEnableVertexAttribArray(shadowMapShaderProgram.aPositionLocation);
-        dataOffset += POSITION_COMPONENT_COUNT;
-        dataOffset += NORMAL_COMPONENT_COUNT;
-
-        globeVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(shadowMapShaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
-        glEnableVertexAttribArray(shadowMapShaderProgram.aTextureCoordsLocation);
-
-        globeIndexBuffer.position(0);
-        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
+        globe.draw(shadowMapShaderProgram);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//        glCullFace(GL_BACK);
+        glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
+
+        //draw starfield
+
+        skyboxShaderProgram.useProgram();
+        Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
+        vpRotationMatrix.m30(0);
+        vpRotationMatrix.m31(0);
+        vpRotationMatrix.m32(0);
+        skyboxShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
+        skyboxShaderProgram.setTexture(starfieldTexture);
+        skybox.draw(skyboxShaderProgram);
 
         //draw globe
 
@@ -455,30 +388,7 @@ public class HelloWorld {
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
-
-        glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
-
-        dataOffset = 0;
-
-        globeVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(globeShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
-        glEnableVertexAttribArray(globeShaderProgram.aPositionLocation);
-        dataOffset += POSITION_COMPONENT_COUNT;
-
-        globeVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(globeShaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
-        glEnableVertexAttribArray(globeShaderProgram.aNormalLocation);
-        dataOffset += NORMAL_COMPONENT_COUNT;
-
-        globeVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(globeShaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE_TEXTURED, globeVertexBuffer);
-        glEnableVertexAttribArray(globeShaderProgram.aTextureCoordsLocation);
-
-        globeIndexBuffer.position(0);
-        glDrawElements(GL_TRIANGLE_STRIP, globeIndexBuffer);
+        globe.draw(globeShaderProgram);
 
         //draw ocean
 
@@ -490,51 +400,9 @@ public class HelloWorld {
                 (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
                 (float) (camDist * Math.sin(camElev)),
                 (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
-
-        dataOffset = 0;
-
-        oceanVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(oceanShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE, oceanVertexBuffer);
-        glEnableVertexAttribArray(oceanShaderProgram.aPositionLocation);
-        dataOffset += POSITION_COMPONENT_COUNT;
-
-        oceanVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(oceanShaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT,
-                GL_FLOAT, false, STRIDE, oceanVertexBuffer);
-        glEnableVertexAttribArray(oceanShaderProgram.aNormalLocation);
-
-        oceanIndexBuffer.position(0);
-        glDrawElements(GL_TRIANGLE_STRIP, oceanIndexBuffer);
-
-        //draw rings
-
-        ringsShaderProgram.useProgram();
-        ringsShaderProgram.setMvpMatrix(mvpMatrix);
-        ringsShaderProgram.setTexture(ringsTexture);
-
-        dataOffset = 0;
-
-        ringsVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(ringsShaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT,
-                GL_FLOAT, false, 16, ringsVertexBuffer);
-        glEnableVertexAttribArray(ringsShaderProgram.aPositionLocation);
-        dataOffset += POSITION_COMPONENT_COUNT;
-
-        ringsVertexBuffer.position(dataOffset);
-        glVertexAttribPointer(ringsShaderProgram.aTexCoordsLocation, 1,
-                GL_FLOAT, false, 16, ringsVertexBuffer);
-        glEnableVertexAttribArray(ringsShaderProgram.aTexCoordsLocation);
-
-        glDisable(GL_CULL_FACE);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, ringsVertices);
-        glEnable(GL_CULL_FACE);
+        ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
-
-        // Poll for window events. The key callback above will only be
-        // invoked during this call.
-        glfwPollEvents();
     }
 
     private void updateProjectionMatrix(int width, int height) {

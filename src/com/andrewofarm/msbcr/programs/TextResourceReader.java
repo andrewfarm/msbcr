@@ -1,3 +1,5 @@
+package com.andrewofarm.msbcr.programs;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -6,7 +8,7 @@ import java.io.IOException;
 /**
  * Created by Andrew on 6/8/17.
  */
-public abstract class TextResourceReader {
+abstract class TextResourceReader {
 
     static String readFile(String path) {
         try {

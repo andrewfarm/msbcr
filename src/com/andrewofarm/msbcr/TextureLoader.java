@@ -1,3 +1,5 @@
+package com.andrewofarm.msbcr;
+
 import org.lwjgl.stb.STBImage;
 
 import java.io.File;
