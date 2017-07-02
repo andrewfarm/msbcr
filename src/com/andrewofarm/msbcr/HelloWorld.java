@@ -48,6 +48,7 @@ public class HelloWorld {
     private static float timePassage = 0.005f;
     private static final float TIME_MOD = 1.1f;
     private boolean speedUp, slowDown;
+    private boolean geostationary = true;
 
     private Matrix4f modelMatrix = new Matrix4f();
 
@@ -70,8 +71,8 @@ public class HelloWorld {
     private Matrix4f lightMvpMatrix = new Matrix4f();
     private Matrix4f lightBiasMvpMatrix = new Matrix4f();
 
-    private static final int MERIDIANS = 1024;
-    private static final int PARALLELS = 512;
+    private static final int MERIDIANS = 512;
+    private static final int PARALLELS = 256;
 
     private Skybox skybox = new Skybox();
     private Sun sun = new Sun(lightX, lightY, lightZ);
@@ -126,9 +127,7 @@ public class HelloWorld {
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE ) {
-                glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
-            } else if (action == GLFW_PRESS) {
+            if (action == GLFW_PRESS) {
                 switch (key) {
                     case GLFW_KEY_UP:
                         up = true;
@@ -147,6 +146,9 @@ public class HelloWorld {
                         break;
                     case GLFW_KEY_MINUS:
                         slowDown = true;
+                        break;
+                    case GLFW_KEY_ESCAPE:
+                        geostationary = !geostationary;
                         break;
                 }
             } else if (action == GLFW_RELEASE) {
@@ -323,8 +325,10 @@ public class HelloWorld {
 
         globeAzimuth += timePassage;
         updateModelMatrix();
-        camAzimuth += timePassage;
-        updateViewMatrix();
+        if (geostationary) {
+            camAzimuth += timePassage;
+            updateViewMatrix();
+        }
         updateMvpMatrix();
         updateLightMatrices();
         updateVpRotationMatrix();
