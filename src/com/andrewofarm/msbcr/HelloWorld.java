@@ -1,9 +1,6 @@
 package com.andrewofarm.msbcr;
 
-import com.andrewofarm.msbcr.objects.Globe;
-import com.andrewofarm.msbcr.objects.Ocean;
-import com.andrewofarm.msbcr.objects.Rings;
-import com.andrewofarm.msbcr.objects.Skybox;
+import com.andrewofarm.msbcr.objects.*;
 import com.andrewofarm.msbcr.programs.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -13,6 +10,8 @@ import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.GL_POINT_SPRITE;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_PROGRAM_POINT_SIZE;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -23,7 +22,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("DefaultFileTemplate")
 public class HelloWorld {
 
-    private static boolean drawRings = true;
+    private static boolean drawRings = false;
 
     private long window;
 
@@ -49,12 +48,15 @@ public class HelloWorld {
     private static float timePassage = 0.005f;
     private static final float TIME_MOD = 1.1f;
     private boolean speedUp, slowDown;
+    private boolean geostationary = true;
 
     private Matrix4f modelMatrix = new Matrix4f();
 
     private Matrix4f viewMatrix = new Matrix4f();
     private Matrix4f projectionMatrix = new Matrix4f();
     private Matrix4f mvpMatrix = new Matrix4f();
+
+    private Matrix4f vpRotationMatrix = new Matrix4f();
 
     private Matrix4f lightViewMatrix = new Matrix4f().lookAt(
             new Vector3f(lightX, lightY, lightZ).normalize().mul(2),
@@ -69,21 +71,24 @@ public class HelloWorld {
     private Matrix4f lightMvpMatrix = new Matrix4f();
     private Matrix4f lightBiasMvpMatrix = new Matrix4f();
 
-    private static final int MERIDIANS = 1024;
-    private static final int PARALLELS = 512;
+    private static final int MERIDIANS = 512;
+    private static final int PARALLELS = 256;
 
     private Skybox skybox = new Skybox();
+    private Sun sun = new Sun(lightX, lightY, lightZ);
     private Globe globe = new Globe(1.0f, MERIDIANS, PARALLELS);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
+    private SunShaderProgram sunShaderProgram;
     private GlobeShaderProgram globeShaderProgram;
     private RingsShaderProgram ringsShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
 
     private int starfieldTexture;
+    private int sunTexture;
     private int globeTexture;
     private int displacementMap;
     private int normalMap;
@@ -122,9 +127,7 @@ public class HelloWorld {
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE ) {
-                glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
-            } else if (action == GLFW_PRESS) {
+            if (action == GLFW_PRESS) {
                 switch (key) {
                     case GLFW_KEY_UP:
                         up = true;
@@ -143,6 +146,9 @@ public class HelloWorld {
                         break;
                     case GLFW_KEY_MINUS:
                         slowDown = true;
+                        break;
+                    case GLFW_KEY_ESCAPE:
+                        geostationary = !geostationary;
                         break;
                 }
             } else if (action == GLFW_RELEASE) {
@@ -241,6 +247,7 @@ public class HelloWorld {
 
         shadowMapShaderProgram = new ShadowMapShaderProgram();
         skyboxShaderProgram = new SkyboxShaderProgram();
+        sunShaderProgram = new SunShaderProgram();
         globeShaderProgram = new GlobeShaderProgram();
         if (drawRings) ringsShaderProgram = new RingsShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
@@ -248,6 +255,7 @@ public class HelloWorld {
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
+        sunTexture = TextureLoader.loadTexture2D("res/sun.jpg");
         starfieldTexture = TextureLoader.loadTextureCube(new String[] {
                 "res/starmap_8k_4.png",
                 "res/starmap_8k_3.png",
@@ -277,6 +285,7 @@ public class HelloWorld {
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     }
 
     private void loop() {
@@ -316,10 +325,13 @@ public class HelloWorld {
 
         globeAzimuth += timePassage;
         updateModelMatrix();
-        camAzimuth += timePassage;
-        updateViewMatrix();
+        if (geostationary) {
+            camAzimuth += timePassage;
+            updateViewMatrix();
+        }
         updateMvpMatrix();
         updateLightMatrices();
+        updateVpRotationMatrix();
     }
 
     private void render() {
@@ -344,13 +356,18 @@ public class HelloWorld {
         //draw starfield
 
         skyboxShaderProgram.useProgram();
-        Matrix4f vpRotationMatrix = new Matrix4f(viewMatrix);
-        vpRotationMatrix.m30(0);
-        vpRotationMatrix.m31(0);
-        vpRotationMatrix.m32(0);
         skyboxShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
         skyboxShaderProgram.setTexture(starfieldTexture);
         skybox.draw(skyboxShaderProgram);
+
+        //draw sun
+
+        sunShaderProgram.useProgram();
+        sunShaderProgram.setVpMatrix(vpRotationMatrix);
+        sunShaderProgram.setSize(500);
+        sunShaderProgram.setColor(new Vector3f(1.0f, 0.95f, 0.9f));
+        sunShaderProgram.setTexture(sunTexture);
+        sun.draw(sunShaderProgram);
 
         //draw globe
 
@@ -367,7 +384,7 @@ public class HelloWorld {
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
         globe.draw(globeShaderProgram);
 
-        //daw rings
+        //draw rings
 
         if (drawRings) {
             glDisable(GL_CULL_FACE);
@@ -381,7 +398,7 @@ public class HelloWorld {
 
         //draw ocean
 
-        glDisable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         oceanShaderProgram.useProgram();
         oceanShaderProgram.setMvpMatrix(mvpMatrix);
         oceanShaderProgram.setModelMatrix(modelMatrix);
@@ -422,6 +439,13 @@ public class HelloWorld {
 
     private void updateMvpMatrix() {
         mvpMatrix.set(projectionMatrix).mul(viewMatrix).mul(modelMatrix);
+    }
+
+    private void updateVpRotationMatrix() {
+        vpRotationMatrix.set(viewMatrix);
+        vpRotationMatrix.m30(0);
+        vpRotationMatrix.m31(0);
+        vpRotationMatrix.m32(0);
     }
 
     public static void main(String[] args) {
