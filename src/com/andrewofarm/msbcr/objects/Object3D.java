@@ -20,6 +20,7 @@ public abstract class Object3D {
     static final int MODE_TRIANGLES = GL11.GL_TRIANGLES;
     static final int MODE_TRIANGLE_STRIP = GL11.GL_TRIANGLE_STRIP;
     static final int MODE_TRIANGLE_FAN = GL_TRIANGLE_FAN;
+    static final int MODE_POINTS = GL_POINTS;
 
     static final int BYTES_PER_FLOAT = 4;
     static final int BYTES_PER_INT = 4;
