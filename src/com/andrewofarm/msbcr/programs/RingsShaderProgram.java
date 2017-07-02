@@ -1,3 +1,4 @@
+package com.andrewofarm.msbcr.programs;
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_1D;
