@@ -85,8 +85,9 @@ public abstract class ShaderProgram {
         int fragmentShaderID = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
         System.out.println("linking shader program");
         int programID = linkProgram(vertexShaderID, fragmentShaderID);
-        System.out.println("validating shader program");
-        validateProgram(programID);
+        //for debugging
+        //System.out.println("validating shader program");
+        //validateProgram(programID);
         return programID;
     }
 }

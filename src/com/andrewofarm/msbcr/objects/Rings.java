@@ -1,6 +1,7 @@
 package com.andrewofarm.msbcr.objects;
 
 import com.andrewofarm.msbcr.programs.RingsShaderProgram;
+import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
 
 import java.nio.FloatBuffer;
 

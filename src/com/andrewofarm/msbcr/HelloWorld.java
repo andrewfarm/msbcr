@@ -11,14 +11,8 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.Optional;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -66,7 +60,7 @@ public class HelloWorld {
             new Vector3f(lightX, lightY, lightZ).normalize().mul(2),
             new Vector3f(0, 0, 0),
             new Vector3f(0, 1, 0));
-    private Matrix4f lightProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 0, 4);
+    private Matrix4f lightProjectionMatrix = new Matrix4f().ortho(-2, 2, -2, 2, 0, 6);
     private Matrix4f lightBiasMatrix = new Matrix4f(
             0.5f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f, 0.0f,
@@ -379,7 +373,9 @@ public class HelloWorld {
             glDisable(GL_CULL_FACE);
             ringsShaderProgram.useProgram();
             ringsShaderProgram.setMvpMatrix(mvpMatrix);
+            ringsShaderProgram.setLightBiasMvpMatrixMatrix(lightBiasMvpMatrix);
             ringsShaderProgram.setTexture(ringsTexture);
+            ringsShaderProgram.setShadowMap(shadowMapDepthTexture);
             rings.draw(ringsShaderProgram);
         }
 
