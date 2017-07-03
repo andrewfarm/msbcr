@@ -43,7 +43,7 @@ public class Globe extends Object3D {
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
         bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT);
         bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT);
-        drawElements(MODE_TRIANGLE_STRIP);
+        drawElements(MODE_LINE_STRIP); //TODO
     }
 
     public void draw(ShadowMapShaderProgram shaderProgram) {

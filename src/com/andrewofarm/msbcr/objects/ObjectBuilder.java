@@ -63,6 +63,11 @@ public abstract class ObjectBuilder {
         }
     }
 
+    static void buildHierarchialSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius,
+        int meridians, int parallels, boolean textured) {
+
+    }
+
     static void buildFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
         generateSphereVertices(vertexBuf, radius, meridians, parallels, 4, textured);
 
@@ -74,7 +79,7 @@ public abstract class ObjectBuilder {
             col1StartIndex = col1 * (parallels + 1);
             col2StartIndex = col2 * (parallels + 1);
 
-            for (int row = 0; row < parallels + 1; row ++) {
+            for (int row = 0; row < parallels + 1; row++) {
 
                 faceVertexIndices[0] = (col2StartIndex + row) * 4 + 3;
                 faceVertexIndices[1] = (col1StartIndex + row) * 4 + 2;
@@ -118,9 +123,25 @@ public abstract class ObjectBuilder {
         }
     }
 
-    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies, boolean textured) {
-        final double azimuthInterval = 2 * Math.PI / meridians;
-        final double polarAngleInterval = Math.PI / parallels;
+
+    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius,
+        int meridians, int parallels,
+        int copies, boolean textured) {
+
+        generateSphereVertices(vertexBuf, radius, meridians, parallels,
+                0, 2 * Math.PI, 0, Math.PI,
+                copies, textured);
+    }
+
+    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels,
+        double startAzimuth, double endAzimuth,
+        double startPolarAngle, double endPolarAngle,
+        int copies, boolean textured) {
+
+        final double azimuthSpan = endAzimuth - startAzimuth;
+        final double polarAngleSpan = startPolarAngle - endPolarAngle;
+        final double azimuthInterval = azimuthSpan / meridians;
+        final double polarAngleInterval = polarAngleSpan / parallels;
         double azimuthFraction;
         double azimuth;
         double polarAngleFraction;
@@ -130,15 +151,15 @@ public abstract class ObjectBuilder {
         Vector3f position = new Vector3f();
         Vector3f normal = new Vector3f();
         for (int col = 0; col <= meridians; col++) {
-            azimuthFraction = (double) col / meridians;
-            azimuth = col * azimuthInterval;
+            azimuth = col * azimuthInterval + startAzimuth;
+            azimuthFraction = azimuth / (2 * Math.PI);
             x1 = radius * (float) Math.sin(azimuth);
             y1 = radius;
             z1 = radius * (float) Math.cos(azimuth);
 
             for (int row = 0; row <= parallels; row++) {
-                polarAngleFraction = (double) row / parallels;
-                polarAngle = row * polarAngleInterval;
+                polarAngle = row * polarAngleInterval + startPolarAngle;
+                polarAngleFraction = polarAngle / Math.PI;
                 float sin = (float) Math.sin(polarAngle);
                 x = x1 * sin;
                 y = y1 * (float) Math.cos(polarAngle);
@@ -148,7 +169,7 @@ public abstract class ObjectBuilder {
                 normal.normalize();
                 if (textured) {
                     for (int i = 0; i < copies; i++) {
-                        putVertex(vertexBuf, position, normal, (float) azimuthFraction, (float) polarAngleFraction);
+                        putVertex(vertexBuf, position, normal, (float) azimuthFraction, 1 - (float) polarAngleFraction);
                     }
                 } else {
                     for (int i = 0; i < copies; i++) {

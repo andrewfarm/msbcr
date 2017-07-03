@@ -22,8 +22,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("DefaultFileTemplate")
 public class HelloWorld {
 
-    private static boolean drawRings = false;
-
     private long window;
 
     private int windowWidth = 800;
@@ -45,7 +43,9 @@ public class HelloWorld {
     private boolean dragging = false;
     private double prevX, prevY;
 
-    private static float timePassage = 0.005f;
+    private boolean drawRings = false;
+
+    private float timePassage = 0.005f;
     private static final float TIME_MOD = 1.1f;
     private boolean speedUp, slowDown;
     private boolean geostationary = true;
@@ -76,7 +76,7 @@ public class HelloWorld {
 
     private Skybox skybox = new Skybox();
     private Sun sun = new Sun(lightX, lightY, lightZ);
-    private Globe globe = new Globe(1.0f, MERIDIANS, PARALLELS);
+    private HierarchialGlobe globe = new HierarchialGlobe(1.0f, MERIDIANS, PARALLELS);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
