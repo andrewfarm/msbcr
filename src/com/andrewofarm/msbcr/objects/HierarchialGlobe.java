@@ -29,7 +29,8 @@ public class HierarchialGlobe extends Globe {
         indexCount = ObjectBuilder.getSphereIndexCount(meridians, parallels) * MAX_DETAIL_LEVELS;
         vertexBuf = newFloatBuffer(vertexCount * TOTAL_COMPONENT_COUNT);
         indexBuf = newIntBuffer(indexCount);
-        ObjectBuilder.buildSphere((FloatBuffer) vertexBuf, (IntBuffer) indexBuf,
-                radius, meridians, parallels, true);
+        ObjectBuilder.buildHierarchialSphere((FloatBuffer) vertexBuf, (IntBuffer) indexBuf,
+                radius, meridians, parallels, MAX_DETAIL_LEVELS,
+                0, 0, true);
     }
 }

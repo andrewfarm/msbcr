@@ -64,8 +64,40 @@ public abstract class ObjectBuilder {
     }
 
     static void buildHierarchialSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius,
-        int meridians, int parallels, boolean textured) {
+        int meridians, int parallels, int detailLevels, double viewAzimuth, double viewPolarAngle, boolean textured) {
 
+        double halfAzimuthSpan = Math.PI;
+        double halfPolarAngleSpan = Math.PI * 0.5;
+        for (int level = 0; level < detailLevels; level++) {
+            generateSphereVertices(vertexBuf, radius, meridians, parallels,
+                    viewAzimuth - halfAzimuthSpan,
+                    viewPolarAngle - halfPolarAngleSpan,
+                    viewAzimuth + halfAzimuthSpan,
+                    viewPolarAngle + halfPolarAngleSpan,
+                    1, textured);
+
+            halfAzimuthSpan *= 0.5;
+            halfPolarAngleSpan *= 0.5;
+        }
+
+        int col1, col2;
+        int col1StartIndex, col2StartIndex;
+        for (col1 = 0; col1 < meridians; col1++) {
+            col2 = col1 + 1;
+            col1StartIndex = col1 * (parallels + 1);
+            col2StartIndex = col2 * (parallels + 1);
+
+            for (int row = 0; row < parallels + 1; row++) {
+                indexBuf.put(col2StartIndex + row);
+                indexBuf.put(col1StartIndex + row);
+            }
+
+            //degenerate vertices
+            if (col2 < meridians) {
+                indexBuf.put(col1StartIndex + parallels + 1);
+                indexBuf.put(col2StartIndex + parallels + 2);
+            }
+        }
     }
 
     static void buildFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
@@ -122,7 +154,6 @@ public abstract class ObjectBuilder {
             }
         }
     }
-
 
     private static void generateSphereVertices(FloatBuffer vertexBuf, float radius,
         int meridians, int parallels,
