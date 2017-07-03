@@ -22,8 +22,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 @SuppressWarnings("DefaultFileTemplate")
 public class HelloWorld {
 
-    private static boolean drawRings = false;
-
     private long window;
 
     private int windowWidth = 800;
@@ -31,7 +29,7 @@ public class HelloWorld {
 
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
-    private static final float TERRAIN_SCALE = 0.75f;
+    private static final float TERRAIN_SCALE = 0.5f;
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 
@@ -42,10 +40,12 @@ public class HelloWorld {
     private float camDist = 4;
     private float globeAzimuth = 0;
 
+    private boolean drawRings = true;
+
     private boolean dragging = false;
     private double prevX, prevY;
 
-    private static float timePassage = 0.005f;
+    private float timePassage = 0.005f;
     private static final float TIME_MOD = 1.1f;
     private boolean speedUp, slowDown;
     private boolean geostationary = true;
