@@ -10,7 +10,6 @@ import org.lwjgl.opengl.GL;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.GL_POINT_SPRITE;
 import static org.lwjgl.opengl.GL20.GL_VERTEX_PROGRAM_POINT_SIZE;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
@@ -76,7 +75,7 @@ public class HelloWorld {
 
     private Skybox skybox = new Skybox();
     private Sun sun = new Sun(lightX, lightY, lightZ);
-    private Globe globe = new Globe(1.0f, MERIDIANS, PARALLELS);
+    private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, MERIDIANS, PARALLELS);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
