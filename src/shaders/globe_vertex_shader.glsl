@@ -19,6 +19,7 @@ varying vec2 v_TextureCoords;
 
 void main() {
     float displacement = (texture2D(u_DisplacementMapUnit, a_TextureCoords).r - u_SeaLevel) * u_TerrainScale;
+    displacement = 0.0; //TODO
     vec3 displacedPosition = a_Position * (1 + displacement);
     mat3 normalMatrix = mat3(u_ModelMatrix);
     v_Normal = normalMatrix * a_Normal;

@@ -187,26 +187,26 @@ public abstract class ObjectBuilder {
 
                 switch (face) {
                     case CUBE_RIGHT:
-                        position.set(1, tileY, tileX);
+                        position.set(1, tileY, -tileX);
                         break;
                     case CUBE_LEFT:
-                        position.set(-1, tileY, -tileX);
+                        position.set(-1, tileY, tileX);
                         break;
                     case CUBE_TOP:
-                        position.set(tileX, 1, tileY);
+                        position.set(tileX, 1, -tileY);
                         break;
                     case CUBE_BOTTOM:
-                        position.set(tileX, -1, -tileY);
+                        position.set(tileX, -1, tileY);
                         break;
                     case CUBE_FRONT:
-                        position.set(-tileX, tileY, 1);
+                        position.set(tileX, tileY, 1);
                         break;
                     case CUBE_BACK:
-                        position.set(tileX, tileY, -1);
+                        position.set(-tileX, tileY, -1);
                         break;
                 }
                 position.normalize().mul(radius);
-                putVertex(vertexBuf, position, position, 0, 0); //TODO texture UVs
+                putVertex(vertexBuf, position, position, tileX * 0.5f + 0.5f, tileY * 0.5f + 0.5f);
             }
         }
     }
@@ -220,14 +220,14 @@ public abstract class ObjectBuilder {
             col2StartIndex = col2 * (resolution + 1);
 
             for (int row = 0; row <= resolution; row++) {
-                indexBuf.put(col2StartIndex + row);
                 indexBuf.put(col1StartIndex + row);
+                indexBuf.put(col2StartIndex + row);
             }
 
             //degenerate vertices
             if (col2 < resolution) {
-                indexBuf.put(col1StartIndex + resolution);
-                indexBuf.put(col2StartIndex + resolution + 1);
+                indexBuf.put(col2StartIndex + resolution);
+                indexBuf.put(col1StartIndex + resolution + 1);
             }
         }
     }

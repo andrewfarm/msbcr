@@ -24,7 +24,7 @@ public class Globe extends Object3D {
                     NORMAL_COMPONENT_COUNT +
                     TEXTURE_COMPONENT_COUNT;
 
-    private static final int TILE_RESOULTION = 4;
+    private static final int TILE_RESOLUTION = 16;
 
     private final float radius;
 
@@ -34,16 +34,16 @@ public class Globe extends Object3D {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.radius = radius;
 
-        tiles.add(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, TILE_RESOULTION));
-        tiles.add(new GlobeTile(CUBE_LEFT,   radius, 0, 0, 1, TILE_RESOULTION));
-        tiles.add(new GlobeTile(CUBE_TOP,    radius, 0, 0, 1, TILE_RESOULTION));
-        tiles.add(new GlobeTile(CUBE_BOTTOM, radius, 0, 0, 1, TILE_RESOULTION));
-        tiles.add(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, TILE_RESOULTION));
-        tiles.add(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, TILE_RESOULTION));
+        tiles.add(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, TILE_RESOLUTION));
+        tiles.add(new GlobeTile(CUBE_LEFT,   radius, 0, 0, 1, TILE_RESOLUTION));
+        tiles.add(new GlobeTile(CUBE_TOP,    radius, 0, 0, 1, TILE_RESOLUTION));
+        tiles.add(new GlobeTile(CUBE_BOTTOM, radius, 0, 0, 1, TILE_RESOLUTION));
+        tiles.add(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, TILE_RESOLUTION));
+        tiles.add(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, TILE_RESOLUTION));
 
-        indexCount = ObjectBuilder.getTileIndexCount(TILE_RESOULTION);
+        indexCount = ObjectBuilder.getTileIndexCount(TILE_RESOLUTION);
         indexBuf = newIntBuffer(indexCount);
-        ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, TILE_RESOULTION);
+        ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, TILE_RESOLUTION);
 
 //        vertexCount = ObjectBuilder.getSphereVertexCount(meridians, parallels);
 //        indexCount = ObjectBuilder.getSphereIndexCount(meridians, parallels);
@@ -71,7 +71,7 @@ public class Globe extends Object3D {
             bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
             bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, tileBuf);
             bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
-            drawElements(MODE_TRIANGLE_STRIP);
+            drawElements(MODE_LINE_STRIP);
         }
     }
 

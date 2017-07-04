@@ -24,7 +24,7 @@ void main() {
     vec3 normalizedNormal = normalize(v_Normal); //TODO
 
     vec4 texColor = texture2D(u_TextureUnit, v_TextureCoords);
-    texColor = vec4(1.0, 0.0, 1.0, 1.0); //TODO
+    texColor = vec4(v_TextureCoords, 0.0, 1.0); //TODO
 
     float totalLight = AMBIENT_STRENGTH;
 
@@ -33,6 +33,7 @@ void main() {
 //    if (texture2D(u_ShadowMapUnit, v_PositionInLightSpace.xy).z >= v_PositionInLightSpace.z - shadowBias) {
         float directionalStrength = max(dot(normalizedNormal, u_LightDirection), 0.0);
         totalLight += (1.0 - AMBIENT_STRENGTH) * directionalStrength;
+        totalLight = 1.0; //TODO
 //    } TODO
     gl_FragColor = vec4((texColor * totalLight).rgb, 1.0);
 }
