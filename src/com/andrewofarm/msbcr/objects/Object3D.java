@@ -66,6 +66,10 @@ public abstract class Object3D {
         glDrawArrays(mode, 0, vertexCount);
     }
 
+    protected void drawArrays(int mode, int first, int count) {
+        glDrawArrays(mode, first, count);
+    }
+
     protected void drawElements(int mode) {
         indexBuf.position(0);
         if (indexBuf instanceof IntBuffer) {

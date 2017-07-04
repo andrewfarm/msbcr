@@ -29,6 +29,7 @@ public class AdaptiveGlobe extends Object3D {
     private static final int TILE_RESOLUTION = 16;
 
     private static final boolean WIREFRAME = true;
+    private static final boolean DRAW_CORNERS = true;
 
     private final float radius;
 
@@ -88,6 +89,15 @@ public class AdaptiveGlobe extends Object3D {
             bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, tileBuf);
             bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
             drawElements(WIREFRAME ? MODE_LINES : MODE_TRIANGLE_STRIP);
+
+            if (DRAW_CORNERS) {
+                FloatBuffer cornerVertexBuf = tile.getCornerVertexBuffer();
+                setDataOffset(0);
+                bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, cornerVertexBuf);
+                bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, cornerVertexBuf);
+                bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, cornerVertexBuf);
+                drawArrays(MODE_POINTS, 0, 4);
+            }
         }
     }
 
