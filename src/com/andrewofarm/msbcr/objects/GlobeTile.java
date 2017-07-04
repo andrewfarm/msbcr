@@ -1,6 +1,7 @@
 package com.andrewofarm.msbcr.objects;
 
 import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
+import org.joml.Vector3f;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -25,6 +26,8 @@ class GlobeTile extends Object3D {
     private final float size;
     private final int resolution;
 
+    private final Vector3f[] corners;
+
     public GlobeTile(int face, float radius, float offsetX, float offsetY, float size, int resolution) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.face = face;
@@ -37,5 +40,21 @@ class GlobeTile extends Object3D {
         vertexCount = ObjectBuilder.getTileVertexCount(resolution);
         vertexBuf = newFloatBuffer(vertexCount * TOTAL_COMPONENT_COUNT);
         ObjectBuilder.buildTileVertices((FloatBuffer) vertexBuf, face, radius, offsetX, offsetY, size, resolution);
+
+        corners = new Vector3f[] {
+                //TODO
+        };
+    }
+
+    public float getOffsetX() {
+        return offsetX;
+    }
+
+    public float getOffsetY() {
+        return offsetY;
+    }
+
+    public float getSize() {
+        return size;
     }
 }

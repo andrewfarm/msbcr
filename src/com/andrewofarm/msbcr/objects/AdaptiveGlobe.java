@@ -2,6 +2,8 @@ package com.andrewofarm.msbcr.objects;
 
 import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
 import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -26,6 +28,8 @@ public class AdaptiveGlobe extends Object3D {
 
     private static final int TILE_RESOLUTION = 16;
 
+    private static final boolean WIREFRAME = true;
+
     private final float radius;
 
     private Set<GlobeTile> tiles = new HashSet<>();
@@ -41,9 +45,15 @@ public class AdaptiveGlobe extends Object3D {
         tiles.add(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, TILE_RESOLUTION));
         tiles.add(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, TILE_RESOLUTION));
 
-        indexCount = ObjectBuilder.getTileIndexCount(TILE_RESOLUTION);
-        indexBuf = newIntBuffer(indexCount);
-        ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, TILE_RESOLUTION);
+        if (WIREFRAME) {
+            indexCount = ObjectBuilder.getWireframeTileIndexCount(TILE_RESOLUTION);
+            indexBuf = newIntBuffer(indexCount);
+            ObjectBuilder.buildWireframeTileIndices((IntBuffer) indexBuf, TILE_RESOLUTION);
+        } else {
+            indexCount = ObjectBuilder.getTileIndexCount(TILE_RESOLUTION);
+            indexBuf = newIntBuffer(indexCount);
+            ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, TILE_RESOLUTION);
+        }
 
 //        vertexCount = ObjectBuilder.getSphereVertexCount(meridians, parallels);
 //        indexCount = ObjectBuilder.getSphereIndexCount(meridians, parallels);
@@ -55,6 +65,12 @@ public class AdaptiveGlobe extends Object3D {
 
     public float getRadius() {
         return radius;
+    }
+
+    public void update(Matrix4f mvpMatrix) {
+        for (GlobeTile tile : tiles) {
+            //TODO
+        }
     }
 
     public void draw(GlobeShaderProgram shaderProgram) {
@@ -71,7 +87,7 @@ public class AdaptiveGlobe extends Object3D {
             bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
             bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, tileBuf);
             bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
-            drawElements(MODE_LINE_STRIP);
+            drawElements(WIREFRAME ? MODE_LINES : MODE_TRIANGLE_STRIP);
         }
     }
 
@@ -89,7 +105,7 @@ public class AdaptiveGlobe extends Object3D {
             bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
             skipAttributes(NORMAL_COMPONENT_COUNT);
             bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
-            drawElements(MODE_TRIANGLE_STRIP);
+            drawElements(MODE_TRIANGLES);
         }
     }
 }

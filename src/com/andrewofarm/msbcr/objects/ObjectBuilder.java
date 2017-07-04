@@ -34,6 +34,10 @@ public abstract class ObjectBuilder {
         return ((resolution + 1) * 2 + 2) * resolution - 2;
     }
 
+    static int getWireframeTileIndexCount(int resolution) {
+        return resolution * resolution * 8;
+    }
+
     static int getFacetedSphereVertexCount(int meridians, int parallels) {
         return getSphereVertexCount(meridians, parallels) * 4;
     }
@@ -187,22 +191,22 @@ public abstract class ObjectBuilder {
 
                 switch (face) {
                     case CUBE_RIGHT:
-                        position.set(1, tileY, -tileX);
+                        position.set(1, -tileY, -tileX);
                         break;
                     case CUBE_LEFT:
-                        position.set(-1, tileY, tileX);
+                        position.set(-1, -tileY, tileX);
                         break;
                     case CUBE_TOP:
-                        position.set(tileX, 1, -tileY);
+                        position.set(tileX, 1, tileY);
                         break;
                     case CUBE_BOTTOM:
-                        position.set(tileX, -1, tileY);
+                        position.set(tileX, -1, -tileY);
                         break;
                     case CUBE_FRONT:
-                        position.set(tileX, tileY, 1);
+                        position.set(tileX, -tileY, 1);
                         break;
                     case CUBE_BACK:
-                        position.set(-tileX, tileY, -1);
+                        position.set(-tileX, -tileY, -1);
                         break;
                 }
                 position.normalize().mul(radius);
@@ -220,14 +224,45 @@ public abstract class ObjectBuilder {
             col2StartIndex = col2 * (resolution + 1);
 
             for (int row = 0; row <= resolution; row++) {
-                indexBuf.put(col1StartIndex + row);
                 indexBuf.put(col2StartIndex + row);
+                indexBuf.put(col1StartIndex + row);
             }
 
             //degenerate vertices
             if (col2 < resolution) {
-                indexBuf.put(col2StartIndex + resolution);
-                indexBuf.put(col1StartIndex + resolution + 1);
+                indexBuf.put(col1StartIndex + resolution);
+                indexBuf.put(col2StartIndex + resolution + 1);
+            }
+        }
+    }
+
+    static void buildWireframeTileIndices(IntBuffer indexBuf, int resolution) {
+        int col1, col2;
+        int col1StartIndex, col2StartIndex;
+        int row;
+        int i1, i2, i3, i4;
+        for (col1 = 0; col1 < resolution; col1++) {
+            col2 = col1 + 1;
+            col1StartIndex = col1 * (resolution + 1);
+            col2StartIndex = col2 * (resolution + 1);
+
+            for (row = 0; row < resolution; row++) {
+                i1 = col1StartIndex + row;
+                i2 = col2StartIndex + row;
+                i3 = i2 + 1;
+                i4 = i1 + 1;
+
+                indexBuf.put(i1);
+                indexBuf.put(i2);
+
+                indexBuf.put(i2);
+                indexBuf.put(i3);
+
+                indexBuf.put(i3);
+                indexBuf.put(i4);
+
+                indexBuf.put(i4);
+                indexBuf.put(i1);
             }
         }
     }
