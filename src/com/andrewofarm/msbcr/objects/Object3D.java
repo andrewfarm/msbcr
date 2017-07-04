@@ -55,6 +55,13 @@ public abstract class Object3D {
         dataOffset += size;
     }
 
+    protected void bindFloatAttribute(int index, int size, FloatBuffer vertexBuf) {
+        vertexBuf.position(dataOffset);
+        glVertexAttribPointer(index, size, GL_FLOAT, false, STRIDE, vertexBuf);
+        glEnableVertexAttribArray(index);
+        dataOffset += size;
+    }
+
     protected void drawArrays(int mode) {
         glDrawArrays(mode, 0, vertexCount);
     }

@@ -40,7 +40,7 @@ public class HelloWorld {
     private float camDist = 4;
     private float globeAzimuth = 0;
 
-    private boolean drawRings = true;
+    private boolean drawRings = false;
 
     private boolean dragging = false;
     private double prevX, prevY;
@@ -398,16 +398,16 @@ public class HelloWorld {
 
         //draw ocean
 
-        glEnable(GL_CULL_FACE);
-        oceanShaderProgram.useProgram();
-        oceanShaderProgram.setMvpMatrix(mvpMatrix);
-        oceanShaderProgram.setModelMatrix(modelMatrix);
-        oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
-        oceanShaderProgram.setCamPos(
-                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
-                (float) (camDist * Math.sin(camElev)),
-                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
-        ocean.draw(oceanShaderProgram);
+//        glEnable(GL_CULL_FACE);
+//        oceanShaderProgram.useProgram();
+//        oceanShaderProgram.setMvpMatrix(mvpMatrix);
+//        oceanShaderProgram.setModelMatrix(modelMatrix);
+//        oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
+//        oceanShaderProgram.setCamPos(
+//                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
+//                (float) (camDist * Math.sin(camElev)),
+//                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
+//        ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
     }

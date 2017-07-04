@@ -11,12 +11,27 @@ import java.nio.IntBuffer;
  */
 public abstract class ObjectBuilder {
 
+    static final int CUBE_RIGHT = 0;
+    static final int CUBE_LEFT = 1;
+    static final int CUBE_TOP = 2;
+    static final int CUBE_BOTTOM = 3;
+    static final int CUBE_FRONT = 4;
+    static final int CUBE_BACK = 5;
+
     static int getSphereVertexCount(int meridians, int parallels) {
         return (parallels + 1) * (meridians + 1);
     }
 
     static int getSphereIndexCount(int meridians, int parallels) {
         return ((parallels + 1) * 2 + 2) * (meridians + 1) - 2;
+    }
+
+    static int getTileVertexCount(int resolution) {
+        return (resolution + 1) * (resolution + 1);
+    }
+
+    static int getTileIndexCount(int resolution) {
+        return ((resolution + 1) * 2 + 2) * resolution - 2;
     }
 
     static int getFacetedSphereVertexCount(int meridians, int parallels) {
@@ -155,6 +170,64 @@ public abstract class ObjectBuilder {
                         putVertex(vertexBuf, position, normal);
                     }
                 }
+            }
+        }
+    }
+
+    static void buildTileVertices(FloatBuffer vertexBuf, int face, float radius,
+        float offsetX, float offsetY, float size, int resolution) {
+
+        final float interval = size * 2 / resolution;
+        float tileX, tileY;
+        Vector3f position = new Vector3f();
+        for (int i = 0; i <= resolution; i++) {
+            tileX = i * interval + offsetX - 1.0f;
+            for (int j = 0; j <= resolution; j++) {
+                tileY = j * interval + offsetY - 1.0f;
+
+                switch (face) {
+                    case CUBE_RIGHT:
+                        position.set(1, tileY, tileX);
+                        break;
+                    case CUBE_LEFT:
+                        position.set(-1, tileY, -tileX);
+                        break;
+                    case CUBE_TOP:
+                        position.set(tileX, 1, tileY);
+                        break;
+                    case CUBE_BOTTOM:
+                        position.set(tileX, -1, -tileY);
+                        break;
+                    case CUBE_FRONT:
+                        position.set(-tileX, tileY, 1);
+                        break;
+                    case CUBE_BACK:
+                        position.set(tileX, tileY, -1);
+                        break;
+                }
+                position.normalize().mul(radius);
+                putVertex(vertexBuf, position, position, 0, 0); //TODO texture UVs
+            }
+        }
+    }
+
+    static void buildTileIndices(IntBuffer indexBuf, int resolution) {
+        int col1, col2;
+        int col1StartIndex, col2StartIndex;
+        for (col1 = 0; col1 < resolution; col1++) {
+            col2 = col1 + 1;
+            col1StartIndex = col1 * (resolution + 1);
+            col2StartIndex = col2 * (resolution + 1);
+
+            for (int row = 0; row <= resolution; row++) {
+                indexBuf.put(col2StartIndex + row);
+                indexBuf.put(col1StartIndex + row);
+            }
+
+            //degenerate vertices
+            if (col2 < resolution) {
+                indexBuf.put(col1StartIndex + resolution);
+                indexBuf.put(col2StartIndex + resolution + 1);
             }
         }
     }
