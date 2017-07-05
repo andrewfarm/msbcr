@@ -75,7 +75,7 @@ public class HelloWorld {
 
     private Skybox skybox = new Skybox();
     private Sun sun = new Sun(lightX, lightY, lightZ);
-    private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, 16);
+    private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, 64);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
@@ -399,16 +399,16 @@ public class HelloWorld {
 
         //draw ocean
 
-//        glEnable(GL_CULL_FACE);
-//        oceanShaderProgram.useProgram();
-//        oceanShaderProgram.setMvpMatrix(mvpMatrix);
-//        oceanShaderProgram.setModelMatrix(modelMatrix);
-//        oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
-//        oceanShaderProgram.setCamPos(
-//                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
-//                (float) (camDist * Math.sin(camElev)),
-//                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
-//        ocean.draw(oceanShaderProgram);
+        glEnable(GL_CULL_FACE);
+        oceanShaderProgram.useProgram();
+        oceanShaderProgram.setMvpMatrix(mvpMatrix);
+        oceanShaderProgram.setModelMatrix(modelMatrix);
+        oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        oceanShaderProgram.setCamPos(
+                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
+                (float) (camDist * Math.sin(camElev)),
+                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
+        ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
     }

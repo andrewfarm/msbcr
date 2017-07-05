@@ -211,6 +211,7 @@ public abstract class ObjectBuilder {
                 }
                 position.normalize().mul(radius);
                 putVertex(vertexBuf, position, position, tileX * 0.5f + 0.5f, tileY * 0.5f + 0.5f);
+//                putVertex(vertexBuf, position, position, (float) (Math.atan2(position.get(0) / radius, position.get(2) / radius) / (2 * Math.PI)), (float) (Math.acos(position.get(1) / radius) / Math.PI));
             }
         }
     }

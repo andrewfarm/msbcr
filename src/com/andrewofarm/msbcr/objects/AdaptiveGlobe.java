@@ -28,10 +28,10 @@ public class AdaptiveGlobe extends Object3D {
                     NORMAL_COMPONENT_COUNT +
                     TEXTURE_COMPONENT_COUNT;
 
-    private static final int MAX_DETAIL_LEVEL = 5;
+    private static final int MAX_DETAIL_LEVEL = 6;
 
-    private static final boolean WIREFRAME = true;
-    private static final boolean DRAW_CORNERS = true;
+    private static final boolean WIREFRAME = false;
+    private static final boolean DRAW_CORNERS = false;
 
     private final float radius;
 
@@ -64,7 +64,7 @@ public class AdaptiveGlobe extends Object3D {
     }
 
     private static int getDesiredDetailLevel(float depth) {
-        return (int) (1 / depth);
+        return (int) (0.5 / depth);
     }
 
     private static float getDepthOfClosestCorner(Matrix4f matrix, GlobeTile tile) {
