@@ -72,7 +72,7 @@ public class AdaptiveGlobe extends Object3D {
         float minDepth = Float.POSITIVE_INFINITY;
         for (Vector3f corner : corners) {
             minDepth = Math.min(minDepth, Math.abs(
-                    matrix.transformAffine(corner.get(0), corner.get(1), corner.get(2), 1.0f, new Vector4f()).get(2)));
+                    matrix.transform(corner.get(0), corner.get(1), corner.get(2), 1.0f, new Vector4f()).get(3)));
         }
         return minDepth;
     }

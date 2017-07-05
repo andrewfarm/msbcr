@@ -73,7 +73,7 @@ class GlobeTile extends Object3D {
                 new Vector3f(
                         cornerVertexBuf.get(TOTAL_COMPONENT_COUNT),
                         cornerVertexBuf.get(TOTAL_COMPONENT_COUNT + 1),
-                        cornerVertexBuf.get(TOTAL_COMPONENT_COUNT + 1)),
+                        cornerVertexBuf.get(TOTAL_COMPONENT_COUNT + 2)),
                 new Vector3f(
                         cornerVertexBuf.get(TOTAL_COMPONENT_COUNT * 2),
                         cornerVertexBuf.get(TOTAL_COMPONENT_COUNT * 2 + 1),
