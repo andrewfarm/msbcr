@@ -5,6 +5,7 @@ import com.andrewofarm.msbcr.programs.ShaderProgram;
 import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -27,7 +28,7 @@ public class AdaptiveGlobe extends Object3D {
                     NORMAL_COMPONENT_COUNT +
                     TEXTURE_COMPONENT_COUNT;
 
-    private int tileResolution = 16;
+    private static final int MAX_DETAIL_LEVEL = 5;
 
     private static final boolean WIREFRAME = true;
     private static final boolean DRAW_CORNERS = true;
@@ -56,32 +57,66 @@ public class AdaptiveGlobe extends Object3D {
             indexBuf = newIntBuffer(indexCount);
             ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, tileResolution);
         }
-
-//        vertexCount = ObjectBuilder.getSphereVertexCount(meridians, parallels);
-//        indexCount = ObjectBuilder.getSphereIndexCount(meridians, parallels);
-//        vertexBuf = newFloatBuffer(vertexCount * TOTAL_COMPONENT_COUNT);
-//        indexBuf = newIntBuffer(indexCount);
-//        ObjectBuilder.buildSphere((FloatBuffer) vertexBuf, (IntBuffer) indexBuf,
-//                radius, meridians, parallels, true);
     }
 
     public float getRadius() {
         return radius;
     }
 
-    public void update(Matrix4f mvpMatrix) {
+    private static int getDesiredDetailLevel(float depth) {
+        return (int) (1 / depth);
+    }
+
+    private static float getDepthOfClosestCorner(Matrix4f matrix, GlobeTile tile) {
+        Vector3f[] corners = tile.getCorners();
+        float minDepth = Float.POSITIVE_INFINITY;
+        for (Vector3f corner : corners) {
+            minDepth = Math.min(minDepth, Math.abs(
+                    matrix.transformAffine(corner.get(0), corner.get(1), corner.get(2), 1.0f, new Vector4f()).get(2)));
+        }
+        return minDepth;
+    }
+
+    public void update(Matrix4f matrix) {
         for (QuadTree<GlobeTile> tileTree : tiles) {
-            //TODO
+            updateTiles(matrix, tileTree, 0);
+        }
+    }
+
+    private void updateTiles(Matrix4f matrix, QuadTree<GlobeTile> tileTree, int level) {
+        GlobeTile tile = tileTree.getValue();
+        int desiredDetailLevel = getDesiredDetailLevel(getDepthOfClosestCorner(matrix, tile));
+        if (desiredDetailLevel <= level) {
+            //no further detail is needed
+            tileTree.removeChildren();
+        } else {
+            if (tileTree.isLeaf()) {
+                //split tile into quarters
+                int face = tile.getFace();
+                float radius = tile.getRadius();
+                float offsetX = tile.getOffsetX();
+                float offsetY = tile.getOffsetY();
+                float newSize = tile.getSize() * 0.5f;
+                int resolution = tile.getResolution();
+                tileTree.addChildren(
+                        new GlobeTile(face, radius, offsetX, offsetY, newSize, resolution),
+                        new GlobeTile(face, radius, offsetX + newSize, offsetY, newSize, resolution),
+                        new GlobeTile(face, radius, offsetX, offsetY + newSize, newSize, resolution),
+                        new GlobeTile(face, radius, offsetX + newSize, offsetY + newSize, newSize, resolution));
+            } else {
+                level++;
+                if (level < MAX_DETAIL_LEVEL) {
+                    //recurse
+                    updateTiles(matrix, tileTree.getTopLeft(), level);
+                    updateTiles(matrix, tileTree.getTopRight(), level);
+                    updateTiles(matrix, tileTree.getBottomLeft(), level);
+                    updateTiles(matrix, tileTree.getBottomRight(), level);
+                }
+            }
         }
     }
 
     public void draw(ShaderProgram shaderProgram) {
-//        setDataOffset(0);
-//        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
-//        bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT);
-//        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT);
-//        drawElements(MODE_TRIANGLE_STRIP);
-
         for (QuadTree<GlobeTile> tileTree : tiles) {
             drawTiles(shaderProgram, tileTree);
         }
@@ -120,7 +155,7 @@ public class AdaptiveGlobe extends Object3D {
         }
     }
 
-    public void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTile tile) {
+    private void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTile tile) {
         FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);

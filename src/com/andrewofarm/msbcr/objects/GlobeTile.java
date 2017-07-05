@@ -85,6 +85,14 @@ class GlobeTile extends Object3D {
         };
     }
 
+    public int getFace() {
+        return face;
+    }
+
+    public float getRadius() {
+        return radius;
+    }
+
     public float getOffsetX() {
         return offsetX;
     }
@@ -95,6 +103,10 @@ class GlobeTile extends Object3D {
 
     public float getSize() {
         return size;
+    }
+
+    public int getResolution() {
+        return resolution;
     }
 
     public Vector3f[] getCorners() {

@@ -181,13 +181,13 @@ public abstract class ObjectBuilder {
     static void buildTileVertices(FloatBuffer vertexBuf, int face, float radius,
         float offsetX, float offsetY, float size, int resolution) {
 
-        final float interval = size * 2 / resolution;
+        final float interval = size / resolution;
         float tileX, tileY;
         Vector3f position = new Vector3f();
         for (int i = 0; i <= resolution; i++) {
-            tileX = i * interval + offsetX - 1.0f;
+            tileX = (i * interval + offsetX) * 2.0f - 1.0f;
             for (int j = 0; j <= resolution; j++) {
-                tileY = j * interval + offsetY - 1.0f;
+                tileY = (j * interval + offsetY) * 2.0f - 1.0f;
 
                 switch (face) {
                     case CUBE_RIGHT:

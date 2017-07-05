@@ -331,6 +331,8 @@ public class HelloWorld {
         updateMvpMatrix();
         updateLightMatrices();
         updateVpRotationMatrix();
+
+        globe.update(viewMatrix.mul(modelMatrix, new Matrix4f()));
     }
 
     private void render() {
