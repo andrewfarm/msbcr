@@ -1,6 +1,7 @@
 package com.andrewofarm.msbcr.objects;
 
 import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
+import com.andrewofarm.msbcr.programs.ShaderProgram;
 import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -26,34 +27,34 @@ public class AdaptiveGlobe extends Object3D {
                     NORMAL_COMPONENT_COUNT +
                     TEXTURE_COMPONENT_COUNT;
 
-    private static final int TILE_RESOLUTION = 16;
+    private int tileResolution = 16;
 
     private static final boolean WIREFRAME = true;
     private static final boolean DRAW_CORNERS = true;
 
     private final float radius;
 
-    private Set<GlobeTile> tiles = new HashSet<>();
+    private Set<QuadTree<GlobeTile>> tiles = new HashSet<>();
 
-    public AdaptiveGlobe(float radius, int meridians, int parallels) {
+    public AdaptiveGlobe(float radius, int tileResolution) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.radius = radius;
 
-        tiles.add(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, TILE_RESOLUTION));
-        tiles.add(new GlobeTile(CUBE_LEFT,   radius, 0, 0, 1, TILE_RESOLUTION));
-        tiles.add(new GlobeTile(CUBE_TOP,    radius, 0, 0, 1, TILE_RESOLUTION));
-        tiles.add(new GlobeTile(CUBE_BOTTOM, radius, 0, 0, 1, TILE_RESOLUTION));
-        tiles.add(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, TILE_RESOLUTION));
-        tiles.add(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, TILE_RESOLUTION));
+        tiles.add(new QuadTree<>(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, tileResolution)));
+        tiles.add(new QuadTree<>(new GlobeTile(CUBE_LEFT,   radius, 0, 0, 1, tileResolution)));
+        tiles.add(new QuadTree<>(new GlobeTile(CUBE_TOP,    radius, 0, 0, 1, tileResolution)));
+        tiles.add(new QuadTree<>(new GlobeTile(CUBE_BOTTOM, radius, 0, 0, 1, tileResolution)));
+        tiles.add(new QuadTree<>(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, tileResolution)));
+        tiles.add(new QuadTree<>(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, tileResolution)));
 
         if (WIREFRAME) {
-            indexCount = ObjectBuilder.getWireframeTileIndexCount(TILE_RESOLUTION);
+            indexCount = ObjectBuilder.getWireframeTileIndexCount(tileResolution);
             indexBuf = newIntBuffer(indexCount);
-            ObjectBuilder.buildWireframeTileIndices((IntBuffer) indexBuf, TILE_RESOLUTION);
+            ObjectBuilder.buildWireframeTileIndices((IntBuffer) indexBuf, tileResolution);
         } else {
-            indexCount = ObjectBuilder.getTileIndexCount(TILE_RESOLUTION);
+            indexCount = ObjectBuilder.getTileIndexCount(tileResolution);
             indexBuf = newIntBuffer(indexCount);
-            ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, TILE_RESOLUTION);
+            ObjectBuilder.buildTileIndices((IntBuffer) indexBuf, tileResolution);
         }
 
 //        vertexCount = ObjectBuilder.getSphereVertexCount(meridians, parallels);
@@ -69,53 +70,62 @@ public class AdaptiveGlobe extends Object3D {
     }
 
     public void update(Matrix4f mvpMatrix) {
-        for (GlobeTile tile : tiles) {
+        for (QuadTree<GlobeTile> tileTree : tiles) {
             //TODO
         }
     }
 
-    public void draw(GlobeShaderProgram shaderProgram) {
+    public void draw(ShaderProgram shaderProgram) {
 //        setDataOffset(0);
 //        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
 //        bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT);
 //        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT);
 //        drawElements(MODE_TRIANGLE_STRIP);
 
-        FloatBuffer tileBuf;
-        for (GlobeTile tile : tiles) {
-            tileBuf = (FloatBuffer) tile.vertexBuf;
-            setDataOffset(0);
-            bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
-            bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, tileBuf);
-            bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
-            drawElements(WIREFRAME ? MODE_LINES : MODE_TRIANGLE_STRIP);
-
-            if (DRAW_CORNERS) {
-                FloatBuffer cornerVertexBuf = tile.getCornerVertexBuffer();
-                setDataOffset(0);
-                bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, cornerVertexBuf);
-                bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, cornerVertexBuf);
-                bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, cornerVertexBuf);
-                drawArrays(MODE_POINTS, 0, 4);
-            }
+        for (QuadTree<GlobeTile> tileTree : tiles) {
+            drawTiles(shaderProgram, tileTree);
         }
     }
 
-    public void draw(ShadowMapShaderProgram shaderProgram) {
-//        setDataOffset(0);
-//        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
-//        skipAttributes(NORMAL_COMPONENT_COUNT);
-//        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT);
-//        drawElements(MODE_TRIANGLE_STRIP);
-
-        FloatBuffer tileBuf;
-        for (GlobeTile tile : tiles) {
-            tileBuf = (FloatBuffer) tile.vertexBuf;
-            setDataOffset(0);
-            bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
-            skipAttributes(NORMAL_COMPONENT_COUNT);
-            bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
-            drawElements(MODE_TRIANGLES);
+    private void drawTiles(ShaderProgram shaderProgram, QuadTree<GlobeTile> tileTree) {
+        if (tileTree.isLeaf()) {
+            if (shaderProgram instanceof GlobeShaderProgram) {
+                drawTile((GlobeShaderProgram) shaderProgram, tileTree.getValue());
+            } else if (shaderProgram instanceof ShadowMapShaderProgram) {
+                drawTile((ShadowMapShaderProgram) shaderProgram, tileTree.getValue());
+            }
+        } else {
+            drawTiles(shaderProgram, tileTree.getTopLeft());
+            drawTiles(shaderProgram, tileTree.getTopRight());
+            drawTiles(shaderProgram, tileTree.getBottomLeft());
+            drawTiles(shaderProgram, tileTree.getBottomRight());
         }
+    }
+
+    private void drawTile(GlobeShaderProgram shaderProgram, GlobeTile tile) {
+        FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
+        setDataOffset(0);
+        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
+        drawElements(WIREFRAME ? MODE_LINES : MODE_TRIANGLE_STRIP);
+
+        if (DRAW_CORNERS) {
+            FloatBuffer cornerVertexBuf = tile.getCornerVertexBuffer();
+            setDataOffset(0);
+            bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, cornerVertexBuf);
+            bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, cornerVertexBuf);
+            bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, cornerVertexBuf);
+            drawArrays(MODE_POINTS, 0, 4);
+        }
+    }
+
+    public void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTile tile) {
+        FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
+        setDataOffset(0);
+        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
+        skipAttributes(NORMAL_COMPONENT_COUNT);
+        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
+        drawElements(MODE_TRIANGLES);
     }
 }

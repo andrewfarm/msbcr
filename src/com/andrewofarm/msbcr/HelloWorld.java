@@ -75,7 +75,7 @@ public class HelloWorld {
 
     private Skybox skybox = new Skybox();
     private Sun sun = new Sun(lightX, lightY, lightZ);
-    private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, MERIDIANS, PARALLELS);
+    private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, 16);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
 
