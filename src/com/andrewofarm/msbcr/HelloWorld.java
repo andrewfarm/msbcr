@@ -126,6 +126,8 @@ public class HelloWorld {
             throw new IllegalStateException("unable to initialize GLFW");
         }
 
+        glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+
         // Create the window
         window = glfwCreateWindow(windowWidth, windowHeight, "Hello World!", NULL, NULL);
         if (window == NULL) {
