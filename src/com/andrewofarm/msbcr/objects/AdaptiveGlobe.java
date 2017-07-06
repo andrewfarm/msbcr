@@ -3,9 +3,7 @@ package com.andrewofarm.msbcr.objects;
 import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
 import com.andrewofarm.msbcr.programs.ShaderProgram;
 import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -35,6 +33,9 @@ public class AdaptiveGlobe extends Object3D {
 
     private final float radius;
 
+    private static final float BASE_GEOMETRIC_ERROR = 0.25f; //TODO calculate programatically
+    private static final float SCREEN_SPACE_ERROR_TOLERANCE = 0.25f;
+
     private Set<QuadTree<GlobeTile>> tiles = new HashSet<>();
 
     public AdaptiveGlobe(float radius, int tileResolution) {
@@ -63,30 +64,36 @@ public class AdaptiveGlobe extends Object3D {
         return radius;
     }
 
-    private static int getDesiredDetailLevel(float depth) {
-        return (int) (0.5 / depth);
-    }
-
-    private static float getDepthOfClosestCorner(Matrix4f matrix, GlobeTile tile) {
+    private static float getDistanceOfClosestCorner(Vector3f viewpointModelSpace, GlobeTile tile) {
         Vector3f[] corners = tile.getCorners();
-        float minDepth = Float.POSITIVE_INFINITY;
+        Vector3f distVector = new Vector3f();
+        float distSq;
+        float minDistSq = Float.POSITIVE_INFINITY;
         for (Vector3f corner : corners) {
-            minDepth = Math.min(minDepth, Math.abs(
-                    matrix.transform(corner.get(0), corner.get(1), corner.get(2), 1.0f, new Vector4f()).get(3)));
+            distVector.set(corner);
+            distVector.sub(viewpointModelSpace);
+            distSq = distVector.lengthSquared();
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+            }
         }
-        return minDepth;
+        return (float) Math.sqrt(minDistSq);
     }
 
-    public void update(Matrix4f matrix) {
+    private static float getScreenSpaceError(float geomError, Vector3f viewpointModelSpace, float twoTanHalfFOV, GlobeTile tile) {
+        return geomError / (getDistanceOfClosestCorner(viewpointModelSpace, tile) * twoTanHalfFOV);
+    }
+
+    public void update(Vector3f viewpointModelSpace, float twoTanHalfFOV) {
         for (QuadTree<GlobeTile> tileTree : tiles) {
-            updateTiles(matrix, tileTree, 0);
+            updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree, 0);
         }
     }
 
-    private void updateTiles(Matrix4f matrix, QuadTree<GlobeTile> tileTree, int level) {
+    private void updateTiles(Vector3f viewpointModelSpace, float twoTanHalfFOV, QuadTree<GlobeTile> tileTree, int level) {
         GlobeTile tile = tileTree.getValue();
-        int desiredDetailLevel = getDesiredDetailLevel(getDepthOfClosestCorner(matrix, tile));
-        if (desiredDetailLevel <= level) {
+        float geomError = BASE_GEOMETRIC_ERROR / (level + 1);
+        if (getScreenSpaceError(geomError, viewpointModelSpace, twoTanHalfFOV, tile) < SCREEN_SPACE_ERROR_TOLERANCE) {
             //no further detail is needed
             tileTree.removeChildren();
         } else {
@@ -107,10 +114,10 @@ public class AdaptiveGlobe extends Object3D {
                 level++;
                 if (level < MAX_DETAIL_LEVEL) {
                     //recurse
-                    updateTiles(matrix, tileTree.getTopLeft(), level);
-                    updateTiles(matrix, tileTree.getTopRight(), level);
-                    updateTiles(matrix, tileTree.getBottomLeft(), level);
-                    updateTiles(matrix, tileTree.getBottomRight(), level);
+                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getTopLeft(), level);
+                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getTopRight(), level);
+                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getBottomLeft(), level);
+                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getBottomRight(), level);
                 }
             }
         }

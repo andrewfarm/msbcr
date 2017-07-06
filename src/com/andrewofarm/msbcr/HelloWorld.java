@@ -4,6 +4,7 @@ import com.andrewofarm.msbcr.objects.*;
 import com.andrewofarm.msbcr.programs.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
@@ -28,7 +29,7 @@ public class HelloWorld {
 
     private static final float GLOBE_RADIUS = 1;
     private static final float SEA_LEVEL = 0.5f;
-    private static final float TERRAIN_SCALE = 0.5f;
+    private static final float TERRAIN_SCALE = 0.4f;
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 
@@ -38,6 +39,12 @@ public class HelloWorld {
     private float camAzimuth = 0, camElev = 0;
     private float camDist = 4;
     private float globeAzimuth = 0;
+    private Vector3f camPos = new Vector3f();
+    private Vector3f camPosModelSpace = new Vector3f();
+    private Vector4f camPos4 = new Vector4f();
+    private Vector4f camPosModelSpace4 = new Vector4f();
+    private static final float FOV = (float) Math.PI / 4;
+    private static final float TWO_TAN_HALF_FOV = (float) (2 * Math.tan(FOV / 2));
 
     private boolean drawRings = false;
 
@@ -50,6 +57,7 @@ public class HelloWorld {
     private boolean geostationary = true;
 
     private Matrix4f modelMatrix = new Matrix4f();
+    private Matrix4f inverseModelMatrix = new Matrix4f();
 
     private Matrix4f viewMatrix = new Matrix4f();
     private Matrix4f projectionMatrix = new Matrix4f();
@@ -331,8 +339,9 @@ public class HelloWorld {
         updateMvpMatrix();
         updateLightMatrices();
         updateVpRotationMatrix();
+        updateCamPos();
 
-        globe.update(mvpMatrix);
+        globe.update(camPosModelSpace, TWO_TAN_HALF_FOV);
     }
 
     private void render() {
@@ -404,10 +413,7 @@ public class HelloWorld {
         oceanShaderProgram.setMvpMatrix(mvpMatrix);
         oceanShaderProgram.setModelMatrix(modelMatrix);
         oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
-        oceanShaderProgram.setCamPos(
-                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
-                (float) (camDist * Math.sin(camElev)),
-                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
+        oceanShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
         ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
@@ -415,7 +421,7 @@ public class HelloWorld {
 
     private void updateProjectionMatrix(int width, int height) {
         projectionMatrix.identity();
-        projectionMatrix.perspective((float) Math.PI / 4, (float) width / (float) height, 0.01f, 20f);
+        projectionMatrix.perspective(FOV, (float) width / (float) height, 0.01f, 20f);
     }
 
     private void updateViewMatrix() {
@@ -431,6 +437,8 @@ public class HelloWorld {
     private void updateModelMatrix() {
         modelMatrix.identity();
         modelMatrix.rotate(globeAzimuth, 0, 1, 0);
+
+        modelMatrix.invert(inverseModelMatrix);
     }
 
     private void updateLightMatrices() {
@@ -447,6 +455,19 @@ public class HelloWorld {
         vpRotationMatrix.m30(0);
         vpRotationMatrix.m31(0);
         vpRotationMatrix.m32(0);
+    }
+
+    private void updateCamPos() {
+        camPos.set(
+                (float) (camDist * Math.sin(camAzimuth) * Math.cos(camElev)),
+                (float) (camDist * Math.sin(camElev)),
+                (float) (camDist * Math.cos(camAzimuth) * Math.cos(camElev)));
+        camPos4.set(camPos, 1.0f);
+        inverseModelMatrix.transform(camPos4, camPosModelSpace4);
+        camPosModelSpace.set(
+                camPosModelSpace4.get(0),
+                camPosModelSpace4.get(1),
+                camPosModelSpace4.get(2));
     }
 
     public static void main(String[] args) {
