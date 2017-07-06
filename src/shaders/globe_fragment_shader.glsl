@@ -30,10 +30,10 @@ void main() {
 
     float shadowBias = max(
         abs(SHADOW_BIAS_COEF * tan(acos(dot(normalizedNormal, u_LightDirection)))), SHADOW_BIAS_MAX);
-//    if (texture2D(u_ShadowMapUnit, v_PositionInLightSpace.xy).z >= v_PositionInLightSpace.z - shadowBias) {
+    if (texture2D(u_ShadowMapUnit, v_PositionInLightSpace.xy).z >= v_PositionInLightSpace.z - shadowBias) {
         float directionalStrength = max(dot(normalizedNormal, u_LightDirection), 0.0);
         totalLight += (1.0 - AMBIENT_STRENGTH) * directionalStrength;
 //        totalLight = 1.0; //TODO
-//    } TODO
+    }
     gl_FragColor = vec4((texColor * totalLight).rgb, 1.0);
 }

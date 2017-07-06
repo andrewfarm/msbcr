@@ -168,6 +168,6 @@ public class AdaptiveGlobe extends Object3D {
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
         skipAttributes(NORMAL_COMPONENT_COUNT);
         bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
-        drawElements(MODE_TRIANGLES);
+        drawElements(MODE_TRIANGLE_STRIP);
     }
 }

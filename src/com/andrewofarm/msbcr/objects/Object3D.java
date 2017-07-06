@@ -44,8 +44,8 @@ public abstract class Object3D {
         this.dataOffset = dataOffset;
     }
 
-    public void skipAttributes(int skipComponents) {
-        dataOffset += skipComponents;
+    public void skipAttributes(int size) {
+        dataOffset += size;
     }
 
     protected void bindFloatAttribute(int index, int size) {
@@ -55,9 +55,9 @@ public abstract class Object3D {
         dataOffset += size;
     }
 
-    protected void bindFloatAttribute(int index, int size, FloatBuffer vertexBuf) {
-        vertexBuf.position(dataOffset);
-        glVertexAttribPointer(index, size, GL_FLOAT, false, STRIDE, vertexBuf);
+    protected void bindFloatAttribute(int index, int size, FloatBuffer buf) {
+        buf.position(dataOffset);
+        glVertexAttribPointer(index, size, GL_FLOAT, false, STRIDE, buf);
         glEnableVertexAttribArray(index);
         dataOffset += size;
     }
