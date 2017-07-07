@@ -24,7 +24,7 @@ void main() {
 //    normalizedNormal = normalize(v_Normal); //TODO
 
     vec4 texColor = texture2D(u_TextureUnit, v_TextureCoords);
-//    texColor = vec4(v_TextureCoords, 0.0, 1.0); //TODO
+    texColor = vec4(1.0); //TODO
 
     float totalLight = AMBIENT_STRENGTH;
 

@@ -5,11 +5,16 @@
 
 uniform vec3 u_LightDirection;
 uniform vec3 u_CamPos;
+uniform sampler2D u_ElevationMapUnit;
+uniform float u_SeaLevel;
 
 varying vec3 v_Position;
 varying vec3 v_Normal;
+varying vec2 v_TextureCoords;
 
 void main() {
+    if (texture2D(u_ElevationMapUnit, v_TextureCoords).r > u_SeaLevel) discard;
+
     vec3 normalizedNormal = normalize(v_Normal);
 
     float directionalStrength = max(dot(normalizedNormal, u_LightDirection), 0.0);

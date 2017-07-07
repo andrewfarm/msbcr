@@ -416,6 +416,8 @@ public class HelloWorld {
         oceanShaderProgram.setModelMatrix(modelMatrix);
         oceanShaderProgram.setLightDirection(lightX, lightY, lightZ);
         oceanShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
+        oceanShaderProgram.setElevationMap(displacementMap);
+        oceanShaderProgram.setSeaLevel(SEA_LEVEL);
         ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
