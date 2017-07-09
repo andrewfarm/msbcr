@@ -125,7 +125,7 @@ public class AdaptiveGlobe extends Object3D {
             if (shaderProgram instanceof GlobeShaderProgram) {
                 drawTile((GlobeShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
             } else if (!WIREFRAME && (shaderProgram instanceof ShadowMapShaderProgram)) {
-                drawTile((ShadowMapShaderProgram) shaderProgram, tileTree.getValue());
+                drawTile((ShadowMapShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
             }
         } else {
             level++;
@@ -162,13 +162,17 @@ public class AdaptiveGlobe extends Object3D {
         }
     }
 
-    private void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTile tile) {
+    private void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTile tile, Vector3f viewpointModelSpace, float twoTanHalfFOV, int level) {
         FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, GlobeTile.POSITION_COMPONENT_COUNT, tileBuf);
         skipAttributes(GlobeTile.NORMAL_COMPONENT_COUNT);
         bindFloatAttribute(shaderProgram.aTextureCoordsLocation, GlobeTile.TEXTURE_COMPONENT_COUNT, tileBuf);
-        skipAttributes(2 * GlobeTile.TEXTURE_COMPONENT_COUNT);
+        bindFloatAttribute(shaderProgram.aTextureCoordsAdj1Location, GlobeTile.TEXTURE_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aTextureCoordsAdj2Location, GlobeTile.TEXTURE_COMPONENT_COUNT, tileBuf);
+        float screenSpaceError = getScreenSpaceError(getGeometricError(level), viewpointModelSpace, twoTanHalfFOV, tile);
+        float morph = Math.min(Math.max(2 * screenSpaceError / SCREEN_SPACE_ERROR_TOLERANCE - 1, 0), 1);
+        shaderProgram.setMorph(morph);
         drawElements(MODE_TRIANGLE_STRIP);
     }
 }
