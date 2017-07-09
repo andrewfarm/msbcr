@@ -9,14 +9,14 @@ import java.nio.FloatBuffer;
  */
 class GlobeTile extends Object3D {
 
-    private static final int POSITION_COMPONENT_COUNT = 3;
-    private static final int NORMAL_COMPONENT_COUNT = 3;
-    private static final int TEXTURE_COMPONENT_COUNT = 2;
+    static final int POSITION_COMPONENT_COUNT = 3;
+    static final int NORMAL_COMPONENT_COUNT = 3;
+    static final int TEXTURE_COMPONENT_COUNT = 2;
 
-    private static final int TOTAL_COMPONENT_COUNT =
+    static final int TOTAL_COMPONENT_COUNT =
             POSITION_COMPONENT_COUNT +
                     NORMAL_COMPONENT_COUNT +
-                    TEXTURE_COMPONENT_COUNT;
+                    (TEXTURE_COMPONENT_COUNT * 3);
 
     private final int face;
     private final float radius;
@@ -51,19 +51,19 @@ class GlobeTile extends Object3D {
                 floatVertexBuf.get(cornerIndices[0]),
                 floatVertexBuf.get(cornerIndices[0] + 1),
                 floatVertexBuf.get(cornerIndices[0] + 2),
-                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1,
                 floatVertexBuf.get(cornerIndices[1]),
                 floatVertexBuf.get(cornerIndices[1] + 1),
                 floatVertexBuf.get(cornerIndices[1] + 2),
-                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1,
                 floatVertexBuf.get(cornerIndices[2]),
                 floatVertexBuf.get(cornerIndices[2] + 1),
                 floatVertexBuf.get(cornerIndices[2] + 2),
-                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1,
                 floatVertexBuf.get(cornerIndices[3]),
                 floatVertexBuf.get(cornerIndices[3] + 1),
                 floatVertexBuf.get(cornerIndices[3] + 2),
-                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1,
         });
         corners = new Vector3f[] {
                 new Vector3f(

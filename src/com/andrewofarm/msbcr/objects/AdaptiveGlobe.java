@@ -17,15 +17,6 @@ import static com.andrewofarm.msbcr.objects.ObjectBuilder.*;
  */
 public class AdaptiveGlobe extends Object3D {
 
-    private static final int POSITION_COMPONENT_COUNT = 3;
-    private static final int NORMAL_COMPONENT_COUNT = 3;
-    private static final int TEXTURE_COMPONENT_COUNT = 2;
-
-    private static final int TOTAL_COMPONENT_COUNT =
-            POSITION_COMPONENT_COUNT +
-                    NORMAL_COMPONENT_COUNT +
-                    TEXTURE_COMPONENT_COUNT;
-
     private static final boolean WIREFRAME = false;
     private static final boolean DRAW_CORNERS = false;
 
@@ -37,7 +28,7 @@ public class AdaptiveGlobe extends Object3D {
     private Set<QuadTree<GlobeTile>> tiles = new HashSet<>();
 
     public AdaptiveGlobe(float radius, int tileResolution) {
-        super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
+        super(GlobeTile.TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.radius = radius;
 
         tiles.add(new QuadTree<>(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, tileResolution)));
@@ -143,17 +134,20 @@ public class AdaptiveGlobe extends Object3D {
     private void drawTile(GlobeShaderProgram shaderProgram, GlobeTile tile) {
         FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
         setDataOffset(0);
-        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
-        bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, tileBuf);
-        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aPositionLocation, GlobeTile.POSITION_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aNormalLocation, GlobeTile.NORMAL_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, GlobeTile.TEXTURE_COMPONENT_COUNT, tileBuf);
+        skipAttributes(2 * GlobeTile.TEXTURE_COMPONENT_COUNT);
+        //noinspection ConstantConditions
         drawElements(WIREFRAME ? MODE_LINES : MODE_TRIANGLE_STRIP);
 
         if (DRAW_CORNERS) {
             FloatBuffer cornerVertexBuf = tile.getCornerVertexBuffer();
             setDataOffset(0);
-            bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, cornerVertexBuf);
-            bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT, cornerVertexBuf);
-            bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, cornerVertexBuf);
+            bindFloatAttribute(shaderProgram.aPositionLocation, GlobeTile.POSITION_COMPONENT_COUNT, cornerVertexBuf);
+            bindFloatAttribute(shaderProgram.aNormalLocation, GlobeTile.NORMAL_COMPONENT_COUNT, cornerVertexBuf);
+            bindFloatAttribute(shaderProgram.aTextureCoordsLocation, GlobeTile.TEXTURE_COMPONENT_COUNT, cornerVertexBuf);
+            skipAttributes(2 * GlobeTile.TEXTURE_COMPONENT_COUNT);
             drawArrays(MODE_POINTS, 0, 4);
         }
     }
@@ -161,9 +155,10 @@ public class AdaptiveGlobe extends Object3D {
     private void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTile tile) {
         FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
         setDataOffset(0);
-        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT, tileBuf);
-        skipAttributes(NORMAL_COMPONENT_COUNT);
-        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT, tileBuf);
+        bindFloatAttribute(shaderProgram.aPositionLocation, GlobeTile.POSITION_COMPONENT_COUNT, tileBuf);
+        skipAttributes(GlobeTile.NORMAL_COMPONENT_COUNT);
+        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, GlobeTile.TEXTURE_COMPONENT_COUNT, tileBuf);
+        skipAttributes(2 * GlobeTile.TEXTURE_COMPONENT_COUNT);
         drawElements(MODE_TRIANGLE_STRIP);
     }
 }

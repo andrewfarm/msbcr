@@ -217,7 +217,7 @@ public class HelloWorld {
         glfwSetScrollCallback(window, (long window, double xoffset, double yoffset) -> {
             camDist -= yoffset * (camDist - GLOBE_RADIUS) * 0.005;
             camDist = Math.min(Math.max(camDist, 1.01f), 15);
-            camLookElev = (float) (1.2 * Math.pow(10, -(camDist - GLOBE_RADIUS)));
+            camLookElev = (float) (1.2 * Math.pow(50, -(camDist - GLOBE_RADIUS)));
             updateViewMatrix();
         });
 

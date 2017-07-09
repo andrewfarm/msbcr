@@ -179,7 +179,7 @@ public abstract class ObjectBuilder {
     }
 
     static void buildTileVertices(FloatBuffer vertexBuf, int face, float radius,
-        float offsetX, float offsetY, float size, int resolution) {
+                                  float offsetX, float offsetY, float size, int resolution) {
 
         final float interval = size / resolution;
         float tileX, tileY;
@@ -211,9 +211,64 @@ public abstract class ObjectBuilder {
                 }
                 position.normalize().mul(radius);
 //                putVertex(vertexBuf, position, position, tileX * 0.5f + 0.5f, tileY * 0.5f + 0.5f);
-                putVertex(vertexBuf, position, position, (float) (Math.atan2(position.get(0) / radius, position.get(2) / radius) / (2 * Math.PI)), (float) (Math.acos(position.get(1) / radius) / Math.PI));
+                putVertex(vertexBuf, position, position,
+                        (float) (Math.atan2(position.get(0) / radius, position.get(2) / radius) / (2 * Math.PI)),
+                        (float) (Math.acos(position.get(1) / radius) / Math.PI));
+
+                vertexBuf.position(vertexBuf.position() + 4);
             }
         }
+
+        /*
+        if (adjTexCoords) {
+            int floatIndex;
+            final int TOTAL_COMPONENT_COUNT = 12;
+
+            //calculate adjacent texture coords for old vertices (from coarser chunk)
+            for (int col = 0; col <= resolution; col += 2) {
+                for (int row = 0; row <= resolution; row += 2) {
+                    floatIndex = (col * (resolution + 1) + row) * TOTAL_COMPONENT_COUNT;
+                    vertexBuf.put(floatIndex + 8, vertexBuf.get(floatIndex + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + 7));
+                    vertexBuf.put(floatIndex + 10, vertexBuf.get(floatIndex + 6));
+                    vertexBuf.put(floatIndex + 11, vertexBuf.get(floatIndex + 7));
+                }
+            }
+
+            //calculate adjacent texture coords for new horizontal edge vertices
+            final int COL_FLOAT_STRIDE = (resolution + 1) * TOTAL_COMPONENT_COUNT;
+            for (int col = 1; col <= resolution; col += 2) {
+                for (int row = 0; row <= resolution; row += 2) {
+                    floatIndex = (col * (resolution + 1) + row) * TOTAL_COMPONENT_COUNT;
+                    vertexBuf.put(floatIndex + 8, vertexBuf.get(floatIndex - COL_FLOAT_STRIDE + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex - COL_FLOAT_STRIDE + 7));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + COL_FLOAT_STRIDE + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + COL_FLOAT_STRIDE + 7));
+                }
+            }
+
+            //calculate adjacent texture coords for new vertical edge vertices
+            for (int col = 0; col <= resolution; col += 2) {
+                for (int row = 1; row <= resolution; row += 2) {
+                    floatIndex = (col * (resolution + 1) + row) * TOTAL_COMPONENT_COUNT;
+                    vertexBuf.put(floatIndex + 8, vertexBuf.get(floatIndex - TOTAL_COMPONENT_COUNT + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex - TOTAL_COMPONENT_COUNT + 7));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + TOTAL_COMPONENT_COUNT + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + TOTAL_COMPONENT_COUNT + 7));
+                }
+            }
+
+            //calculate adjacent texture coords for new center vertices
+            for (int col = 1; col <= resolution; col += 2) {
+                for (int row = 1; row <= resolution; row += 2) {
+                    floatIndex = (col * (resolution + 1) + row) * TOTAL_COMPONENT_COUNT;
+                    vertexBuf.put(floatIndex + 8, vertexBuf.get(floatIndex - COL_FLOAT_STRIDE - TOTAL_COMPONENT_COUNT + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex - COL_FLOAT_STRIDE - TOTAL_COMPONENT_COUNT + 7));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + COL_FLOAT_STRIDE + TOTAL_COMPONENT_COUNT + 6));
+                    vertexBuf.put(floatIndex + 9, vertexBuf.get(floatIndex + COL_FLOAT_STRIDE + TOTAL_COMPONENT_COUNT + 7));
+                }
+            }
+        }*/
     }
 
     static void buildTileIndices(IntBuffer indexBuf, int resolution) {
