@@ -425,7 +425,7 @@ public class HelloWorld {
 
     private void updateProjectionMatrix(int width, int height) {
         projectionMatrix.identity();
-        projectionMatrix.perspective(FOV, (float) width / (float) height, 0.01f, 20f);
+        projectionMatrix.perspective(FOV, (float) width / (float) height, 0.001f, 20f);
     }
 
     private void updateViewMatrix() {

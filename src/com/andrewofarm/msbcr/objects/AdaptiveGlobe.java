@@ -26,15 +26,13 @@ public class AdaptiveGlobe extends Object3D {
                     NORMAL_COMPONENT_COUNT +
                     TEXTURE_COMPONENT_COUNT;
 
-    private static final int MAX_DETAIL_LEVEL = 6;
-
     private static final boolean WIREFRAME = false;
     private static final boolean DRAW_CORNERS = false;
 
     private final float radius;
 
-    private static final float BASE_GEOMETRIC_ERROR = 0.25f; //TODO calculate programatically
-    private static final float SCREEN_SPACE_ERROR_TOLERANCE = 0.25f;
+    private static final float BASE_GEOMETRIC_ERROR = 0.005f; //TODO calculate programatically
+    private static final float SCREEN_SPACE_ERROR_TOLERANCE = 0.005f;
 
     private Set<QuadTree<GlobeTile>> tiles = new HashSet<>();
 
@@ -92,7 +90,7 @@ public class AdaptiveGlobe extends Object3D {
 
     private void updateTiles(Vector3f viewpointModelSpace, float twoTanHalfFOV, QuadTree<GlobeTile> tileTree, int level) {
         GlobeTile tile = tileTree.getValue();
-        float geomError = BASE_GEOMETRIC_ERROR / (level + 1);
+        float geomError = BASE_GEOMETRIC_ERROR / (float) Math.pow(2, level);
         if (getScreenSpaceError(geomError, viewpointModelSpace, twoTanHalfFOV, tile) < SCREEN_SPACE_ERROR_TOLERANCE) {
             //no further detail is needed
             tileTree.removeChildren();
@@ -112,13 +110,11 @@ public class AdaptiveGlobe extends Object3D {
                         new GlobeTile(face, radius, offsetX + newSize, offsetY + newSize, newSize, resolution));
             } else {
                 level++;
-                if (level < MAX_DETAIL_LEVEL) {
-                    //recurse
-                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getTopLeft(), level);
-                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getTopRight(), level);
-                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getBottomLeft(), level);
-                    updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getBottomRight(), level);
-                }
+                //recurse
+                updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getTopLeft(), level);
+                updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getTopRight(), level);
+                updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getBottomLeft(), level);
+                updateTiles(viewpointModelSpace, twoTanHalfFOV, tileTree.getBottomRight(), level);
             }
         }
     }
@@ -133,7 +129,7 @@ public class AdaptiveGlobe extends Object3D {
         if (tileTree.isLeaf()) {
             if (shaderProgram instanceof GlobeShaderProgram) {
                 drawTile((GlobeShaderProgram) shaderProgram, tileTree.getValue());
-            } else if (shaderProgram instanceof ShadowMapShaderProgram) {
+            } else if (!WIREFRAME && (shaderProgram instanceof ShadowMapShaderProgram)) {
                 drawTile((ShadowMapShaderProgram) shaderProgram, tileTree.getValue());
             }
         } else {
