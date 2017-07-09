@@ -18,6 +18,7 @@ import static com.andrewofarm.msbcr.objects.ObjectBuilder.*;
 public class AdaptiveGlobe extends Object3D {
 
     private static final boolean WIREFRAME = false;
+    private static final boolean DIAGONALS = true;
     private static final boolean DRAW_CORNERS = false;
 
     private final float radius;
@@ -39,9 +40,9 @@ public class AdaptiveGlobe extends Object3D {
         tiles.add(new QuadTree<>(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, tileResolution)));
 
         if (WIREFRAME) {
-            indexCount = ObjectBuilder.getWireframeTileIndexCount(tileResolution);
+            indexCount = ObjectBuilder.getWireframeTileIndexCount(tileResolution, DIAGONALS);
             indexBuf = newIntBuffer(indexCount);
-            ObjectBuilder.buildWireframeTileIndices((IntBuffer) indexBuf, tileResolution);
+            ObjectBuilder.buildWireframeTileIndices((IntBuffer) indexBuf, tileResolution, DIAGONALS);
         } else {
             indexCount = ObjectBuilder.getTileIndexCount(tileResolution);
             indexBuf = newIntBuffer(indexCount);

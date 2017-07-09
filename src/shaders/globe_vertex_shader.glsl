@@ -22,9 +22,9 @@ varying vec2 v_TextureCoords;
 
 void main() {
     float fineDisplacement = (texture2D(u_DisplacementMapUnit, a_TextureCoords).r - u_SeaLevel) * u_TerrainScale;
-    float coarseDisplacement1 = (texture2D(u_DisplacementMapUnit, a_TextureCoordsAdj1).r - u_SeaLevel) * u_TerrainScale;
-    float coarseDisplacement2 = (texture2D(u_DisplacementMapUnit, a_TextureCoordsAdj2).r - u_SeaLevel) * u_TerrainScale;
-    float coarseDisplacement = (coarseDisplacement1 + coarseDisplacement2) * 0.5;
+    float coarseDisplacementAdj1 = (texture2D(u_DisplacementMapUnit, a_TextureCoordsAdj1).r - u_SeaLevel) * u_TerrainScale;
+    float coarseDisplacementAdj2 = (texture2D(u_DisplacementMapUnit, a_TextureCoordsAdj2).r - u_SeaLevel) * u_TerrainScale;
+    float coarseDisplacement = (coarseDisplacementAdj1 + coarseDisplacementAdj2) * 0.5;
     float displacement = mix(coarseDisplacement, fineDisplacement, u_Morph);
     gl_PointSize = 50.0; //TODO
     vec3 displacedPosition = a_Position * (1 + displacement);
@@ -33,7 +33,7 @@ void main() {
     //For sphere, tangent is the normal rotated 90 degrees about y
     v_Tangent = vec3(-v_Normal.z, 0.0, v_Normal.x);
     v_Bitangent = cross(v_Normal, v_Tangent);
-    v_TextureCoords = a_TextureCoordsAdj1; //TODO
+    v_TextureCoords = a_TextureCoords;
     v_PositionInLightSpace = u_LightBiasMvpMatrix * vec4(displacedPosition, 1.0);
     gl_Position = u_MvpMatrix * vec4(displacedPosition, 1.0);
 }

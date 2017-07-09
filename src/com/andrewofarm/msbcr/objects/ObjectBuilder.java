@@ -34,8 +34,8 @@ public abstract class ObjectBuilder {
         return ((resolution + 1) * 2 + 2) * resolution - 2;
     }
 
-    static int getWireframeTileIndexCount(int resolution) {
-        return resolution * resolution * 8;
+    static int getWireframeTileIndexCount(int resolution, boolean diagonals) {
+        return resolution * resolution * (diagonals ? 10 : 8);
     }
 
     static int getFacetedSphereVertexCount(int meridians, int parallels) {
@@ -289,7 +289,7 @@ public abstract class ObjectBuilder {
         }
     }
 
-    static void buildWireframeTileIndices(IntBuffer indexBuf, int resolution) {
+    static void buildWireframeTileIndices(IntBuffer indexBuf, int resolution, boolean diagonals) {
         int col1, col2;
         int col1StartIndex, col2StartIndex;
         int row;
@@ -316,6 +316,11 @@ public abstract class ObjectBuilder {
 
                 indexBuf.put(i4);
                 indexBuf.put(i1);
+
+                if (diagonals) {
+                    indexBuf.put(i1);
+                    indexBuf.put(i3);
+                }
             }
         }
     }
