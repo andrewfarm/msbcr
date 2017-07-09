@@ -360,7 +360,7 @@ public class HelloWorld {
         shadowMapShaderProgram.setDisplacementMap(displacementMap);
         shadowMapShaderProgram.setSeaLevel(SEA_LEVEL);
         shadowMapShaderProgram.setTerrainScale(TERRAIN_SCALE);
-        globe.draw(shadowMapShaderProgram);
+        globe.draw(shadowMapShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
@@ -394,7 +394,7 @@ public class HelloWorld {
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
-        globe.draw(globeShaderProgram);
+        globe.draw(globeShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
 
         //draw rings
 

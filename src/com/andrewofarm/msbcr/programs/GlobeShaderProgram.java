@@ -22,9 +22,12 @@ public class GlobeShaderProgram extends ShaderProgram {
     private static final String U_SHADOW_MAP_UNIT = "u_ShadowMapUnit";
     private static final String U_SEA_LEVEL = "u_SeaLevel";
     private static final String U_TERRAIN_SCALE = "u_TerrainScale";
+    private static final String U_MORPH = "u_Morph";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
+    private static final String A_TEXTURE_COORDS_ADJ1 = "a_TextureCoordsAdj1";
+    private static final String A_TEXTURE_COORDS_ADJ2 = "a_TextureCoordsAdj2";
 
     public final int uMvpMatrixLocation;
     public final int uModelMatrixLocation;
@@ -36,9 +39,12 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int uShadowMapUnitLocation;
     public final int uSeaLevelLocation;
     public final int uTerrainScaleLocation;
+    public final int uMorphLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
+    public final int aTextureCoordsAdj1Location;
+    public final int aTextureCoordsAdj2Location;
 
     public GlobeShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
@@ -54,9 +60,12 @@ public class GlobeShaderProgram extends ShaderProgram {
         uShadowMapUnitLocation = glGetUniformLocation(programID, U_SHADOW_MAP_UNIT);
         uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEL);
         uTerrainScaleLocation = glGetUniformLocation(programID, U_TERRAIN_SCALE);
+        uMorphLocation = glGetUniformLocation(programID, U_MORPH);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
+        aTextureCoordsAdj1Location = glGetAttribLocation(programID, A_TEXTURE_COORDS_ADJ1);
+        aTextureCoordsAdj2Location = glGetAttribLocation(programID, A_TEXTURE_COORDS_ADJ2);
     }
 
     public void setMvpMatrix(Matrix4f m) {
@@ -105,5 +114,9 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     public void setTerrainScale(float terrainScale) {
         glUniform1f(uTerrainScaleLocation, terrainScale);
+    }
+
+    public void setMorph(float morph) {
+        glUniform1f(uMorphLocation, morph);
     }
 }
