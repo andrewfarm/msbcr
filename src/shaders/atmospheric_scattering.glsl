@@ -41,6 +41,12 @@ float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {
 
 float inScatter_rayleigh(float wavelength) {
     float outerIntegral = 0.0;
+    //pointA is the NEAR intersection between the atmosphere ceiling and
+    //  the ray from the camera to the vertex.
+    //pointB is the FAR intersection between the atmosphere ceiling and
+    //  the ray from the camera to the vertex.
+    //pointC is the intersection between the atmosphere ceiling and the
+    //  ray from the sample point to the sun.
 //    vec3 pointA, pointB, pointC; TODO
     vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
@@ -51,15 +57,11 @@ float inScatter_rayleigh(float wavelength) {
         samplePoint += differential;
     }
 //    float theta; TODO
-    return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength) * phase_rayleigh(theta) * outerIntegral;
+    return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
 }
 
-float surfaceScatter_rayleigh(float wavelength, float reflectedLight) {
-//    vec3 pointA, pointB; TODO
+float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfaceVertex) {
+    vec3 atmosphereEntryPoint; //TODO
     return inScatter_rayleigh(wavelength) +
-        (reflectedLight * exp(-outScatter_rayleigh(pointA, pointB, wavelength)));
-}
-
-void main() {
-
+        (reflectedLight * exp(-outScatter_rayleigh(atmosphereEntryPoint, surfaceVertex, wavelength)));
 }

@@ -48,7 +48,8 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     public GlobeShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
-                TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
+                TextResourceReader.readFile("src/shaders/atmospheric_scattering.glsl") +
+                        TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
