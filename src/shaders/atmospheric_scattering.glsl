@@ -15,8 +15,33 @@
 uniform vec3 u_CamPos;
 uniform float u_GlobeRadius;
 
+struct SphereIntersection {
+    bool intersects;
+    vec3 near;
+    vec3 far;
+};
+
+SphereIntersection intersectRaySphere(vec3 point, vec3 direction, vec3 sphereCenter, float sphereRadius) {
+    const vec3 sphereCenterToPoint = point - sphereCenter;
+    const float a = lengthSquared(direction);
+    const float b = dot(2 * direction, sphereCenterToPoint);
+    const float c = lengthSquared(sphereCenterToPoint) - (sphereRadius * sphereRadius);
+    SphereIntersection intersection;
+    const float discriminant = (b * b) - (4.0 * a * c);
+    if (discriminant < 0) {
+        intersection.intersects = false;
+    } else {
+        intersection.intersects = true;
+        const float root = sqrt(discriminant);
+        const float denom = 2.0 * a;
+        intersection.near = point + ((-b - root) / denom * direction);
+        intersection.far = point + ((-b + root) / denom * direction);
+    }
+    return intersection;
+}
+
 float phase_rayleigh(float theta) {
-    float cosTheta = cos(theta);
+    const float cosTheta = cos(theta);
     return 0.75 * (1.0 + cosTheta * cosTheta);
 }
 
@@ -30,7 +55,7 @@ float density(vec3 point) {
 
 float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {
     float opticalDepth = 0.0;
-    vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
+    const vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
         opticalDepth += density(samplePoint);
@@ -47,13 +72,13 @@ float inScatter_rayleigh(float wavelength) {
     //  the ray from the camera to the vertex.
     //pointC is the intersection between the atmosphere ceiling and the
     //  ray from the sample point to the sun.
-//    vec3 pointA, pointB, pointC; TODO
-    vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
+    vec3 pointA, pointB, pointC; //TODO
+    const vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
         outerIntegral += (density(samplePoint) *
             exp(-outScatter_rayleigh(samplePoint, pointC, wavelength) -
-                outScatter_rayleigh(samplePoint, u_CamPos, waveLength)));
+                outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
         samplePoint += differential;
     }
 //    float theta; TODO
