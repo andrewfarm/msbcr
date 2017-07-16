@@ -54,30 +54,36 @@ float scatterCoef_rayleigh(float wavelength) {
 }
 
 float density(vec3 point) {
+    // optimized version of
+    // exp(-(length(point) - u_GlobeRadius) / ATMOSPHERE_THCKNESS / SCALE_HEIGHT);
     return exp((u_GlobeRadius - length(point)) / (ATMOSPHERE_THICKNESS * SCALE_HEIGHT));
 }
 
 float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {
     float opticalDepth = 0.0;
-    vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
+    vec3 dist = pointB - pointA;
+    vec3 differential = dist / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
         opticalDepth += density(samplePoint);
         samplePoint += differential;
     }
+    opticalDepth *= length(dist);
     return FOUR_PI * scatterCoef_rayleigh(wavelength) * opticalDepth;
 }
 
 float inScatter_rayleigh(float wavelength) {
     float outerIntegral = 0.0;
-    //pointA is the NEAR intersection between the atmosphere ceiling and
-    //  the ray from the camera to the vertex.
-    //pointB is the FAR intersection between the atmosphere ceiling and
-    //  the ray from the camera to the vertex.
-    //pointC is the intersection between the atmosphere ceiling and the
-    //  ray from the sample point to the sun.
+    // pointA is the NEAR intersection between the atmosphere ceiling and
+    //   the ray from the camera to the fragment, or the camera position if
+    //   it is inside the atmosphere.
+    // pointB is the FAR intersection between the atmosphere ceiling or the ground and
+    //   the ray from the camera to the vertex.
+    // pointC is the intersection between the atmosphere ceiling and the
+    //   ray from the sample point to the sun.
     vec3 pointA, pointB, pointC; //TODO
-    vec3 differential = (pointB - pointA) / float(INNER_INTEGRAL_DIVS);
+    vec3 dist = pointB - pointA;
+    vec3 differential = dist / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
         outerIntegral += (density(samplePoint) *
@@ -85,6 +91,7 @@ float inScatter_rayleigh(float wavelength) {
                 outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
         samplePoint += differential;
     }
+    outerIntegral *= length(dist);
 //    float theta; TODO
     return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
 }
