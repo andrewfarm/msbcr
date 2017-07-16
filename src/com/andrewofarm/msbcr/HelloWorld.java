@@ -394,6 +394,8 @@ public class HelloWorld {
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
+        globeShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
+        globeShaderProgram.setGlobeRadius(GLOBE_RADIUS);
         globe.draw(globeShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
 
         //draw rings
@@ -418,7 +420,7 @@ public class HelloWorld {
         oceanShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
         oceanShaderProgram.setElevationMap(displacementMap);
         oceanShaderProgram.setSeaLevel(SEA_LEVEL);
-        ocean.draw(oceanShaderProgram);
+//        ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
     }

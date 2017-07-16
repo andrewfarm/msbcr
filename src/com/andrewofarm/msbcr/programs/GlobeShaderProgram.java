@@ -23,6 +23,8 @@ public class GlobeShaderProgram extends ShaderProgram {
     private static final String U_SEA_LEVEL = "u_SeaLevel";
     private static final String U_TERRAIN_SCALE = "u_TerrainScale";
     private static final String U_MORPH = "u_Morph";
+    private static final String U_CAM_POS = "u_CamPos";
+    private static final String U_GLOBE_RADIUS = "u_GlobeRadius";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
@@ -40,6 +42,8 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int uSeaLevelLocation;
     public final int uTerrainScaleLocation;
     public final int uMorphLocation;
+    public final int uCamPosLocation;
+    public final int uGlobeRadiusLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
@@ -62,6 +66,8 @@ public class GlobeShaderProgram extends ShaderProgram {
         uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEL);
         uTerrainScaleLocation = glGetUniformLocation(programID, U_TERRAIN_SCALE);
         uMorphLocation = glGetUniformLocation(programID, U_MORPH);
+        uCamPosLocation = glGetUniformLocation(programID, U_CAM_POS);
+        uGlobeRadiusLocation = glGetUniformLocation(programID, U_GLOBE_RADIUS);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -119,5 +125,13 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     public void setMorph(float morph) {
         glUniform1f(uMorphLocation, morph);
+    }
+
+    public void setCamPos(float x, float y, float z) {
+        glUniform3f(uCamPosLocation, x, y, z);
+    }
+
+    public void setGlobeRadius(float globeRadius) {
+        glUniform1f(uGlobeRadiusLocation, globeRadius);
     }
 }

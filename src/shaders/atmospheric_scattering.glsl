@@ -2,8 +2,8 @@
 
 #define FOUR_PI 12.566370614359173
 
-#define INNER_INTEGRAL_DIVS 5
-#define OUTER_INTEGRAL_DIVS 5
+#define INNER_INTEGRAL_DIVS 10
+#define OUTER_INTEGRAL_DIVS 10
 
 #define SCATTER_CONST_RAYLEIGH 1.0
 
@@ -86,9 +86,10 @@ float inScatter_rayleigh(float wavelength) {
     vec3 differential = dist / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
-        outerIntegral += (density(samplePoint) *
-            exp(-outScatter_rayleigh(samplePoint, pointC, wavelength) -
-                outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
+//        outerIntegral += (density(samplePoint) *
+//            exp(-outScatter_rayleigh(samplePoint, pointC, wavelength) -
+//                outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
+        outerIntegral += 0.001;
         samplePoint += differential;
     }
     outerIntegral *= length(dist);
@@ -96,8 +97,9 @@ float inScatter_rayleigh(float wavelength) {
     return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
 }
 
-float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfaceVertex) {
-    vec3 atmosphereEntryPoint; //TODO
-    return inScatter_rayleigh(wavelength) +
-        (reflectedLight * exp(-outScatter_rayleigh(atmosphereEntryPoint, surfaceVertex, wavelength)));
+float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfacePoint) {
+    vec3 atmosphereEntryPoint = intersectRaySphere(u_CamPos, surfacePoint - u_CamPos,
+        vec3(0.0) /*TODO*/, u_GlobeRadius).near;
+    return inScatter_rayleigh(wavelength);// +
+//        (reflectedLight * exp(-outScatter_rayleigh(atmosphereEntryPoint, surfacePoint, wavelength)));
 }
