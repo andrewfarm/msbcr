@@ -14,7 +14,8 @@ attribute vec2 a_TextureCoords;
 attribute vec2 a_TextureCoordsAdj1;
 attribute vec2 a_TextureCoordsAdj2;
 
-varying vec4 v_PositionInLightSpace;
+varying vec3 v_Position;
+varying vec3 v_PositionInLightSpace;
 varying vec3 v_Normal;
 varying vec3 v_Tangent;
 varying vec3 v_Bitangent;
@@ -34,6 +35,7 @@ void main() {
     v_Tangent = vec3(-v_Normal.z, 0.0, v_Normal.x);
     v_Bitangent = cross(v_Normal, v_Tangent);
     v_TextureCoords = a_TextureCoords;
-    v_PositionInLightSpace = u_LightBiasMvpMatrix * vec4(displacedPosition, 1.0);
+    v_PositionInLightSpace = (u_LightBiasMvpMatrix * vec4(displacedPosition, 1.0)).xyz;
     gl_Position = u_MvpMatrix * vec4(displacedPosition, 1.0);
+    v_Position = gl_Position.xyz;
 }

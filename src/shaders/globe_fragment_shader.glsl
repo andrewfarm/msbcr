@@ -8,7 +8,8 @@ uniform sampler2D u_TextureUnit;
 uniform sampler2D u_NormalMapUnit;
 uniform sampler2D u_ShadowMapUnit;
 
-varying vec4 v_PositionInLightSpace;
+varying vec3 v_Position;
+varying vec3 v_PositionInLightSpace;
 varying vec3 v_Normal;
 varying vec3 v_Tangent;
 varying vec3 v_Bitangent;
