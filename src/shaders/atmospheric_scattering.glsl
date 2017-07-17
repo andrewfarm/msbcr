@@ -2,15 +2,15 @@
 
 #define FOUR_PI 12.566370614359173
 
-#define INNER_INTEGRAL_DIVS 10
-#define OUTER_INTEGRAL_DIVS 10
+#define INNER_INTEGRAL_DIVS 5
+#define OUTER_INTEGRAL_DIVS 5
 
-#define SCATTER_CONST_RAYLEIGH 1.0
+#define SCATTER_CONST_RAYLEIGH 0.02
 
 #define ATMOSPHERE_THICKNESS 0.1
 #define SCALE_HEIGHT 0.25
 
-#define SUN_BRIGHTNESS 1.0
+#define SUN_BRIGHTNESS 10.0
 
 uniform vec3 u_CamPos;
 uniform vec3 u_LightDirection; //must be normalized!
@@ -89,14 +89,12 @@ float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB, vec3 pointC
     vec3 differential = dist / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
-//        outerIntegral += (density(samplePoint) *
-//            exp(-outScatter_rayleigh(samplePoint, pointC, wavelength) -
-//                outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
-        outerIntegral += 0.001;
+        outerIntegral += (density(samplePoint) *
+            exp(-outScatter_rayleigh(samplePoint, pointC, wavelength) -
+                outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
         samplePoint += differential;
     }
     outerIntegral *= length(dist);
-    outerIntegral = length(dist) * 0.1;
 //    float theta; TODO
     return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
 }
@@ -109,7 +107,6 @@ float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfa
     }
     vec3 lightRayEntryPoint = intersectRaySphere(surfacePoint, u_LightDirection,
         vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING).far;
-//    gl_FragColor = vec4(camRayIntersection.near, 1.0); //TODO
-    return inScatter_rayleigh(wavelength, camRayIntersection.near, surfacePoint, lightRayEntryPoint);// +
-//        (reflectedLight * exp(-outScatter_rayleigh(camRayEntryIntersection.near, surfacePoint, wavelength)));
+    return inScatter_rayleigh(wavelength, camRayIntersection.near, surfacePoint, lightRayEntryPoint) +
+        (reflectedLight * exp(-outScatter_rayleigh(camRayIntersection.near, surfacePoint, wavelength)));
 }
