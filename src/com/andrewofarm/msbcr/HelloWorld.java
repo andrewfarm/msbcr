@@ -87,6 +87,7 @@ public class HelloWorld {
     private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, 64);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
+    private AtmosphereCeiling atmCeiling = new AtmosphereCeiling(GLOBE_RADIUS + ATMOSPHERE_WIDTH, 64, 32);
 
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
@@ -94,6 +95,7 @@ public class HelloWorld {
     private GlobeShaderProgram globeShaderProgram;
     private RingsShaderProgram ringsShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
+    private AtmosphereCeilingShaderProgram atmosphereCeilingShaderProgram;
 
     private int starfieldTexture;
     private int sunTexture;
@@ -261,6 +263,7 @@ public class HelloWorld {
         globeShaderProgram = new GlobeShaderProgram();
         if (drawRings) ringsShaderProgram = new RingsShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
+        atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");

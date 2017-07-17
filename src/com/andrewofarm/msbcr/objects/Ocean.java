@@ -32,7 +32,7 @@ public class Ocean extends Object3D {
         vertexBuf = newFloatBuffer(vertexCount * TOTAL_COMPONENT_COUNT);
         indexBuf = newIntBuffer(indexCount);
         ObjectBuilder.buildSphere((FloatBuffer) vertexBuf, (IntBuffer) indexBuf,
-                radius, meridians, parallels, true);
+                radius, meridians, parallels, true, true);
     }
 
     public float getRadius() {

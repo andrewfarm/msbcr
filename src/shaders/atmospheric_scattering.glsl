@@ -84,7 +84,7 @@ float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {
  *     the ray from the camera to the fragment, or the camera position if
  *     it is inside the atmosphere.
  * pointB is the FAR intersection between the atmosphere ceiling or the ground and
- *     the ray from the camera to the vertex.
+ *     the ray from the camera to the fragment.
  */
 float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB) {
     float outerIntegral = 0.0;

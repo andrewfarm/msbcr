@@ -59,8 +59,8 @@ public abstract class ObjectBuilder {
     }
 
 
-    static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
-        generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, textured);
+    static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean normals, boolean textured) {
+        generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, normals, textured);
 
         int col1, col2;
         int col1StartIndex, col2StartIndex;
@@ -82,8 +82,8 @@ public abstract class ObjectBuilder {
         }
     }
 
-    static void buildFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean textured) {
-        generateSphereVertices(vertexBuf, radius, meridians, parallels, 4, textured);
+    static void buildFacetedSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean normals, boolean textured) {
+        generateSphereVertices(vertexBuf, radius, meridians, parallels, 4, normals, textured);
 
         final int[] faceVertexIndices = new int[4];
         int col1, col2;
@@ -137,7 +137,7 @@ public abstract class ObjectBuilder {
         }
     }
 
-    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies, boolean textured) {
+    private static void generateSphereVertices(FloatBuffer vertexBuf, float radius, int meridians, int parallels, int copies, boolean normals, boolean textured) {
         final double azimuthInterval = 2 * Math.PI / meridians;
         final double polarAngleInterval = Math.PI / parallels;
         double azimuthFraction;
@@ -165,13 +165,21 @@ public abstract class ObjectBuilder {
                 position.set(x, y, z);
                 normal.set(x, y, z);
                 normal.normalize();
-                if (textured) {
+                if (textured && normals) {
                     for (int i = 0; i < copies; i++) {
                         putVertex(vertexBuf, position, normal, (float) azimuthFraction, (float) polarAngleFraction);
                     }
-                } else {
+                } else if (textured) {
+                    for (int i = 0; i < copies; i++) {
+                        putVertex(vertexBuf, position, (float) azimuthFraction, (float) polarAngleFraction);
+                    }
+                } else if (normals) {
                     for (int i = 0; i < copies; i++) {
                         putVertex(vertexBuf, position, normal);
+                    }
+                } else {
+                    for (int i = 0; i < copies; i++) {
+                        putVertex(vertexBuf, position);
                     }
                 }
             }
@@ -385,13 +393,23 @@ public abstract class ObjectBuilder {
         });
     }
 
-    private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal) {
+    private static void putVertex(FloatBuffer vertexBuf, Vector3f position) {
         vertexBuf.put(position.x);
         vertexBuf.put(position.y);
         vertexBuf.put(position.z);
+    }
+
+    private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal) {
+        putVertex(vertexBuf, position);
         vertexBuf.put(normal.x);
         vertexBuf.put(normal.y);
         vertexBuf.put(normal.z);
+    }
+
+    private static void putVertex(FloatBuffer vertexBuf, Vector3f position, float tu, float tv) {
+        putVertex(vertexBuf, position);
+        vertexBuf.put(tu);
+        vertexBuf.put(tv);
     }
 
     private static void putVertex(FloatBuffer vertexBuf, Vector3f position, Vector3f normal, float tu, float tv) {
