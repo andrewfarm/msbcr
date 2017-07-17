@@ -105,13 +105,19 @@ float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB, vec3 pointC
 }
 
 float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfacePoint) {
-    SphereIntersection camRayIntersection = intersectRaySphere(u_CamPos, surfacePoint - u_CamPos,
-        vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING);
-    if (!camRayIntersection.intersects) {
-        return reflectedLight;
+    vec3 pointA;
+    if (length(u_CamPos) > ATMOSPHERE_CEILING) {
+        SphereIntersection camRayIntersection = intersectRaySphere(u_CamPos, surfacePoint - u_CamPos,
+            vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING);
+        if (!camRayIntersection.intersects) {
+            return reflectedLight;
+        }
+        pointA = camRayIntersection.near;
+    } else {
+        pointA = u_CamPos;
     }
     vec3 lightRayEntryPoint = intersectRaySphere(surfacePoint, u_LightDirection,
         vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING).far;
-    return inScatter_rayleigh(wavelength, camRayIntersection.near, surfacePoint, lightRayEntryPoint) +
-        (reflectedLight * exp(-outScatter_rayleigh(camRayIntersection.near, surfacePoint, wavelength)));
+    return inScatter_rayleigh(wavelength, pointA, surfacePoint, lightRayEntryPoint) +
+        (reflectedLight * exp(-outScatter_rayleigh(pointA, surfacePoint, wavelength)));
 }
