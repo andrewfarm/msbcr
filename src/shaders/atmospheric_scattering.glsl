@@ -2,6 +2,11 @@
 
 #define FOUR_PI 12.566370614359173
 
+// wavelengths in micrometers
+#define WAVELENGTH_RED   0.650
+#define WAVELENGTH_GREEN 0.532
+#define WAVELENGTH_BLUE  0.473
+
 #define INNER_INTEGRAL_DIVS 5
 #define OUTER_INTEGRAL_DIVS 5
 

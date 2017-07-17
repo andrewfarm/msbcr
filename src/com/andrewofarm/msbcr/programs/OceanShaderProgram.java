@@ -17,6 +17,7 @@ public class OceanShaderProgram extends ShaderProgram {
     private static final String U_MODEL_MATRIX = "u_ModelMatrix";
     private static final String U_LIGHT_DIRECTION = "u_LightDirection";
     private static final String U_CAM_POS = "u_CamPos";
+    private static final String U_GLOBE_RADIUS = "u_GlobeRadius";
     private static final String U_ELEVATION_MAP_UNIT = "u_ElevationMapUnit";
     private static final String U_SEA_LEVEl = "u_SeaLevel";
     private static final String A_POSITION = "a_Position";
@@ -27,6 +28,7 @@ public class OceanShaderProgram extends ShaderProgram {
     public final int uModelMatrixLocation;
     public final int uLightDirectionLocation;
     public final int uCamPosLocation;
+    public final int uGlobeRadiusLocation;
     public final int uElevationMapUnitLocation;
     public final int uSeaLevelLocation;
     public final int aPositionLocation;
@@ -35,12 +37,14 @@ public class OceanShaderProgram extends ShaderProgram {
 
     public OceanShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/ocean_vertex_shader.glsl"),
-                TextResourceReader.readFile("src/shaders/ocean_fragment_shader.glsl"));
+                TextResourceReader.readFile("src/shaders/atmospheric_scattering.glsl") +
+                        TextResourceReader.readFile("src/shaders/ocean_fragment_shader.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
         uLightDirectionLocation = glGetUniformLocation(programID, U_LIGHT_DIRECTION);
         uCamPosLocation = glGetUniformLocation(programID, U_CAM_POS);
+        uGlobeRadiusLocation = glGetUniformLocation(programID, U_GLOBE_RADIUS);
         uElevationMapUnitLocation = glGetUniformLocation(programID, U_ELEVATION_MAP_UNIT);
         uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEl);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
@@ -62,6 +66,10 @@ public class OceanShaderProgram extends ShaderProgram {
 
     public void setCamPos(float x, float y, float z) {
         glUniform3f(uCamPosLocation, x, y, z);
+    }
+
+    public void setGlobeRadius(float globeRadius) {
+        glUniform1f(uGlobeRadiusLocation, globeRadius);
     }
 
     public void setElevationMap(int textureID) {
