@@ -8,12 +8,11 @@
 #define WAVELENGTH_GREEN 0.532
 #define WAVELENGTH_BLUE  0.473
 
-uniform vec3 u_LightDirection; //must be normalized!
 uniform sampler2D u_TextureUnit;
 uniform sampler2D u_NormalMapUnit;
 uniform sampler2D u_ShadowMapUnit;
 
-varying vec3 v_Position;
+varying vec3 v_PositionInWorldSpace;
 varying vec3 v_PositionInLightSpace;
 varying vec3 v_Normal;
 varying vec3 v_Tangent;
@@ -37,8 +36,8 @@ void main() {
         totalLight += (1.0 - AMBIENT_STRENGTH) * directionalStrength;
     }
     vec3 surfaceColor = (texColor * totalLight).rgb;
-    float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   surfaceColor.r, v_Position);
-    float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, surfaceColor.g, v_Position);
-    float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  surfaceColor.b, v_Position);
+    float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   surfaceColor.r, v_PositionInWorldSpace);
+    float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, surfaceColor.g, v_PositionInWorldSpace);
+    float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  surfaceColor.b, v_PositionInWorldSpace);
     gl_FragColor = vec4(r, g, b, 1.0);
 }

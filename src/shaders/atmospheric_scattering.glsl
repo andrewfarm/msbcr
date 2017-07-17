@@ -13,7 +13,9 @@
 #define SUN_BRIGHTNESS 1.0
 
 uniform vec3 u_CamPos;
+uniform vec3 u_LightDirection; //must be normalized!
 uniform float u_GlobeRadius;
+#define ATMOSPHERE_CEILING u_GlobeRadius + ATMOSPHERE_THICKNESS
 
 float lengthSquared(vec3 v) {
     return dot(v, v);
@@ -72,16 +74,17 @@ float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {
     return FOUR_PI * scatterCoef_rayleigh(wavelength) * opticalDepth;
 }
 
-float inScatter_rayleigh(float wavelength) {
+/*
+ * pointA is the NEAR intersection between the atmosphere ceiling and
+ *     the ray from the camera to the fragment, or the camera position if
+ *     it is inside the atmosphere.
+ * pointB is the FAR intersection between the atmosphere ceiling or the ground and
+ *     the ray from the camera to the vertex.
+ * pointC is the intersection between the atmosphere ceiling and the
+ *     ray from the sample point to the sun.
+ */
+float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB, vec3 pointC) {
     float outerIntegral = 0.0;
-    // pointA is the NEAR intersection between the atmosphere ceiling and
-    //   the ray from the camera to the fragment, or the camera position if
-    //   it is inside the atmosphere.
-    // pointB is the FAR intersection between the atmosphere ceiling or the ground and
-    //   the ray from the camera to the vertex.
-    // pointC is the intersection between the atmosphere ceiling and the
-    //   ray from the sample point to the sun.
-    vec3 pointA, pointB, pointC; //TODO
     vec3 dist = pointB - pointA;
     vec3 differential = dist / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
@@ -93,13 +96,20 @@ float inScatter_rayleigh(float wavelength) {
         samplePoint += differential;
     }
     outerIntegral *= length(dist);
+    outerIntegral = length(dist) * 0.1;
 //    float theta; TODO
     return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
 }
 
 float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfacePoint) {
-    vec3 atmosphereEntryPoint = intersectRaySphere(u_CamPos, surfacePoint - u_CamPos,
-        vec3(0.0) /*TODO*/, u_GlobeRadius).near;
-    return inScatter_rayleigh(wavelength);// +
-//        (reflectedLight * exp(-outScatter_rayleigh(atmosphereEntryPoint, surfacePoint, wavelength)));
+    SphereIntersection camRayIntersection = intersectRaySphere(u_CamPos, surfacePoint - u_CamPos,
+        vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING);
+    if (!camRayIntersection.intersects) {
+        return reflectedLight;
+    }
+    vec3 lightRayEntryPoint = intersectRaySphere(surfacePoint, u_LightDirection,
+        vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING).far;
+//    gl_FragColor = vec4(camRayIntersection.near, 1.0); //TODO
+    return inScatter_rayleigh(wavelength, camRayIntersection.near, surfacePoint, lightRayEntryPoint);// +
+//        (reflectedLight * exp(-outScatter_rayleigh(camRayEntryIntersection.near, surfacePoint, wavelength)));
 }
