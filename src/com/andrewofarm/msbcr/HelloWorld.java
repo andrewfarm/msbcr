@@ -28,7 +28,8 @@ public class HelloWorld {
     private int windowHeight = 600;
 
     private static final float GLOBE_RADIUS = 1.0f;
-    private static final float ATMOSPHERE_WIDTH = 0.1f;
+    private static final float ATMOSPHERE_WIDTH = 0.15f;
+    private static final float ATMOSPHERE_CEILING = GLOBE_RADIUS + ATMOSPHERE_WIDTH;
     private static final float SEA_LEVEL = 0.5f;
     private static final float TERRAIN_SCALE = 0.5f;
 
@@ -87,7 +88,7 @@ public class HelloWorld {
     private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, 64);
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
-    private AtmosphereCeiling atmCeiling = new AtmosphereCeiling(GLOBE_RADIUS + ATMOSPHERE_WIDTH, 64, 32);
+    private AtmosphereCeiling atmCeiling = new AtmosphereCeiling(ATMOSPHERE_CEILING, 64, 32);
 
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
@@ -428,6 +429,24 @@ public class HelloWorld {
         oceanShaderProgram.setSeaLevel(SEA_LEVEL);
         oceanShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         ocean.draw(oceanShaderProgram);
+
+        //draw atmosphere ceiling
+
+        glEnable(GL_CULL_FACE);
+        glCullFace((camPos.lengthSquared() /*TODO*/ > ATMOSPHERE_CEILING * ATMOSPHERE_CEILING) ?
+            GL_BACK : GL_FRONT);
+        glBlendFunc(GL_ONE, GL_ONE);
+        atmosphereCeilingShaderProgram.useProgram();
+        atmosphereCeilingShaderProgram.setMvpMatrix(mvpMatrix);
+        atmosphereCeilingShaderProgram.setModelMatrix(modelMatrix);
+        atmosphereCeilingShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        atmosphereCeilingShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
+        atmosphereCeilingShaderProgram.setGlobeRadius(GLOBE_RADIUS);
+        atmosphereCeilingShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
+        atmCeiling.draw(atmosphereCeilingShaderProgram);
+
+        glCullFace(GL_BACK);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glfwSwapBuffers(window); // swap the color buffers
     }

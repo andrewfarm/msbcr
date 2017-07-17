@@ -1,5 +1,6 @@
 package com.andrewofarm.msbcr.objects;
 
+import com.andrewofarm.msbcr.programs.AtmosphereCeilingShaderProgram;
 import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
 import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
 
@@ -34,7 +35,7 @@ public class AtmosphereCeiling extends Object3D {
         return radius;
     }
 
-    public void draw(GlobeShaderProgram shaderProgram) {
+    public void draw(AtmosphereCeilingShaderProgram shaderProgram) {
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
         drawElements(MODE_TRIANGLE_STRIP);

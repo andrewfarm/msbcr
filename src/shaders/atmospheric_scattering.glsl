@@ -10,11 +10,11 @@
 #define INNER_INTEGRAL_DIVS 5
 #define OUTER_INTEGRAL_DIVS 5
 
-#define SCATTER_CONST_RAYLEIGH 0.01
+#define SCATTER_CONST_RAYLEIGH 0.005
 
 #define SCALE_HEIGHT 0.25
 
-#define SUN_BRIGHTNESS 10.0
+#define SUN_BRIGHTNESS 15.0
 
 uniform vec3 u_CamPos;
 uniform vec3 u_LightDirection; //must be normalized!
@@ -106,9 +106,27 @@ float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB) {
     return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
 }
 
+float inScatter_rayleigh_doIntersection(float wavelength, vec3 pointOnCeiling) {
+    SphereIntersection intersection = intersectRaySphere(u_CamPos, pointOnCeiling - u_CamPos,
+        vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING);
+    vec3 pointA;
+    if (lengthSquared(u_CamPos) /*TODO*/ > ATMOSPHERE_CEILING * ATMOSPHERE_CEILING) {
+//        if (!intersection.intersects) {
+//            //this should never happen except in the case of geometry and/or rounding errors
+//            //at the edge of the atmosphere
+//            //if it does, just don't scatter any light
+//            return 0.0;
+//        }
+        pointA = intersection.near;
+    } else {
+        pointA = u_CamPos;
+    }
+    return inScatter_rayleigh(wavelength, pointA, intersection.far);
+}
+
 float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfacePoint) {
     vec3 pointA;
-    if (length(u_CamPos) > ATMOSPHERE_CEILING) {
+    if (lengthSquared(u_CamPos) /*TODO*/ > ATMOSPHERE_CEILING * ATMOSPHERE_CEILING) {
         SphereIntersection camRayIntersection = intersectRaySphere(u_CamPos, surfacePoint - u_CamPos,
             vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING);
         if (!camRayIntersection.intersects) {
