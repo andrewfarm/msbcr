@@ -85,15 +85,17 @@ float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {
  *     it is inside the atmosphere.
  * pointB is the FAR intersection between the atmosphere ceiling or the ground and
  *     the ray from the camera to the vertex.
- * pointC is the intersection between the atmosphere ceiling and the
- *     ray from the sample point to the sun.
  */
-float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB, vec3 pointC) {
+float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB) {
     float outerIntegral = 0.0;
     vec3 dist = pointB - pointA;
     vec3 differential = dist / float(INNER_INTEGRAL_DIVS);
     vec3 samplePoint = pointA + (differential * 0.5);
+    // pointC is the intersection between the atmosphere ceiling and the
+    //     ray from the sample point to the sun.
+    vec3 pointC;
     for (int i = 0; i < INNER_INTEGRAL_DIVS; i++) {
+        pointC = intersectRaySphere(samplePoint, u_LightDirection, vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING).far;
         outerIntegral += (density(samplePoint) *
             exp(-outScatter_rayleigh(samplePoint, pointC, wavelength) -
                 outScatter_rayleigh(samplePoint, u_CamPos, wavelength)));
@@ -116,8 +118,6 @@ float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfa
     } else {
         pointA = u_CamPos;
     }
-    vec3 lightRayEntryPoint = intersectRaySphere(surfacePoint, u_LightDirection,
-        vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING).far;
-    return inScatter_rayleigh(wavelength, pointA, surfacePoint, lightRayEntryPoint) +
+    return inScatter_rayleigh(wavelength, pointA, surfacePoint) +
         (reflectedLight * exp(-outScatter_rayleigh(pointA, surfacePoint, wavelength)));
 }
