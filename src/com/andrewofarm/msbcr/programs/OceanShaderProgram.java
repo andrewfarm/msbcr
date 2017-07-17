@@ -20,6 +20,7 @@ public class OceanShaderProgram extends ShaderProgram {
     private static final String U_GLOBE_RADIUS = "u_GlobeRadius";
     private static final String U_ELEVATION_MAP_UNIT = "u_ElevationMapUnit";
     private static final String U_SEA_LEVEl = "u_SeaLevel";
+    private static final String U_ATMOSPHERE_WIDTH = "u_AtmosphereWidth";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
@@ -31,6 +32,7 @@ public class OceanShaderProgram extends ShaderProgram {
     public final int uGlobeRadiusLocation;
     public final int uElevationMapUnitLocation;
     public final int uSeaLevelLocation;
+    public final int uAtmosphereWidthLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
@@ -47,6 +49,7 @@ public class OceanShaderProgram extends ShaderProgram {
         uGlobeRadiusLocation = glGetUniformLocation(programID, U_GLOBE_RADIUS);
         uElevationMapUnitLocation = glGetUniformLocation(programID, U_ELEVATION_MAP_UNIT);
         uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEl);
+        uAtmosphereWidthLocation = glGetUniformLocation(programID, U_ATMOSPHERE_WIDTH);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -80,5 +83,9 @@ public class OceanShaderProgram extends ShaderProgram {
 
     public void setSeaLevel(float seaLevel) {
         glUniform1f(uSeaLevelLocation, seaLevel);
+    }
+
+    public void setAtmosphereWidth(float atmosphereWidth) {
+        glUniform1f(uAtmosphereWidthLocation, atmosphereWidth);
     }
 }

@@ -10,9 +10,8 @@
 #define INNER_INTEGRAL_DIVS 5
 #define OUTER_INTEGRAL_DIVS 5
 
-#define SCATTER_CONST_RAYLEIGH 0.02
+#define SCATTER_CONST_RAYLEIGH 0.01
 
-#define ATMOSPHERE_THICKNESS 0.1
 #define SCALE_HEIGHT 0.25
 
 #define SUN_BRIGHTNESS 10.0
@@ -20,7 +19,8 @@
 uniform vec3 u_CamPos;
 uniform vec3 u_LightDirection; //must be normalized!
 uniform float u_GlobeRadius;
-#define ATMOSPHERE_CEILING u_GlobeRadius + ATMOSPHERE_THICKNESS
+uniform float u_AtmosphereWidth;
+#define ATMOSPHERE_CEILING u_GlobeRadius + u_AtmosphereWidth
 
 float lengthSquared(vec3 v) {
     return dot(v, v);
@@ -63,7 +63,7 @@ float scatterCoef_rayleigh(float wavelength) {
 float density(vec3 point) {
     // optimized version of
     // exp(-(length(point) - u_GlobeRadius) / ATMOSPHERE_THCKNESS / SCALE_HEIGHT);
-    return exp((u_GlobeRadius - length(point)) / (ATMOSPHERE_THICKNESS * SCALE_HEIGHT));
+    return exp((u_GlobeRadius - length(point)) / (u_AtmosphereWidth * SCALE_HEIGHT));
 }
 
 float outScatter_rayleigh(vec3 pointA, vec3 pointB, float wavelength) {

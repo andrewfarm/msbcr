@@ -27,7 +27,8 @@ public class HelloWorld {
     private int windowWidth = 800;
     private int windowHeight = 600;
 
-    private static final float GLOBE_RADIUS = 1;
+    private static final float GLOBE_RADIUS = 1.0f;
+    private static final float ATMOSPHERE_WIDTH = 0.1f;
     private static final float SEA_LEVEL = 0.5f;
     private static final float TERRAIN_SCALE = 0.5f;
 
@@ -396,6 +397,7 @@ public class HelloWorld {
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
         globeShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
         globeShaderProgram.setGlobeRadius(GLOBE_RADIUS);
+        globeShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         globe.draw(globeShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
 
         //draw rings
@@ -421,6 +423,7 @@ public class HelloWorld {
         oceanShaderProgram.setGlobeRadius(GLOBE_RADIUS);
         oceanShaderProgram.setElevationMap(displacementMap);
         oceanShaderProgram.setSeaLevel(SEA_LEVEL);
+        oceanShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         ocean.draw(oceanShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers

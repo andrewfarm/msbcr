@@ -25,6 +25,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     private static final String U_MORPH = "u_Morph";
     private static final String U_CAM_POS = "u_CamPos";
     private static final String U_GLOBE_RADIUS = "u_GlobeRadius";
+    private static final String U_ATMOSPHERE_WIDTH = "u_AtmosphereWidth";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
@@ -44,6 +45,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int uMorphLocation;
     public final int uCamPosLocation;
     public final int uGlobeRadiusLocation;
+    public final int uAtmosphereWidthLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
@@ -68,6 +70,7 @@ public class GlobeShaderProgram extends ShaderProgram {
         uMorphLocation = glGetUniformLocation(programID, U_MORPH);
         uCamPosLocation = glGetUniformLocation(programID, U_CAM_POS);
         uGlobeRadiusLocation = glGetUniformLocation(programID, U_GLOBE_RADIUS);
+        uAtmosphereWidthLocation = glGetUniformLocation(programID, U_ATMOSPHERE_WIDTH);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -133,5 +136,9 @@ public class GlobeShaderProgram extends ShaderProgram {
 
     public void setGlobeRadius(float globeRadius) {
         glUniform1f(uGlobeRadiusLocation, globeRadius);
+    }
+
+    public void setAtmosphereWidth(float atmosphereWidth) {
+        glUniform1f(uAtmosphereWidthLocation, atmosphereWidth);
     }
 }
