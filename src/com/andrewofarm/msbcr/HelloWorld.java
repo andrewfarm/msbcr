@@ -433,7 +433,7 @@ public class HelloWorld {
         //draw atmosphere ceiling
 
         glEnable(GL_CULL_FACE);
-        glCullFace((camPos.lengthSquared() /*TODO*/ > ATMOSPHERE_CEILING * ATMOSPHERE_CEILING) ? GL_FRONT : GL_BACK);
+        glCullFace(GL_FRONT);
         glBlendFunc(GL_ONE, GL_ONE);
         atmosphereCeilingShaderProgram.useProgram();
         atmosphereCeilingShaderProgram.setMvpMatrix(mvpMatrix);
