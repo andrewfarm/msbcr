@@ -270,15 +270,12 @@ public class HelloWorld {
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
         sunTexture = TextureLoader.loadTexture2D("res/sun.jpg");
-        starfieldTexture = TextureLoader.loadTextureCube(new String[] {
-                "res/starmap_8k_4.png",
-                "res/starmap_8k_3.png",
-                "res/starmap_8k_6.png",
-                "res/starmap_8k_5.png",
-                "res/starmap_8k_2.png",
-                "res/starmap_8k_1.png"
-        });
+        starfieldTexture = TextureLoader.loadTextureCube("res/starmap_8k_", ".png");
         if (drawRings) ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
+
+        globe.setTextures(TextureLoader.loadTextures2D("res/earth-nasa_", ".png"));
+        globe.setDisplacementMaps(TextureLoader.loadTextures2D("res/elevation_", ".png"));
+        globe.setNormalMaps(TextureLoader.loadTextures2D("res/normalmap_", ".png"));
 
         TextureLoader.ShadowMap shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
         if (shadowMap != null) {
@@ -393,9 +390,6 @@ public class HelloWorld {
         globeShaderProgram.setModelMatrix(modelMatrix);
         globeShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
         globeShaderProgram.setLightDirection(lightX, lightY, lightZ);
-        globeShaderProgram.setDisplacementMap(displacementMap);
-        globeShaderProgram.setTexture(globeTexture);
-        globeShaderProgram.setNormalMap(normalMap);
         globeShaderProgram.setShadowMap(shadowMapDepthTexture);
         globeShaderProgram.setSeaLevel(SEA_LEVEL);
         globeShaderProgram.setTerrainScale(TERRAIN_SCALE);

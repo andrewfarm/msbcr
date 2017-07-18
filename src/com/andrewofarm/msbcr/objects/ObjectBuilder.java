@@ -9,14 +9,14 @@ import java.nio.IntBuffer;
 /**
  * Created by Andrew on 6/8/17.
  */
-public abstract class ObjectBuilder {
+abstract class ObjectBuilder {
 
-    static final int CUBE_RIGHT = 0;
-    static final int CUBE_LEFT = 1;
-    static final int CUBE_TOP = 2;
-    static final int CUBE_BOTTOM = 3;
-    static final int CUBE_FRONT = 4;
-    static final int CUBE_BACK = 5;
+    static final int CUBE_BACK = 0;
+    static final int CUBE_FRONT = 1;
+    static final int CUBE_LEFT = 2;
+    static final int CUBE_RIGHT = 3;
+    static final int CUBE_TOP = 4;
+    static final int CUBE_BOTTOM = 5;
 
     static int getSphereVertexCount(int meridians, int parallels) {
         return (parallels + 1) * (meridians + 1);
@@ -218,10 +218,10 @@ public abstract class ObjectBuilder {
                         break;
                 }
                 position.normalize().mul(radius);
-//                putVertex(vertexBuf, position, position, tileX * 0.5f + 0.5f, tileY * 0.5f + 0.5f);
-                putVertex(vertexBuf, position, position,
-                        (float) (Math.atan2(position.get(0) / radius, position.get(2) / radius) / (2 * Math.PI)),
-                        (float) (Math.acos(position.get(1) / radius) / Math.PI));
+                putVertex(vertexBuf, position, position, tileX * 0.5f + 0.5f, tileY * 0.5f + 0.5f);
+//                putVertex(vertexBuf, position, position,
+//                        (float) (Math.atan2(position.get(0) / radius, position.get(2) / radius) / (2 * Math.PI)),
+//                        (float) (Math.acos(position.get(1) / radius) / Math.PI));
 
                 vertexBuf.position(vertexBuf.position() + 4);
             }

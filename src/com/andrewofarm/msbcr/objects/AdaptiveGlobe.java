@@ -26,18 +26,23 @@ public class AdaptiveGlobe extends Object3D {
     private static final float BASE_GEOMETRIC_ERROR = 0.005f; //TODO calculate programatically
     private static final float SCREEN_SPACE_ERROR_TOLERANCE = 0.005f;
 
-    private Set<QuadTree<GlobeTile>> tiles = new HashSet<>();
+    @SuppressWarnings("unchecked")
+    private QuadTree<GlobeTile>[] tiles = new QuadTree[6];
+
+    private int[] textures;
+    private int[] displacementMaps;
+    private int[] normalMaps;
 
     public AdaptiveGlobe(float radius, int tileResolution) {
         super(GlobeTile.TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.radius = radius;
 
-        tiles.add(new QuadTree<>(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, tileResolution)));
-        tiles.add(new QuadTree<>(new GlobeTile(CUBE_LEFT,   radius, 0, 0, 1, tileResolution)));
-        tiles.add(new QuadTree<>(new GlobeTile(CUBE_TOP,    radius, 0, 0, 1, tileResolution)));
-        tiles.add(new QuadTree<>(new GlobeTile(CUBE_BOTTOM, radius, 0, 0, 1, tileResolution)));
-        tiles.add(new QuadTree<>(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, tileResolution)));
-        tiles.add(new QuadTree<>(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, tileResolution)));
+        tiles[CUBE_RIGHT]  = new QuadTree<>(new GlobeTile(CUBE_RIGHT,  radius, 0, 0, 1, tileResolution));
+        tiles[CUBE_LEFT]   = new QuadTree<>(new GlobeTile(CUBE_LEFT,   radius, 0, 0, 1, tileResolution));
+        tiles[CUBE_TOP]    = new QuadTree<>(new GlobeTile(CUBE_TOP,    radius, 0, 0, 1, tileResolution));
+        tiles[CUBE_BOTTOM] = new QuadTree<>(new GlobeTile(CUBE_BOTTOM, radius, 0, 0, 1, tileResolution));
+        tiles[CUBE_FRONT]  = new QuadTree<>(new GlobeTile(CUBE_FRONT,  radius, 0, 0, 1, tileResolution));
+        tiles[CUBE_BACK]   = new QuadTree<>(new GlobeTile(CUBE_BACK,   radius, 0, 0, 1, tileResolution));
 
         if (WIREFRAME) {
             indexCount = ObjectBuilder.getWireframeTileIndexCount(tileResolution, DIAGONALS);
@@ -52,6 +57,18 @@ public class AdaptiveGlobe extends Object3D {
 
     public float getRadius() {
         return radius;
+    }
+
+    public void setTextures(int[] textures) {
+        this.textures = textures;
+    }
+
+    public void setDisplacementMaps(int[] displacementMaps) {
+        this.displacementMaps = displacementMaps;
+    }
+
+    public void setNormalMaps(int[] normalMaps) {
+        this.normalMaps = normalMaps;
     }
 
     private static float getDistanceOfClosestCorner(Vector3f viewpointModelSpace, GlobeTile tile) {
@@ -115,18 +132,36 @@ public class AdaptiveGlobe extends Object3D {
     }
 
     public void draw(ShaderProgram shaderProgram, Vector3f viewpointModelSpace, float twoTanHalfFOV) {
-        for (QuadTree<GlobeTile> tileTree : tiles) {
-            drawTiles(shaderProgram, tileTree, viewpointModelSpace, twoTanHalfFOV, 0);
+        for (int i = 0; i < tiles.length; i++) {
+            if (shaderProgram instanceof GlobeShaderProgram) {
+                GlobeShaderProgram globeShaderProgram = (GlobeShaderProgram) shaderProgram;
+                globeShaderProgram.setTexture(textures[i]);
+                globeShaderProgram.setDisplacementMap(displacementMaps[i]);
+                globeShaderProgram.setNormalMap(normalMaps[i]);
+                drawTiles(globeShaderProgram, tiles[i], viewpointModelSpace, twoTanHalfFOV, 0);
+            } else if (!WIREFRAME && (shaderProgram instanceof ShadowMapShaderProgram)) {
+                ShadowMapShaderProgram shadowMapShaderProgram = (ShadowMapShaderProgram) shaderProgram;
+                shadowMapShaderProgram.setDisplacementMap(displacementMaps[i]);
+                drawTiles(shadowMapShaderProgram, tiles[i], viewpointModelSpace, twoTanHalfFOV, 0);
+            }
         }
     }
 
-    private void drawTiles(ShaderProgram shaderProgram, QuadTree<GlobeTile> tileTree, Vector3f viewpointModelSpace, float twoTanHalfFOV, int level) {
+    private void drawTiles(GlobeShaderProgram shaderProgram, QuadTree<GlobeTile> tileTree, Vector3f viewpointModelSpace, float twoTanHalfFOV, int level) {
         if (tileTree.isLeaf()) {
-            if (shaderProgram instanceof GlobeShaderProgram) {
-                drawTile((GlobeShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
-            } else if (!WIREFRAME && (shaderProgram instanceof ShadowMapShaderProgram)) {
-                drawTile((ShadowMapShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
-            }
+            drawTile(shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
+        } else {
+            level++;
+            drawTiles(shaderProgram, tileTree.getTopLeft(),     viewpointModelSpace, twoTanHalfFOV, level);
+            drawTiles(shaderProgram, tileTree.getTopRight(),    viewpointModelSpace, twoTanHalfFOV, level);
+            drawTiles(shaderProgram, tileTree.getBottomLeft(),  viewpointModelSpace, twoTanHalfFOV, level);
+            drawTiles(shaderProgram, tileTree.getBottomRight(), viewpointModelSpace, twoTanHalfFOV, level);
+        }
+    }
+
+    private void drawTiles(ShadowMapShaderProgram shaderProgram, QuadTree<GlobeTile> tileTree, Vector3f viewpointModelSpace, float twoTanHalfFOV, int level) {
+        if (tileTree.isLeaf()) {
+            drawTile(shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
         } else {
             level++;
             drawTiles(shaderProgram, tileTree.getTopLeft(),     viewpointModelSpace, twoTanHalfFOV, level);

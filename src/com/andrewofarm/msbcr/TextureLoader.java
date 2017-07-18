@@ -31,14 +31,14 @@ public abstract class TextureLoader {
     }
 
     static int loadTexture2D(String imgPath) {
-        return loadTexture(imgPath, true);
+        return loadTexture(imgPath, -1, true);
     }
 
     static int loadTexture1D(String imgPath) {
-        return loadTexture(imgPath, false);
+        return loadTexture(imgPath, -1, false);
     }
 
-    private static int loadTexture(String imgPath, boolean is2D) {
+    private static int loadTexture(String imgPath, int textureID, boolean is2D) {
         int[] imgWidth = new int[1];
         int[] imgHeight = new int[1];
         @SuppressWarnings("unused") int[] channels = new int[1];
@@ -56,12 +56,15 @@ public abstract class TextureLoader {
 
         System.out.println("image loaded");
 
-        //create texture object
-        final int[] textureObjectIDs = new int[1];
-        glGenTextures(textureObjectIDs);
+        if (textureID < 0) {
+            //create texture object
+            final int[] textureObjectIDs = new int[1];
+            glGenTextures(textureObjectIDs);
+            textureID = textureObjectIDs[0];
+        }
 
         //check for errors
-        if (textureObjectIDs[0] == 0) {
+        if (textureID == 0) {
             System.err.println("could not create texture");
             return 0;
         }
@@ -69,7 +72,7 @@ public abstract class TextureLoader {
         final int TARGET = is2D ? GL_TEXTURE_2D : GL_TEXTURE_1D;
 
         //bind texture to TARGET
-        glBindTexture(TARGET, textureObjectIDs[0]);
+        glBindTexture(TARGET, textureID);
 
         //specify texture filtering (scaling) methods
         glTexParameteri(TARGET, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -89,7 +92,38 @@ public abstract class TextureLoader {
         //unbind texture from TARGET
         glBindTexture(TARGET, 0);
 
-        return textureObjectIDs[0];
+        return textureID;
+    }
+
+    static int[] loadTextures2D(String prefix, String suffix) {
+        return loadTextures2D(new String[] {
+                prefix + 1 + suffix,
+                prefix + 2 + suffix,
+                prefix + 3 + suffix,
+                prefix + 4 + suffix,
+                prefix + 5 + suffix,
+                prefix + 6 + suffix,
+        });
+    }
+
+    static int[] loadTextures2D(String[] imgPaths) {
+        final int[] textureIDs = new int[imgPaths.length];
+        glGenTextures(textureIDs);
+        for (int i = 0; i < imgPaths.length; i++) {
+            loadTexture(imgPaths[i], textureIDs[i], true);
+        }
+        return textureIDs;
+    }
+
+    static int loadTextureCube(String prefix, String suffix) {
+        return loadTextureCube(new String[] {
+                prefix + 1 + suffix,
+                prefix + 2 + suffix,
+                prefix + 3 + suffix,
+                prefix + 4 + suffix,
+                prefix + 5 + suffix,
+                prefix + 6 + suffix,
+        });
     }
 
     static int loadTextureCube(String[] imgPaths) {
