@@ -48,7 +48,7 @@ public class HelloWorld {
     private static final float FOV = (float) Math.PI / 4;
     private static final float TWO_TAN_HALF_FOV = (float) (2 * Math.tan(FOV / 2));
 
-    private boolean drawRings = false;
+    private boolean drawRings = true;
 
     private boolean dragging = false;
     private double prevX, prevY;
@@ -433,8 +433,7 @@ public class HelloWorld {
         //draw atmosphere ceiling
 
         glEnable(GL_CULL_FACE);
-        glCullFace((camPos.lengthSquared() /*TODO*/ > ATMOSPHERE_CEILING * ATMOSPHERE_CEILING) ?
-            GL_BACK : GL_FRONT);
+        glCullFace((camPos.lengthSquared() /*TODO*/ > ATMOSPHERE_CEILING * ATMOSPHERE_CEILING) ? GL_FRONT : GL_BACK);
         glBlendFunc(GL_ONE, GL_ONE);
         atmosphereCeilingShaderProgram.useProgram();
         atmosphereCeilingShaderProgram.setMvpMatrix(mvpMatrix);
