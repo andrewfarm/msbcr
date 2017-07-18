@@ -12,7 +12,7 @@
 
 #define SCATTER_CONST_RAYLEIGH 0.005
 
-#define SCALE_HEIGHT 0.25
+#define SCALE_HEIGHT 0.2
 
 #define SUN_BRIGHTNESS 15.0
 
@@ -136,6 +136,11 @@ float surfaceScatter_rayleigh(float wavelength, float reflectedLight, vec3 surfa
     } else {
         pointA = u_CamPos;
     }
+//    SphereIntersection lightEntryPoint = intersectRaySphere(surfacePoint, u_LightDirection,
+//        vec3(0.0) /*TODO*/, ATMOSPHERE_CEILING);
+//    if (lightEntryPoint.intersects) {
+//        reflectedLight -= SUN_BRIGHTNESS * 0.03 * exp(-outScatter_rayleigh(lightEntryPoint.far, surfacePoint, wavelength));
+//    }
     return inScatter_rayleigh(wavelength, pointA, surfacePoint) +
         (reflectedLight * exp(-outScatter_rayleigh(pointA, surfacePoint, wavelength)));
 }

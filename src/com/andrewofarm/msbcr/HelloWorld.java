@@ -28,7 +28,7 @@ public class HelloWorld {
     private int windowHeight = 600;
 
     private static final float GLOBE_RADIUS = 1.0f;
-    private static final float ATMOSPHERE_WIDTH = 0.15f;
+    private static final float ATMOSPHERE_WIDTH = 0.2f;
     private static final float ATMOSPHERE_CEILING = GLOBE_RADIUS + ATMOSPHERE_WIDTH;
     private static final float SEA_LEVEL = 0.5f;
     private static final float TERRAIN_SCALE = 0.5f;
