@@ -462,6 +462,7 @@ public class HelloWorld {
         atmCeiling.draw(atmosphereCeilingShaderProgram);
 
         glDisable(GL_CULL_FACE);
+        glDepthMask(false); //perform depth tests, but don't write to the depth buffer
         updateMvpMatrix(auroraModelMatrix);
         auroraShaderProgram.useProgram();
         auroraShaderProgram.setMvpMatrix(mvpMatrix);
@@ -474,6 +475,7 @@ public class HelloWorld {
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        glDepthMask(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glfwSwapBuffers(window); // swap the color buffers
