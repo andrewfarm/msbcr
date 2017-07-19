@@ -1,8 +1,6 @@
 package com.andrewofarm.msbcr.objects;
 
-import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
 import com.andrewofarm.msbcr.programs.OceanShaderProgram;
-import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;

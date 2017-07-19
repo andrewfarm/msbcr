@@ -104,7 +104,7 @@ public class HelloWorld {
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
     private SunShaderProgram sunShaderProgram;
-    private GlobeShaderProgram globeShaderProgram;
+    private AdaptiveGlobeShaderProgram adaptiveGlobeShaderProgram;
     private RingsShaderProgram ringsShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
     private AtmosphereCeilingShaderProgram atmosphereCeilingShaderProgram;
@@ -274,7 +274,7 @@ public class HelloWorld {
         shadowMapShaderProgram = new ShadowMapShaderProgram();
         skyboxShaderProgram = new SkyboxShaderProgram();
         sunShaderProgram = new SunShaderProgram();
-        globeShaderProgram = new GlobeShaderProgram();
+        adaptiveGlobeShaderProgram = new AdaptiveGlobeShaderProgram();
         if (drawRings) ringsShaderProgram = new RingsShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
         atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
@@ -405,21 +405,21 @@ public class HelloWorld {
 
         //draw globe
 
-        globeShaderProgram.useProgram();
-        globeShaderProgram.setMvpMatrix(mvpMatrix);
-        globeShaderProgram.setModelMatrix(modelMatrix);
-        globeShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
-        globeShaderProgram.setLightDirection(lightX, lightY, lightZ);
-        globeShaderProgram.setDisplacementMap(displacementMap);
-        globeShaderProgram.setTexture(globeTexture);
-        globeShaderProgram.setNormalMap(normalMap);
-        globeShaderProgram.setShadowMap(shadowMapDepthTexture);
-        globeShaderProgram.setSeaLevel(SEA_LEVEL);
-        globeShaderProgram.setTerrainScale(TERRAIN_SCALE);
-        globeShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
-        globeShaderProgram.setGlobeRadius(GLOBE_RADIUS);
-        globeShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
-        globe.draw(globeShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
+        adaptiveGlobeShaderProgram.useProgram();
+        adaptiveGlobeShaderProgram.setMvpMatrix(mvpMatrix);
+        adaptiveGlobeShaderProgram.setModelMatrix(modelMatrix);
+        adaptiveGlobeShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
+        adaptiveGlobeShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        adaptiveGlobeShaderProgram.setDisplacementMap(displacementMap);
+        adaptiveGlobeShaderProgram.setTexture(globeTexture);
+        adaptiveGlobeShaderProgram.setNormalMap(normalMap);
+        adaptiveGlobeShaderProgram.setShadowMap(shadowMapDepthTexture);
+        adaptiveGlobeShaderProgram.setSeaLevel(SEA_LEVEL);
+        adaptiveGlobeShaderProgram.setTerrainScale(TERRAIN_SCALE);
+        adaptiveGlobeShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
+        adaptiveGlobeShaderProgram.setGlobeRadius(GLOBE_RADIUS);
+        adaptiveGlobeShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
+        globe.draw(adaptiveGlobeShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
 
         //draw rings
 
