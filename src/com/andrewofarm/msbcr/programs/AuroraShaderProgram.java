@@ -13,28 +13,27 @@ public class AuroraShaderProgram extends ShaderProgram {
 
     private static final String U_MVP_MATRIX = "u_MvpMatrix";
     private static final String U_TEXTURE_UNIT = "u_TextureUnit";
-    private static final String U_SIN_POLAR_ANGLE = "u_SinPolarAngle";
-    private static final String U_COS_POLAR_ANGLE = "u_CosPolarAngle";
+    private static final String U_POLAR_ANGLE = "u_PolarAngle";
     private static final String U_NOISE_PHASE = "u_NoisePhase";
     private static final String A_POSITION = "a_Position";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
 
     public final int uMvpMatrixLocation;
     public final int uTextureUnitLocation;
-    public final int uSinPolarAngleLocation;
-    public final int uCosPolarAngleLocation;
+    public final int uPolarAngleLocation;
     public final int uNoisePhaseLocation;
     public final int aPositionLocation;
     public final int aTextureCoordsLocation;
 
     public AuroraShaderProgram() {
-        super(TextResourceReader.readFile("src/shaders/aurora_vertex_shader.glsl"),
-                TextResourceReader.readFile("src/shaders/aurora_fragment_shader.glsl"));
+        super(TextResourceReader.readFile("src/shaders/aurora_vertex_shader.glsl") +
+                        TextResourceReader.readFile("src/shaders/classicnoise3D.glsl"),
+                TextResourceReader.readFile("src/shaders/aurora_fragment_shader.glsl") +
+                        TextResourceReader.readFile("src/shaders/classicnoise3D.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);
-        uSinPolarAngleLocation = glGetUniformLocation(programID, U_SIN_POLAR_ANGLE);
-        uCosPolarAngleLocation = glGetUniformLocation(programID, U_COS_POLAR_ANGLE);
+        uPolarAngleLocation = glGetUniformLocation(programID, U_POLAR_ANGLE);
         uNoisePhaseLocation = glGetUniformLocation(programID, U_NOISE_PHASE);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
@@ -51,8 +50,7 @@ public class AuroraShaderProgram extends ShaderProgram {
     }
 
     public void setPolarAngle(float polarAngle) {
-        glUniform1f(uSinPolarAngleLocation, (float) Math.sin(polarAngle));
-        glUniform1f(uCosPolarAngleLocation, (float) Math.cos(polarAngle));
+        glUniform1f(uPolarAngleLocation, polarAngle);
     }
 
     public void setNoisePhase(float noisePhase) {

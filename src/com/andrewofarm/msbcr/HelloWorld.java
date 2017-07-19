@@ -61,6 +61,12 @@ public class HelloWorld {
     private Matrix4f modelMatrix = new Matrix4f();
     private Matrix4f inverseModelMatrix = new Matrix4f();
 
+    private static final float GEOMAGNETIC_POLE_LATITUDE = 0.3033f;
+    private static final float GEOMAGNETIC_POLE_LONGITUDE = 0.1681f;
+    private static final float AURORA_POLAR_ANGLE = 0.3f;
+    private static final float AURORA_LOWER_BOUND = GLOBE_RADIUS + 0.01f;
+    private static final float AURORA_UPPER_BOUND = GLOBE_RADIUS + 0.04f;
+
     private Matrix4f auroraModelMatrix = new Matrix4f();
 
     private Matrix4f viewMatrix = new Matrix4f();
@@ -91,7 +97,7 @@ public class HelloWorld {
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
     private AtmosphereCeiling atmCeiling = new AtmosphereCeiling(ATMOSPHERE_CEILING, 64, 32);
-    private Aurora aurora = new Aurora(128, GLOBE_RADIUS + 0.01f, GLOBE_RADIUS + 0.04f);
+    private Aurora aurora = new Aurora(512, AURORA_LOWER_BOUND, AURORA_UPPER_BOUND);
 
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
@@ -450,9 +456,12 @@ public class HelloWorld {
         atmCeiling.draw(atmosphereCeilingShaderProgram);
 
         glDisable(GL_CULL_FACE);
+        updateMvpMatrix(auroraModelMatrix);
         auroraShaderProgram.useProgram();
         auroraShaderProgram.setMvpMatrix(mvpMatrix);
-        auroraShaderProgram.setPolarAngle(0.175f);
+        auroraShaderProgram.setPolarAngle(AURORA_POLAR_ANGLE);
+        aurora.draw(auroraShaderProgram);
+        auroraShaderProgram.setPolarAngle((float) Math.PI + AURORA_POLAR_ANGLE);
         aurora.draw(auroraShaderProgram);
 
         glEnable(GL_CULL_FACE);
@@ -483,7 +492,9 @@ public class HelloWorld {
 
         modelMatrix.invert(inverseModelMatrix);
 
-//        auroraModelMatrix.set(modelMatrix).rotate());
+        auroraModelMatrix.set(modelMatrix)
+                .rotate(-GEOMAGNETIC_POLE_LATITUDE, 1, 0, 0)
+                .rotate(GEOMAGNETIC_POLE_LONGITUDE, 0, 1, 0);
     }
 
     private void updateLightMatrices() {
