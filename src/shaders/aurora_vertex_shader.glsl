@@ -10,6 +10,7 @@ uniform float u_NoisePhase;
 attribute vec2 a_Position;
 attribute float a_TextureCoords;
 
+varying vec2 v_CircularPosition;
 varying float v_TextureCoords;
 
 float cnoise(vec3 v);
@@ -18,6 +19,7 @@ void main() {
     v_TextureCoords = a_TextureCoords;
     float sinAzimuth = sin(a_Position.y);
     float cosAzimuth = cos(a_Position.y);
+    v_CircularPosition = vec2(cosAzimuth, sinAzimuth);
     float noisyPolarAngle = u_PolarAngle + cnoise(vec3(
             AURORAL_OVAL_NOISE_FREQ * cosAzimuth,
             AURORAL_OVAL_NOISE_FREQ * sinAzimuth,
