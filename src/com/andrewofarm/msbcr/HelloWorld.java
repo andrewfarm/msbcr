@@ -48,7 +48,7 @@ public class HelloWorld {
     private static final float FOV = (float) Math.PI / 4;
     private static final float TWO_TAN_HALF_FOV = (float) (2 * Math.tan(FOV / 2));
     private float auroraNoisePhase = 0;
-    private static final float AURORA_NOISE_PHASE_INCREMENT = 10f;
+    private static final float AURORA_NOISE_PHASE_INCREMENT = 20f;
 
     private boolean drawRings = false;
 
@@ -116,6 +116,7 @@ public class HelloWorld {
     private int displacementMap;
     private int normalMap;
     private int ringsTexture;
+    private int auroraTexture;
 
     private int shadowMapWidth = 4096;
     private int shadowMapHeight = 4096;
@@ -292,6 +293,7 @@ public class HelloWorld {
                 "res/starmap_8k_1.png"
         });
         if (drawRings) ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
+        auroraTexture = TextureLoader.loadTexture1D("res/aurora.png");
 
         TextureLoader.ShadowMap shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
         if (shadowMap != null) {
@@ -463,6 +465,7 @@ public class HelloWorld {
         updateMvpMatrix(auroraModelMatrix);
         auroraShaderProgram.useProgram();
         auroraShaderProgram.setMvpMatrix(mvpMatrix);
+        auroraShaderProgram.setTexture(auroraTexture);
         auroraShaderProgram.setNoisePhase(auroraNoisePhase);
         auroraShaderProgram.setPolarAngle(AURORA_POLAR_ANGLE);
         aurora.draw(auroraShaderProgram);
