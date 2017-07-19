@@ -58,6 +58,10 @@ public abstract class ObjectBuilder {
         return 36;
     }
 
+    static int getAuroraVertexCount(int segments) {
+        return (segments + 1) * 2;
+    }
+
 
     static void buildSphere(FloatBuffer vertexBuf, IntBuffer indexBuf, float radius, int meridians, int parallels, boolean normals, boolean textured) {
         generateSphereVertices(vertexBuf, radius, meridians, parallels, 1, normals, textured);
@@ -151,9 +155,9 @@ public abstract class ObjectBuilder {
         for (int col = 0; col <= meridians; col++) {
             azimuthFraction = (double) col / meridians;
             azimuth = col * azimuthInterval;
-            x1 = radius * (float) Math.sin(azimuth);
+            x1 = radius * (float) Math.cos(azimuth);
             y1 = radius;
-            z1 = radius * (float) Math.cos(azimuth);
+            z1 = radius * (float) -Math.sin(azimuth);
 
             for (int row = 0; row <= parallels; row++) {
                 polarAngleFraction = (double) row / parallels;
@@ -220,7 +224,7 @@ public abstract class ObjectBuilder {
                 position.normalize().mul(radius);
 //                putVertex(vertexBuf, position, position, tileX * 0.5f + 0.5f, tileY * 0.5f + 0.5f);
                 putVertex(vertexBuf, position, position,
-                        (float) (Math.atan2(position.get(0) / radius, position.get(2) / radius) / (2 * Math.PI)),
+                        (float) (-Math.atan2(position.get(2) / radius, position.get(0) / radius) / (2 * Math.PI)),
                         (float) (Math.acos(position.get(1) / radius) / Math.PI));
 
                 vertexBuf.position(vertexBuf.position() + 4);
@@ -391,6 +395,22 @@ public abstract class ObjectBuilder {
                 6, 2, 7,
                 7, 2, 3,
         });
+    }
+
+    static void buildAuroraVertices(FloatBuffer vertexBuf, float lowerBound, float upperBound, int segments) {
+        final float angleInterval = (float) (2 * Math.PI / segments);
+        float angle;
+        for (int i = 0; i <= segments; i++) {
+            angle = i * angleInterval;
+
+            vertexBuf.put(lowerBound);
+            vertexBuf.put(angle);
+            vertexBuf.put(0);
+
+            vertexBuf.put(upperBound);
+            vertexBuf.put(angle);
+            vertexBuf.put(1);
+        }
     }
 
     private static void putVertex(FloatBuffer vertexBuf, Vector3f position) {

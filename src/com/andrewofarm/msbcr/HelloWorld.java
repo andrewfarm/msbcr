@@ -48,7 +48,7 @@ public class HelloWorld {
     private static final float FOV = (float) Math.PI / 4;
     private static final float TWO_TAN_HALF_FOV = (float) (2 * Math.tan(FOV / 2));
 
-    private boolean drawRings = true;
+    private boolean drawRings = false;
 
     private boolean dragging = false;
     private double prevX, prevY;
@@ -60,6 +60,8 @@ public class HelloWorld {
 
     private Matrix4f modelMatrix = new Matrix4f();
     private Matrix4f inverseModelMatrix = new Matrix4f();
+
+    private Matrix4f auroraModelMatrix = new Matrix4f();
 
     private Matrix4f viewMatrix = new Matrix4f();
     private Matrix4f projectionMatrix = new Matrix4f();
@@ -89,6 +91,7 @@ public class HelloWorld {
     private Rings rings = new Rings(128, 1.5f, 3.0f);
     private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
     private AtmosphereCeiling atmCeiling = new AtmosphereCeiling(ATMOSPHERE_CEILING, 64, 32);
+    private Aurora aurora = new Aurora(128, GLOBE_RADIUS + 0.01f, GLOBE_RADIUS + 0.04f);
 
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
@@ -97,6 +100,7 @@ public class HelloWorld {
     private RingsShaderProgram ringsShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
     private AtmosphereCeilingShaderProgram atmosphereCeilingShaderProgram;
+    private AuroraShaderProgram auroraShaderProgram;
 
     private int starfieldTexture;
     private int sunTexture;
@@ -265,6 +269,7 @@ public class HelloWorld {
         if (drawRings) ringsShaderProgram = new RingsShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
         atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
+        auroraShaderProgram = new AuroraShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -343,7 +348,7 @@ public class HelloWorld {
             camAzimuth += timePassage;
             updateViewMatrix();
         }
-        updateMvpMatrix();
+        updateMvpMatrix(modelMatrix);
         updateLightMatrices();
         updateVpRotationMatrix();
         updateCamPos();
@@ -444,6 +449,13 @@ public class HelloWorld {
         atmosphereCeilingShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         atmCeiling.draw(atmosphereCeilingShaderProgram);
 
+        glDisable(GL_CULL_FACE);
+        auroraShaderProgram.useProgram();
+        auroraShaderProgram.setMvpMatrix(mvpMatrix);
+        auroraShaderProgram.setPolarAngle(0.175f);
+        aurora.draw(auroraShaderProgram);
+
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -470,6 +482,8 @@ public class HelloWorld {
         modelMatrix.rotate(globeAzimuth, 0, 1, 0);
 
         modelMatrix.invert(inverseModelMatrix);
+
+//        auroraModelMatrix.set(modelMatrix).rotate());
     }
 
     private void updateLightMatrices() {
@@ -477,7 +491,7 @@ public class HelloWorld {
         lightBiasMvpMatrix.set(lightBiasMatrix).mul(lightMvpMatrix);
     }
 
-    private void updateMvpMatrix() {
+    private void updateMvpMatrix(Matrix4f modelMatrix) {
         mvpMatrix.set(projectionMatrix).mul(viewMatrix).mul(modelMatrix);
     }
 
