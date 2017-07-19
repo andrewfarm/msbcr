@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
 import org.joml.Vector3f;
 
@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 /**
  * Created by Andrew on 7/4/17.
  */
-class GlobeTile extends Object3D {
+class GlobeTileGeometry extends Geometry {
 
     static final int POSITION_COMPONENT_COUNT = 3;
     static final int NORMAL_COMPONENT_COUNT = 3;
@@ -27,7 +27,7 @@ class GlobeTile extends Object3D {
     private FloatBuffer cornerVertexBuf;
     private final Vector3f[] corners;
 
-    public GlobeTile(int face, float radius, float offsetX, float offsetY, float size, int resolution) {
+    public GlobeTileGeometry(int face, float radius, float offsetX, float offsetY, float size, int resolution) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.face = face;
         this.radius = radius;

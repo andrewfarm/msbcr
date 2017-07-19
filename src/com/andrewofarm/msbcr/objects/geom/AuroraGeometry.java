@@ -1,13 +1,13 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
-import com.andrewofarm.msbcr.programs.AuroraShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.AuroraShaderProgram;
 
 import java.nio.FloatBuffer;
 
 /**
  * Created by Andrew on 7/1/17.
  */
-public class Aurora extends Object3D {
+public class AuroraGeometry extends Geometry {
 
     private static final int POSITION_COMPONENT_COUNT = 2;
     private static final int TEXTURE_COMPONENT_COUNT = 1;
@@ -19,7 +19,7 @@ public class Aurora extends Object3D {
     private final float lowerBound;
     private final float outerRadius;
 
-    public Aurora(int segments, float lowerBound, float outerRadius) {
+    public AuroraGeometry(int segments, float lowerBound, float outerRadius) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.lowerBound = lowerBound;
         this.outerRadius = outerRadius;

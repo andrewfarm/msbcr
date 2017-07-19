@@ -1,7 +1,7 @@
 package com.andrewofarm.msbcr;
 
-import com.andrewofarm.msbcr.objects.*;
-import com.andrewofarm.msbcr.programs.*;
+import com.andrewofarm.msbcr.objects.geom.*;
+import com.andrewofarm.msbcr.objects.programs.*;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -93,13 +93,13 @@ public class HelloWorld {
     private static final int MERIDIANS = 512;
     private static final int PARALLELS = 256;
 
-    private Skybox skybox = new Skybox();
-    private Sun sun = new Sun(lightX, lightY, lightZ);
-    private AdaptiveGlobe globe = new AdaptiveGlobe(1.0f, 64);
-    private Rings rings = new Rings(128, 1.5f, 3.0f);
-    private Ocean ocean = new Ocean(1.0f, MERIDIANS, PARALLELS);
-    private AtmosphereCeiling atmCeiling = new AtmosphereCeiling(ATMOSPHERE_CEILING, 64, 32);
-    private Aurora aurora = new Aurora(512, AURORA_LOWER_BOUND, AURORA_UPPER_BOUND);
+    private SkyboxGeometry skybox = new SkyboxGeometry();
+    private SunGeometry sun = new SunGeometry(lightX, lightY, lightZ);
+    private AdaptiveGlobeGeometry globe = new AdaptiveGlobeGeometry(1.0f, 64);
+    private RingsGeometry rings = new RingsGeometry(128, 1.5f, 3.0f);
+    private OceanGeometry ocean = new OceanGeometry(1.0f, MERIDIANS, PARALLELS);
+    private AtmosphereCeilingGeometry atmCeiling = new AtmosphereCeilingGeometry(ATMOSPHERE_CEILING, 64, 32);
+    private AuroraGeometry aurora = new AuroraGeometry(512, AURORA_LOWER_BOUND, AURORA_UPPER_BOUND);
 
     private ShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;

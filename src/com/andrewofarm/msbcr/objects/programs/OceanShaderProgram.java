@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.programs;
+package com.andrewofarm.msbcr.objects.programs;
 
 import org.joml.Matrix4f;
 

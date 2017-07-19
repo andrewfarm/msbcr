@@ -1,20 +1,20 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
-import com.andrewofarm.msbcr.programs.SunShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.SunShaderProgram;
 
 import java.nio.FloatBuffer;
 
 /**
  * Created by Andrew on 7/2/17.
  */
-public class Sun extends Object3D {
+public class SunGeometry extends Geometry {
 
     private static final int POSITION_COMPONENT_COUNT = 3;
 
     private static final int TOTAL_COMPONENT_COUNT =
             POSITION_COMPONENT_COUNT;
 
-    public Sun(float x, float y, float z) {
+    public SunGeometry(float x, float y, float z) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
 
         vertexCount = 1;

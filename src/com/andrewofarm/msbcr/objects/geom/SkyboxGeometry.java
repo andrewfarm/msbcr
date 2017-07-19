@@ -1,6 +1,6 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
-import com.andrewofarm.msbcr.programs.SkyboxShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.SkyboxShaderProgram;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -8,14 +8,14 @@ import java.nio.FloatBuffer;
 /**
  * Created by Andrew on 7/1/17.
  */
-public class Skybox extends Object3D {
+public class SkyboxGeometry extends Geometry {
 
     private static final int POSITION_COMPONENT_COUNT = 3;
 
     private static final int TOTAL_COMPONENT_COUNT =
             POSITION_COMPONENT_COUNT;
 
-    public Skybox() {
+    public SkyboxGeometry() {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
 
         vertexCount = ObjectBuilder.getSkyboxVertexCount();

@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
 import org.joml.Vector3f;
 

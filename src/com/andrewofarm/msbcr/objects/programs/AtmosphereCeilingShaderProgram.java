@@ -1,11 +1,7 @@
-package com.andrewofarm.msbcr.programs;
+package com.andrewofarm.msbcr.objects.programs;
 
 import org.joml.Matrix4f;
 
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.*;
 
 /**

@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.programs;
+package com.andrewofarm.msbcr.objects.programs;
 
 import org.joml.Matrix4f;
 
@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL20.*;
 /**
  * Created by Andrew on 6/8/17.
  */
-public class AdaptiveGlobeShaderProgram extends ShaderProgram {
+public class GlobeShaderProgram extends ShaderProgram {
 
     private static final String U_MVP_MATRIX = "u_MvpMatrix";
     private static final String U_MODEL_MATRIX = "u_ModelMatrix";
@@ -22,15 +22,9 @@ public class AdaptiveGlobeShaderProgram extends ShaderProgram {
     private static final String U_SHADOW_MAP_UNIT = "u_ShadowMapUnit";
     private static final String U_SEA_LEVEL = "u_SeaLevel";
     private static final String U_TERRAIN_SCALE = "u_TerrainScale";
-    private static final String U_MORPH = "u_Morph";
-    private static final String U_CAM_POS = "u_CamPos";
-    private static final String U_GLOBE_RADIUS = "u_GlobeRadius";
-    private static final String U_ATMOSPHERE_WIDTH = "u_AtmosphereWidth";
     private static final String A_POSITION = "a_Position";
     private static final String A_NORMAL = "a_Normal";
     private static final String A_TEXTURE_COORDS = "a_TextureCoords";
-    private static final String A_TEXTURE_COORDS_ADJ1 = "a_TextureCoordsAdj1";
-    private static final String A_TEXTURE_COORDS_ADJ2 = "a_TextureCoordsAdj2";
 
     public final int uMvpMatrixLocation;
     public final int uModelMatrixLocation;
@@ -42,20 +36,13 @@ public class AdaptiveGlobeShaderProgram extends ShaderProgram {
     public final int uShadowMapUnitLocation;
     public final int uSeaLevelLocation;
     public final int uTerrainScaleLocation;
-    public final int uMorphLocation;
-    public final int uCamPosLocation;
-    public final int uGlobeRadiusLocation;
-    public final int uAtmosphereWidthLocation;
     public final int aPositionLocation;
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
-    public final int aTextureCoordsAdj1Location;
-    public final int aTextureCoordsAdj2Location;
 
-    public AdaptiveGlobeShaderProgram() {
-        super(TextResourceReader.readFile("src/shaders/adaptive_globe_vertex_shader.glsl"),
-                TextResourceReader.readFile("src/shaders/atmospheric_scattering.glsl") +
-                        TextResourceReader.readFile("src/shaders/adaptive_globe_fragment_shader.glsl"));
+    public GlobeShaderProgram() {
+        super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
+                TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
@@ -67,15 +54,9 @@ public class AdaptiveGlobeShaderProgram extends ShaderProgram {
         uShadowMapUnitLocation = glGetUniformLocation(programID, U_SHADOW_MAP_UNIT);
         uSeaLevelLocation = glGetUniformLocation(programID, U_SEA_LEVEL);
         uTerrainScaleLocation = glGetUniformLocation(programID, U_TERRAIN_SCALE);
-        uMorphLocation = glGetUniformLocation(programID, U_MORPH);
-        uCamPosLocation = glGetUniformLocation(programID, U_CAM_POS);
-        uGlobeRadiusLocation = glGetUniformLocation(programID, U_GLOBE_RADIUS);
-        uAtmosphereWidthLocation = glGetUniformLocation(programID, U_ATMOSPHERE_WIDTH);
         aPositionLocation = glGetAttribLocation(programID, A_POSITION);
         aNormalLocation = glGetAttribLocation(programID, A_NORMAL);
         aTextureCoordsLocation = glGetAttribLocation(programID, A_TEXTURE_COORDS);
-        aTextureCoordsAdj1Location = glGetAttribLocation(programID, A_TEXTURE_COORDS_ADJ1);
-        aTextureCoordsAdj2Location = glGetAttribLocation(programID, A_TEXTURE_COORDS_ADJ2);
     }
 
     public void setMvpMatrix(Matrix4f m) {
@@ -124,21 +105,5 @@ public class AdaptiveGlobeShaderProgram extends ShaderProgram {
 
     public void setTerrainScale(float terrainScale) {
         glUniform1f(uTerrainScaleLocation, terrainScale);
-    }
-
-    public void setMorph(float morph) {
-        glUniform1f(uMorphLocation, morph);
-    }
-
-    public void setCamPos(float x, float y, float z) {
-        glUniform3f(uCamPosLocation, x, y, z);
-    }
-
-    public void setGlobeRadius(float globeRadius) {
-        glUniform1f(uGlobeRadiusLocation, globeRadius);
-    }
-
-    public void setAtmosphereWidth(float atmosphereWidth) {
-        glUniform1f(uAtmosphereWidthLocation, atmosphereWidth);
     }
 }

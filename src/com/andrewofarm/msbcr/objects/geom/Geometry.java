@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
 import org.lwjgl.opengl.GL11;
 
@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 /**
  * Created by Andrew on 7/1/17.
  */
-public abstract class Object3D {
+public abstract class Geometry {
 
     public final int STRIDE; //vertex stride, in bytes
 
@@ -32,7 +32,7 @@ public abstract class Object3D {
 
     private int dataOffset;
 
-    public Object3D(int stride) {
+    public Geometry(int stride) {
         STRIDE = stride;
     }
 

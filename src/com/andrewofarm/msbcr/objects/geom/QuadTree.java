@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
 /**
  * Created by Andrew on 7/4/17.

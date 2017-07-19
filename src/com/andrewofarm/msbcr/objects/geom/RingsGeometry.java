@@ -1,14 +1,13 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
-import com.andrewofarm.msbcr.programs.RingsShaderProgram;
-import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.RingsShaderProgram;
 
 import java.nio.FloatBuffer;
 
 /**
  * Created by Andrew on 7/1/17.
  */
-public class Rings extends Object3D {
+public class RingsGeometry extends Geometry {
 
     private static final int POSITION_COMPONENT_COUNT = 3;
     private static final int TEXTURE_COMPONENT_COUNT = 1;
@@ -20,7 +19,7 @@ public class Rings extends Object3D {
     private final float innerRadius;
     private final float outerRadius;
 
-    public Rings(int segments, float innerRadius, float outerRadius) {
+    public RingsGeometry(int segments, float innerRadius, float outerRadius) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;

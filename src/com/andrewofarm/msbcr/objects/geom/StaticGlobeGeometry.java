@@ -1,7 +1,7 @@
-package com.andrewofarm.msbcr.objects;
+package com.andrewofarm.msbcr.objects.geom;
 
-import com.andrewofarm.msbcr.programs.GlobeShaderProgram;
-import com.andrewofarm.msbcr.programs.ShadowMapShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.GlobeShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.ShadowMapShaderProgram;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -9,7 +9,7 @@ import java.nio.IntBuffer;
 /**
  * Created by Andrew on 7/1/17.
  */
-public class Globe extends Object3D {
+public class StaticGlobeGeometry extends Geometry {
 
     private static final int POSITION_COMPONENT_COUNT = 3;
     private static final int NORMAL_COMPONENT_COUNT = 3;
@@ -22,7 +22,7 @@ public class Globe extends Object3D {
 
     private final float radius;
 
-    public Globe(float radius, int meridians, int parallels) {
+    public StaticGlobeGeometry(float radius, int meridians, int parallels) {
         super(TOTAL_COMPONENT_COUNT * BYTES_PER_FLOAT);
         this.radius = radius;
 

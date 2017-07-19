@@ -1,4 +1,4 @@
-package com.andrewofarm.msbcr.programs;
+package com.andrewofarm.msbcr.objects.programs;
 
 import static org.lwjgl.opengl.GL20.*;
 
