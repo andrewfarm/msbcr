@@ -47,6 +47,8 @@ public class HelloWorld {
     private Vector4f camPosModelSpace4 = new Vector4f();
     private static final float FOV = (float) Math.PI / 4;
     private static final float TWO_TAN_HALF_FOV = (float) (2 * Math.tan(FOV / 2));
+    private float auroraNoisePhase = 0;
+    private static final float AURORA_NOISE_PHASE_INCREMENT = 10f;
 
     private boolean drawRings = false;
 
@@ -348,6 +350,8 @@ public class HelloWorld {
             timePassage /= TIME_MOD;
         }
 
+        auroraNoisePhase += AURORA_NOISE_PHASE_INCREMENT * timePassage;
+
         globeAzimuth += timePassage;
         updateModelMatrix();
         if (geostationary) {
@@ -459,6 +463,7 @@ public class HelloWorld {
         updateMvpMatrix(auroraModelMatrix);
         auroraShaderProgram.useProgram();
         auroraShaderProgram.setMvpMatrix(mvpMatrix);
+        auroraShaderProgram.setNoisePhase(auroraNoisePhase);
         auroraShaderProgram.setPolarAngle(AURORA_POLAR_ANGLE);
         aurora.draw(auroraShaderProgram);
         auroraShaderProgram.setPolarAngle((float) Math.PI + AURORA_POLAR_ANGLE);

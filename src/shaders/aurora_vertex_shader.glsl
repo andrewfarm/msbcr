@@ -1,6 +1,6 @@
 #version 120
 
-#define AURORAL_OVAL_NOISE_AMP 0.1
+#define AURORAL_OVAL_NOISE_AMP 0.05
 #define AURORAL_OVAL_NOISE_FREQ 5.0
 
 uniform mat4 u_MvpMatrix;
