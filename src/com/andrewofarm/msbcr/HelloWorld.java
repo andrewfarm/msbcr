@@ -101,7 +101,7 @@ public class HelloWorld {
     private AtmosphereCeilingGeometry atmCeiling = new AtmosphereCeilingGeometry(ATMOSPHERE_CEILING, 64, 32);
     private AuroraGeometry aurora = new AuroraGeometry(512, AURORA_LOWER_BOUND, AURORA_UPPER_BOUND);
 
-    private ShadowMapShaderProgram shadowMapShaderProgram;
+    private AdaptiveGlobeShadowMapShaderProgram shadowMapShaderProgram;
     private SkyboxShaderProgram skyboxShaderProgram;
     private SunShaderProgram sunShaderProgram;
     private AdaptiveGlobeShaderProgram adaptiveGlobeShaderProgram;
@@ -271,7 +271,7 @@ public class HelloWorld {
         // bindings available for use.
         GL.createCapabilities();
 
-        shadowMapShaderProgram = new ShadowMapShaderProgram();
+        shadowMapShaderProgram = new AdaptiveGlobeShadowMapShaderProgram();
         skyboxShaderProgram = new SkyboxShaderProgram();
         sunShaderProgram = new SunShaderProgram();
         adaptiveGlobeShaderProgram = new AdaptiveGlobeShaderProgram();

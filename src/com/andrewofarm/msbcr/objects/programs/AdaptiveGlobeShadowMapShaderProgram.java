@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL20.*;
 /**
  * Created by Andrew on 6/18/17.
  */
-public class ShadowMapShaderProgram extends ShaderProgram {
+public class AdaptiveGlobeShadowMapShaderProgram extends ShaderProgram {
 
     private static final String U_LIGHT_MVP_MATRIX = "u_LightMvpMatrix";
     private static final String U_DISPLACEMENT_MAP_UNIT = "u_DisplacementMapUnit";
@@ -33,8 +33,8 @@ public class ShadowMapShaderProgram extends ShaderProgram {
     public final int aTextureCoordsAdj1Location;
     public final int aTextureCoordsAdj2Location;
 
-    public ShadowMapShaderProgram() {
-        super(TextResourceReader.readFile("src/shaders/shadowmap_vertex_shader.glsl"),
+    public AdaptiveGlobeShadowMapShaderProgram() {
+        super(TextResourceReader.readFile("src/shaders/adaptive_globe_shadowmap_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/shadowmap_fragment_shader.glsl"));
 
         uLightMvpMatrixLocation = glGetUniformLocation(programID, U_LIGHT_MVP_MATRIX);

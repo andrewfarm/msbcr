@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL20.*;
 /**
  * Created by Andrew on 6/8/17.
  */
-public class GlobeShaderProgram extends ShaderProgram {
+public class StaticGlobeShaderProgram extends ShaderProgram {
 
     private static final String U_MVP_MATRIX = "u_MvpMatrix";
     private static final String U_MODEL_MATRIX = "u_ModelMatrix";
@@ -40,7 +40,7 @@ public class GlobeShaderProgram extends ShaderProgram {
     public final int aNormalLocation;
     public final int aTextureCoordsLocation;
 
-    public GlobeShaderProgram() {
+    public StaticGlobeShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
                 TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
 
