@@ -3,6 +3,8 @@
 By Andrew Farm  
 [http://www.andrewofarm.com/](http://www.andrewofarm.com/)
 
+![Screenshot](MSBCR.png)
+
 ## Introduction
 
 MSBCR is a real-time 3D world renderer. It is written in Java using
@@ -26,33 +28,40 @@ MSBCR uses LWJGL 3.1.2 as a Java wrapper around OpenGL. The required LWJGL
 binaries are included in this repository in the lwjgl/ directory.
 
 If you for some strange reason choose instead to download LWJGL from
-[http://lwjgl.org/](http://lwjgl.org/), MSBCR uses these components:
+[lwjgl.org](http://lwjgl.org/), MSBCR uses these components:
 
   * LWJGL core
   * OpenGL bindings
   * stb bindings
   * JOML v1.9.3
-  * Make sure you download the correct binaries for your platform.
 
 ## Installation
 
-MSBCR has been tested on macOS Sierra 10.12.5 with an 1536MB Intel Iris 6100
+MSBCR has been tested on macOS Sierra 10.12.5 with a 1536MB Intel Iris 6100
 GPU.
 
-MSBCR can by run by running HelloWorld.java. First you must add the LWJGL
-binaries to the classpath or as a user library. The way to do this varies by IDE.
+MSBCR can by run by running HelloWorld.java. First you must ensure the LWJGL
+binaries are added to the classpath or as a user library. The way to do this
+varies by IDE.
 
 Whichever platform you build MSBCR on, you must add the following to the Java
 VM arguments:
 
-    -Dorg.lwjgl.librarypath=lwjgl -XstartOnFirstThread
+    -Dorg.lwjgl.librarypath=lwjgl
 
-The first argument specifies the location of the LWJGL binaries (the lwjgl/
-directory), and the second argument is necessary for GLFW to work properly.
+This specifies the location of the LWJGL binaries (the lwjgl/
+directory).
 
-When running from the command line, simply run the command with these arguments.
+When running from the command line, simply run the command with this argument.
 In IntelliJ IDEA, the VM arguments can be edited under Run > Edit
 Configurations.
+
+### X Window System
+
+On some platforms, GLFW uses the X Window System. If this is the case, you will
+also need to add the following VM argument in order for GLFW to work properly:
+
+    -XstartOnFirstThread
 
 ## Support
 
