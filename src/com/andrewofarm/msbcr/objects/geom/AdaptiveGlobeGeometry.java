@@ -2,7 +2,7 @@ package com.andrewofarm.msbcr.objects.geom;
 
 import com.andrewofarm.msbcr.objects.programs.AdaptiveGlobeShaderProgram;
 import com.andrewofarm.msbcr.objects.programs.ShaderProgram;
-import com.andrewofarm.msbcr.objects.programs.ShadowMapShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.AdaptiveGlobeShadowMapShaderProgram;
 import org.joml.Vector3f;
 
 import java.nio.FloatBuffer;
@@ -124,8 +124,8 @@ public class AdaptiveGlobeGeometry extends Geometry {
         if (tileTree.isLeaf()) {
             if (shaderProgram instanceof AdaptiveGlobeShaderProgram) {
                 drawTile((AdaptiveGlobeShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
-            } else if (!WIREFRAME && (shaderProgram instanceof ShadowMapShaderProgram)) {
-                drawTile((ShadowMapShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
+            } else if (!WIREFRAME && (shaderProgram instanceof AdaptiveGlobeShadowMapShaderProgram)) {
+                drawTile((AdaptiveGlobeShadowMapShaderProgram) shaderProgram, tileTree.getValue(), viewpointModelSpace, twoTanHalfFOV, level);
             }
         } else {
             level++;
@@ -162,7 +162,7 @@ public class AdaptiveGlobeGeometry extends Geometry {
         }
     }
 
-    private void drawTile(ShadowMapShaderProgram shaderProgram, GlobeTileGeometry tile, Vector3f viewpointModelSpace, float twoTanHalfFOV, int level) {
+    private void drawTile(AdaptiveGlobeShadowMapShaderProgram shaderProgram, GlobeTileGeometry tile, Vector3f viewpointModelSpace, float twoTanHalfFOV, int level) {
         FloatBuffer tileBuf = (FloatBuffer) tile.vertexBuf;
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, GlobeTileGeometry.POSITION_COMPONENT_COUNT, tileBuf);

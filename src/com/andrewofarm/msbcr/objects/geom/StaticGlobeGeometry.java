@@ -1,7 +1,7 @@
 package com.andrewofarm.msbcr.objects.geom;
 
-import com.andrewofarm.msbcr.objects.programs.GlobeShaderProgram;
-import com.andrewofarm.msbcr.objects.programs.ShadowMapShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.StaticGlobeShaderProgram;
+import com.andrewofarm.msbcr.objects.programs.StaticGlobeShadowMapShaderProgram;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -38,7 +38,7 @@ public class StaticGlobeGeometry extends Geometry {
         return radius;
     }
 
-    public void draw(GlobeShaderProgram shaderProgram) {
+    public void draw(StaticGlobeShaderProgram shaderProgram) {
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
         bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT);
@@ -46,7 +46,7 @@ public class StaticGlobeGeometry extends Geometry {
         drawElements(MODE_TRIANGLE_STRIP);
     }
 
-    public void draw(ShadowMapShaderProgram shaderProgram) {
+    public void draw(StaticGlobeShadowMapShaderProgram shaderProgram) {
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
         skipAttributes(NORMAL_COMPONENT_COUNT);
