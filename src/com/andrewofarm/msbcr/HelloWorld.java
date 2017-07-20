@@ -67,7 +67,7 @@ public class HelloWorld {
     private static final float GEOMAGNETIC_POLE_LONGITUDE = 0.1681f;
     private static final float AURORA_POLAR_ANGLE = 0.3f;
     private static final float AURORA_LOWER_BOUND = GLOBE_RADIUS + 0.01f;
-    private static final float AURORA_UPPER_BOUND = GLOBE_RADIUS + 0.04f;
+    private static final float AURORA_UPPER_BOUND = GLOBE_RADIUS + 0.1f;
 
     private Matrix4f auroraModelMatrix = new Matrix4f();
 
