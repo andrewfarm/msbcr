@@ -1,5 +1,6 @@
 package com.andrewofarm.msbcr.objects.geom;
 
+import com.andrewofarm.msbcr.objects.programs.CloudShaderProgram;
 import com.andrewofarm.msbcr.objects.programs.OceanShaderProgram;
 
 import java.nio.FloatBuffer;
@@ -38,6 +39,14 @@ public class OceanGeometry extends Geometry {
     }
 
     public void draw(OceanShaderProgram shaderProgram) {
+        setDataOffset(0);
+        bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
+        bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT);
+        bindFloatAttribute(shaderProgram.aTextureCoordsLocation, TEXTURE_COMPONENT_COUNT);
+        drawElements(MODE_TRIANGLE_STRIP);
+    }
+
+    public void draw(CloudShaderProgram shaderProgram) {
         setDataOffset(0);
         bindFloatAttribute(shaderProgram.aPositionLocation, POSITION_COMPONENT_COUNT);
         bindFloatAttribute(shaderProgram.aNormalLocation, NORMAL_COMPONENT_COUNT);

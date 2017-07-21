@@ -30,6 +30,8 @@ public class HelloWorld {
     private static final float GLOBE_RADIUS = 1.0f;
     private static final float ATMOSPHERE_WIDTH = 0.2f;
     private static final float ATMOSPHERE_CEILING = GLOBE_RADIUS + ATMOSPHERE_WIDTH;
+    private static final float CLOUD_HEIGHT = 0.02f;
+    private static final float CLOUD_RADIUS = GLOBE_RADIUS + CLOUD_HEIGHT;
     private static final float SEA_LEVEL = 0.5f;
     private static final float TERRAIN_SCALE = 0.5f;
 
@@ -47,8 +49,11 @@ public class HelloWorld {
     private Vector4f camPosModelSpace4 = new Vector4f();
     private static final float FOV = (float) Math.PI / 4;
     private static final float TWO_TAN_HALF_FOV = (float) (2 * Math.tan(FOV / 2));
+
     private float auroraNoisePhase = 0;
     private static final float AURORA_NOISE_PHASE_INCREMENT = 20f;
+    private float cloudsNoisePhase = 0;
+    private static final float CLOUDS_NOISE_PHASE_INCREMENT = 5f;
 
     private boolean drawRings = false;
 
@@ -98,6 +103,7 @@ public class HelloWorld {
     private AdaptiveGlobeGeometry globe = new AdaptiveGlobeGeometry(1.0f, 64);
     private RingsGeometry rings = new RingsGeometry(128, 1.5f, 3.0f);
     private OceanGeometry ocean = new OceanGeometry(1.0f, MERIDIANS, PARALLELS);
+    private OceanGeometry clouds = new OceanGeometry(CLOUD_RADIUS, MERIDIANS, PARALLELS);
     private AtmosphereCeilingGeometry atmCeiling = new AtmosphereCeilingGeometry(ATMOSPHERE_CEILING, 64, 32);
     private AuroraGeometry aurora = new AuroraGeometry(512, AURORA_LOWER_BOUND, AURORA_UPPER_BOUND);
 
@@ -107,6 +113,7 @@ public class HelloWorld {
     private AdaptiveGlobeShaderProgram adaptiveGlobeShaderProgram;
     private RingsShaderProgram ringsShaderProgram;
     private OceanShaderProgram oceanShaderProgram;
+    private CloudShaderProgram cloudShaderProgram;
     private AtmosphereCeilingShaderProgram atmosphereCeilingShaderProgram;
     private AuroraShaderProgram auroraShaderProgram;
 
@@ -277,6 +284,7 @@ public class HelloWorld {
         adaptiveGlobeShaderProgram = new AdaptiveGlobeShaderProgram();
         if (drawRings) ringsShaderProgram = new RingsShaderProgram();
         oceanShaderProgram = new OceanShaderProgram();
+        cloudShaderProgram = new CloudShaderProgram();
         atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
         auroraShaderProgram = new AuroraShaderProgram();
 
@@ -353,6 +361,7 @@ public class HelloWorld {
         }
 
         auroraNoisePhase += AURORA_NOISE_PHASE_INCREMENT * timePassage;
+        cloudsNoisePhase += CLOUDS_NOISE_PHASE_INCREMENT * timePassage;
 
         globeAzimuth += timePassage;
         updateModelMatrix();
@@ -461,8 +470,29 @@ public class HelloWorld {
         atmosphereCeilingShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         atmCeiling.draw(atmosphereCeilingShaderProgram);
 
+        //draw clouds
+
         glDisable(GL_CULL_FACE);
         glDepthMask(false); //perform depth tests, but don't write to the depth buffer
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        cloudShaderProgram.useProgram();
+        cloudShaderProgram.setMvpMatrix(mvpMatrix);
+        cloudShaderProgram.setModelMatrix(modelMatrix);
+        cloudShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
+        cloudShaderProgram.setCloudCoverUnit(0); //TODO
+        cloudShaderProgram.setNoisePhase(0); //TODO
+        cloudShaderProgram.setLightDirection(lightX, lightY, lightZ);
+        cloudShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
+        cloudShaderProgram.setGlobeRadius(GLOBE_RADIUS);
+        cloudShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
+        clouds.draw(cloudShaderProgram);
+        glDepthMask(true);
+
+        //draw aurora
+
+        glDisable(GL_CULL_FACE);
+        glDepthMask(false); //perform depth tests, but don't write to the depth buffer
+        glBlendFunc(GL_ONE, GL_ONE);
         updateMvpMatrix(auroraModelMatrix);
         auroraShaderProgram.useProgram();
         auroraShaderProgram.setMvpMatrix(mvpMatrix);

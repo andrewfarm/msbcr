@@ -27,9 +27,9 @@ public class AuroraShaderProgram extends ShaderProgram {
 
     public AuroraShaderProgram() {
         super(TextResourceReader.readFile("src/shaders/aurora_vertex_shader.glsl") +
-                        TextResourceReader.readFile("src/shaders/classicnoise3D.glsl"),
+                        TextResourceReader.readFile("src/shaders/webgl-noise/src/classicnoise3D.glsl"),
                 TextResourceReader.readFile("src/shaders/aurora_fragment_shader.glsl") +
-                        TextResourceReader.readFile("src/shaders/classicnoise3D.glsl"));
+                        TextResourceReader.readFile("src/shaders/webgl-noise/src/classicnoise3D.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uTextureUnitLocation = glGetUniformLocation(programID, U_TEXTURE_UNIT);

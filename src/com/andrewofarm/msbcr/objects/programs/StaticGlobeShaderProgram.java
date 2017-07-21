@@ -41,8 +41,8 @@ public class StaticGlobeShaderProgram extends ShaderProgram {
     public final int aTextureCoordsLocation;
 
     public StaticGlobeShaderProgram() {
-        super(TextResourceReader.readFile("src/shaders/globe_vertex_shader.glsl"),
-                TextResourceReader.readFile("src/shaders/globe_fragment_shader.glsl"));
+        super(TextResourceReader.readFile("src/shaders/static_globe_vertex_shader.glsl"),
+                TextResourceReader.readFile("src/shaders/static_globe_fragment_shader.glsl"));
 
         uMvpMatrixLocation = glGetUniformLocation(programID, U_MVP_MATRIX);
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
