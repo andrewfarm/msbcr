@@ -30,8 +30,6 @@ public class HelloWorld {
     private static final float GLOBE_RADIUS = 1.0f;
     private static final float ATMOSPHERE_WIDTH = 0.2f;
     private static final float ATMOSPHERE_CEILING = GLOBE_RADIUS + ATMOSPHERE_WIDTH;
-    private static final float CLOUD_HEIGHT = 0.02f;
-    private static final float CLOUD_RADIUS = GLOBE_RADIUS + CLOUD_HEIGHT;
     private static final float SEA_LEVEL = 0.5f;
     private static final float TERRAIN_SCALE = 0.5f;
 
@@ -103,7 +101,7 @@ public class HelloWorld {
     private AdaptiveGlobeGeometry globe = new AdaptiveGlobeGeometry(1.0f, 64);
     private RingsGeometry rings = new RingsGeometry(128, 1.5f, 3.0f);
     private OceanGeometry ocean = new OceanGeometry(1.0f, MERIDIANS, PARALLELS);
-    private OceanGeometry clouds = new OceanGeometry(CLOUD_RADIUS, MERIDIANS, PARALLELS);
+    private OceanGeometry cloudLayer1 = new OceanGeometry(GLOBE_RADIUS + 0.02f, MERIDIANS, PARALLELS);
     private AtmosphereCeilingGeometry atmCeiling = new AtmosphereCeilingGeometry(ATMOSPHERE_CEILING, 64, 32);
     private AuroraGeometry aurora = new AuroraGeometry(512, AURORA_LOWER_BOUND, AURORA_UPPER_BOUND);
 
@@ -470,7 +468,7 @@ public class HelloWorld {
         atmosphereCeilingShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         atmCeiling.draw(atmosphereCeilingShaderProgram);
 
-        //draw clouds
+        //draw cloud layers
 
         glDisable(GL_CULL_FACE);
         glDepthMask(false); //perform depth tests, but don't write to the depth buffer
@@ -481,12 +479,12 @@ public class HelloWorld {
         cloudShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
         cloudShaderProgram.setCloudCoverUnit(0); //TODO
         cloudShaderProgram.setShadowMapUnit(shadowMapDepthTexture);
-        cloudShaderProgram.setNoisePhase(cloudsNoisePhase);
         cloudShaderProgram.setLightDirection(lightX, lightY, lightZ);
         cloudShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
         cloudShaderProgram.setGlobeRadius(GLOBE_RADIUS);
         cloudShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
-        clouds.draw(cloudShaderProgram);
+        cloudShaderProgram.setNoisePhase(cloudsNoisePhase);
+        cloudLayer1.draw(cloudShaderProgram);
         glDepthMask(true);
 
         //draw aurora
