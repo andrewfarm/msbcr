@@ -480,7 +480,8 @@ public class HelloWorld {
         cloudShaderProgram.setModelMatrix(modelMatrix);
         cloudShaderProgram.setLightBiasMvpMatrix(lightBiasMvpMatrix);
         cloudShaderProgram.setCloudCoverUnit(0); //TODO
-        cloudShaderProgram.setNoisePhase(0); //TODO
+        cloudShaderProgram.setShadowMapUnit(shadowMapDepthTexture);
+        cloudShaderProgram.setNoisePhase(cloudsNoisePhase);
         cloudShaderProgram.setLightDirection(lightX, lightY, lightZ);
         cloudShaderProgram.setCamPos(camPos.get(0), camPos.get(1), camPos.get(2));
         cloudShaderProgram.setGlobeRadius(GLOBE_RADIUS);

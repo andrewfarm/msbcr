@@ -5,6 +5,7 @@ import org.joml.Matrix4f;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glUniform1f;
@@ -18,6 +19,7 @@ public class CloudShaderProgram extends ShaderProgram {
     private static final String U_MODEL_MATRIX = "u_ModelMatrix";
     private static final String U_LIGHT_BIAS_MVP_MATRIX = "u_LightBiasMvpMatrix";
     private static final String U_CLOUD_COVER_UNIT = "u_CloudCoverUnit";
+    private static final String U_SHADOW_MAP_UNIT = "u_ShadowMapUnit";
     private static final String U_NOISE_PHASE = "u_NoisePhase";
     private static final String U_LIGHT_DIRECTION = "u_LightDirection";
     private static final String U_CAM_POS = "u_CamPos";
@@ -31,6 +33,7 @@ public class CloudShaderProgram extends ShaderProgram {
     public final int uModelMatrixLocation;
     public final int uLightBiasMvpMatrixLocation;
     public final int uCloudCoverUnitLocation;
+    public final int uShadowMapUnitLocation;
     public final int uNoisePhaseLocation;
     public final int uLightDirectionLocation;
     public final int uCamPosLocation;
@@ -50,6 +53,7 @@ public class CloudShaderProgram extends ShaderProgram {
         uModelMatrixLocation = glGetUniformLocation(programID, U_MODEL_MATRIX);
         uLightBiasMvpMatrixLocation = glGetUniformLocation(programID, U_LIGHT_BIAS_MVP_MATRIX);
         uCloudCoverUnitLocation = glGetUniformLocation(programID, U_CLOUD_COVER_UNIT);
+        uShadowMapUnitLocation = glGetUniformLocation(programID, U_SHADOW_MAP_UNIT);
         uNoisePhaseLocation = glGetUniformLocation(programID, U_NOISE_PHASE);
         uLightDirectionLocation = glGetUniformLocation(programID, U_LIGHT_DIRECTION);
         uCamPosLocation = glGetUniformLocation(programID, U_CAM_POS);
@@ -76,6 +80,12 @@ public class CloudShaderProgram extends ShaderProgram {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
         glUniform1i(uCloudCoverUnitLocation, 0);
+    }
+
+    public void setShadowMapUnit(int textureID) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glUniform1i(uShadowMapUnitLocation, 1);
     }
 
     public void setNoisePhase(float noisePhase) {

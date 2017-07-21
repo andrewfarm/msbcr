@@ -4,8 +4,8 @@
 #define SHADOW_BIAS_MAX 0.002
 
 #define CLOUD_AMP 1.0
-#define CLOUD_FREQ 20.0
-#define CLOUD_OCTAVES 1
+#define CLOUD_FREQ 5.0
+#define CLOUD_OCTAVES 8
 
 uniform sampler2D u_CloudCoverUnit;
 uniform sampler2D u_ShadowMapUnit;
@@ -37,7 +37,7 @@ void main() {
         totalLight += (1.0 - AMBIENT_STRENGTH) * directionalStrength;
     }
 
-    vec4 surfaceColor = vec4(vec3(1.0), noise);
+    vec4 surfaceColor = vec4(vec3(totalLight), noise);
     float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   surfaceColor.r, v_Position);
     float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, surfaceColor.g, v_Position);
     float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  surfaceColor.b, v_Position);
