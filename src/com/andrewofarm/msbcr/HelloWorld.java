@@ -115,6 +115,9 @@ public class HelloWorld {
     private AtmosphereCeilingShaderProgram atmosphereCeilingShaderProgram;
     private AuroraShaderProgram auroraShaderProgram;
 
+    private ScreenGeometry screenGeometry = new ScreenGeometry();
+    private ScreenShaderProgram screenShaderProgram;
+
     private int starfieldTexture;
     private int sunTexture;
     private int globeTexture;
@@ -289,6 +292,8 @@ public class HelloWorld {
         atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
         auroraShaderProgram = new AuroraShaderProgram();
 
+        screenShaderProgram = new SimpleScreenShaderProgram();
+
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
         normalMap = TextureLoader.loadTexture2D("res/normalmap.png");
@@ -311,20 +316,15 @@ public class HelloWorld {
             shadowMapDepthTexture = shadowMap.textureID;
         }
 
+        TextureLoader.TextureFramebuffer screenBuffer = TextureLoader.createColorTextureFrameBuffer(
+                windowWidth, windowHeight, GL_FLOAT, GL_NEAREST);
+        if (screenBuffer != null) {
+            screenFramebuffer = screenBuffer.frameBufferID;
+            screenTexture = screenBuffer.textureID;
+        }
+
         modelMatrix.identity();
         viewMatrix.setTranslation(0, 0, -camDist).rotate(camAzimuth, 0, 1, 0).rotate(camElev, 1, 0, 0);
-
-        updateLightMatrices();
-
-        // Set the clear color
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     }
 
     private void loop() {
@@ -380,6 +380,31 @@ public class HelloWorld {
     }
 
     private void render() {
+//        renderScene();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, windowWidth * 2, windowHeight * 2);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glClear(GL_COLOR_BUFFER_BIT);
+        screenShaderProgram.useProgram();
+        screenShaderProgram.setTexture(screenTexture);
+        screenGeometry.draw(screenShaderProgram);
+
+        glfwSwapBuffers(window); // swap the color buffers
+    }
+
+    private void renderScene() {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
         //render to shadow map
@@ -510,8 +535,6 @@ public class HelloWorld {
         glCullFace(GL_BACK);
         glDepthMask(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glfwSwapBuffers(window); // swap the color buffers
     }
 
     private void updateProjectionMatrix(int width, int height) {
