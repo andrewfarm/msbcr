@@ -4,7 +4,6 @@ import org.lwjgl.stb.STBImage;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -20,13 +19,13 @@ import static org.lwjgl.opengl.GL32.glFramebufferTexture;
  */
 public abstract class TextureLoader {
 
-    static class ShadowMap {
+    static class TextureFramebuffer {
         int frameBufferID;
-        int depthTextureID;
+        int textureID;
 
-        ShadowMap(int frameBufferID, int depthTextureID) {
+        TextureFramebuffer(int frameBufferID, int textureID) {
             this.frameBufferID = frameBufferID;
-            this.depthTextureID = depthTextureID;
+            this.textureID = textureID;
         }
     }
 
@@ -141,37 +140,46 @@ public abstract class TextureLoader {
         return textureObjectIDs[0];
     }
 
-    static ShadowMap createShadowMap(int width, int height) {
-        System.out.println("creating shadow map");
+    static TextureFramebuffer createColorTextureFrameBuffer(int width, int height, int type, int filter) {
+        return createTextureFramebuffer(GL_RGB, GL_RGB, type, filter, width, height, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0);
+    }
+
+    static TextureFramebuffer createDepthTextureFrameBuffer(int width, int height, int type, int filter) {
+        return createTextureFramebuffer(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, type, filter, width, height, GL_DEPTH_ATTACHMENT, GL_NONE);
+    }
+
+    private static TextureFramebuffer createTextureFramebuffer(int internalFormat, int format, int type, int filter,
+                                                               int width, int height, int attachment, int buffer) {
+        System.out.println("creating textured framebuffer");
         int[] frameBufferIDs = new int[1];
         glGenFramebuffers(frameBufferIDs);
 
-        int[] depthTextureIDs = new int[1];
-        glGenTextures(depthTextureIDs);
-        glBindTexture(GL_TEXTURE_2D, depthTextureIDs[0]);
+        int[] textureIDs = new int[1];
+        glGenTextures(textureIDs);
+        glBindTexture(GL_TEXTURE_2D, textureIDs[0]);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, width, height, 0,
-                GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0,
+                format, type, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBufferIDs[0]);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTextureIDs[0], 0);
-        glDrawBuffer(GL_NONE); // No color buffer is drawn to.
-        glReadBuffer(GL_NONE);
+        glFramebufferTexture(GL_FRAMEBUFFER, attachment, textureIDs[0], 0);
+        glDrawBuffer(buffer); // No color buffer is drawn to.
+        glReadBuffer(buffer);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         // Always check that our framebuffer is ok
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if(status == GL_FRAMEBUFFER_COMPLETE) {
-            System.out.println("shadow map creation successful");
+            System.out.println("framebuffer creation successful");
         } else {
-            System.err.println("error creating framebuffer for shadow map (status: " + status + ")");
+            System.err.println("error creating framebuffer (status: " + status + ")");
             return null;
         }
 
-        return new ShadowMap(frameBufferIDs[0], depthTextureIDs[0]);
+        return new TextureFramebuffer(frameBufferIDs[0], textureIDs[0]);
     }
 }

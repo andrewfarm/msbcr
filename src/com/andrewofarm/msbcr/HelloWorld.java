@@ -129,6 +129,9 @@ public class HelloWorld {
     private int shadowMapFramebuffer;
     private int shadowMapDepthTexture;
 
+    private int screenFramebuffer;
+    private int screenTexture;
+
     private void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
@@ -301,10 +304,11 @@ public class HelloWorld {
         if (drawRings) ringsTexture = TextureLoader.loadTexture1D("res/rings.jpg");
         auroraTexture = TextureLoader.loadTexture1D("res/aurora.png");
 
-        TextureLoader.ShadowMap shadowMap = TextureLoader.createShadowMap(shadowMapWidth, shadowMapHeight);
+        TextureLoader.TextureFramebuffer shadowMap = TextureLoader.createDepthTextureFrameBuffer(
+                shadowMapWidth, shadowMapHeight, GL_FLOAT, GL_LINEAR);
         if (shadowMap != null) {
             shadowMapFramebuffer = shadowMap.frameBufferID;
-            shadowMapDepthTexture = shadowMap.depthTextureID;
+            shadowMapDepthTexture = shadowMap.textureID;
         }
 
         modelMatrix.identity();
