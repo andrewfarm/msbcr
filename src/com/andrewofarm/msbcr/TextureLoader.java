@@ -141,15 +141,18 @@ public abstract class TextureLoader {
     }
 
     static TextureFramebuffer createColorTextureFrameBuffer(int width, int height, int type, int filter) {
-        return createTextureFramebuffer(GL_RGB, GL_RGB, type, filter, width, height, GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0);
+        return createTextureFramebuffer(GL_RGB, GL_RGB, type, filter, width, height,
+                GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0, true);
     }
 
     static TextureFramebuffer createDepthTextureFrameBuffer(int width, int height, int type, int filter) {
-        return createTextureFramebuffer(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, type, filter, width, height, GL_DEPTH_ATTACHMENT, GL_NONE);
+        return createTextureFramebuffer(GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, type, filter, width, height,
+                GL_DEPTH_ATTACHMENT, GL_NONE, false);
     }
 
     private static TextureFramebuffer createTextureFramebuffer(int internalFormat, int format, int type, int filter,
-                                                               int width, int height, int attachment, int buffer) {
+                                                               int width, int height, int attachment, int buffer,
+                                                               boolean addDepthRenderBuffer) {
         System.out.println("creating textured framebuffer");
         int[] frameBufferIDs = new int[1];
         glGenFramebuffers(frameBufferIDs);
@@ -169,7 +172,15 @@ public abstract class TextureLoader {
         glFramebufferTexture(GL_FRAMEBUFFER, attachment, textureIDs[0], 0);
         glDrawBuffer(buffer); // No color buffer is drawn to.
         glReadBuffer(buffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        if (addDepthRenderBuffer) {
+            // The depth buffer
+            int[] depthRenderBufferIDs = new int[1];
+            glGenRenderbuffers(depthRenderBufferIDs);
+            glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBufferIDs[0]);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferIDs[0]);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        }
 
         // Always check that our framebuffer is ok
         int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -180,6 +191,7 @@ public abstract class TextureLoader {
             return null;
         }
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         return new TextureFramebuffer(frameBufferIDs[0], textureIDs[0]);
     }
 }

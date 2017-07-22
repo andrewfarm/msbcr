@@ -292,7 +292,7 @@ public class HelloWorld {
         atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
         auroraShaderProgram = new AuroraShaderProgram();
 
-        screenShaderProgram = new SimpleScreenShaderProgram();
+        screenShaderProgram = new HDRScreenShaderProgram();
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -317,7 +317,7 @@ public class HelloWorld {
         }
 
         TextureLoader.TextureFramebuffer screenBuffer = TextureLoader.createColorTextureFrameBuffer(
-                windowWidth, windowHeight, GL_FLOAT, GL_NEAREST);
+                windowWidth * 2, windowHeight * 2, GL_FLOAT, GL_NEAREST);
         if (screenBuffer != null) {
             screenFramebuffer = screenBuffer.frameBufferID;
             screenTexture = screenBuffer.textureID;
@@ -380,7 +380,7 @@ public class HelloWorld {
     }
 
     private void render() {
-//        renderScene();
+        renderScene();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, windowWidth * 2, windowHeight * 2);
@@ -405,8 +405,6 @@ public class HelloWorld {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
         //render to shadow map
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFramebuffer);
@@ -420,10 +418,12 @@ public class HelloWorld {
         shadowMapShaderProgram.setTerrainScale(TERRAIN_SCALE);
         globe.draw(shadowMapShaderProgram, camPosModelSpace, TWO_TAN_HALF_FOV);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, screenFramebuffer);
         glViewport(0, 0, windowWidth * 2, windowHeight * 2); //TODO check for retina display
 
         //draw starfield
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         skyboxShaderProgram.useProgram();
         skyboxShaderProgram.setVpMatrix(projectionMatrix.mul(vpRotationMatrix, vpRotationMatrix));
@@ -513,7 +513,7 @@ public class HelloWorld {
         cloudShaderProgram.setGlobeRadius(GLOBE_RADIUS);
         cloudShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         cloudShaderProgram.setNoisePhase(cloudsNoisePhase);
-        cloudLayer1.draw(cloudShaderProgram);
+//        cloudLayer1.draw(cloudShaderProgram);
         glDepthMask(true);
 
         //draw aurora
