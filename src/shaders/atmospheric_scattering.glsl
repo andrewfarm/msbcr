@@ -102,8 +102,8 @@ float inScatter_rayleigh(float wavelength, vec3 pointA, vec3 pointB) {
         samplePoint += differential;
     }
     outerIntegral *= length(dist);
-//    float theta; TODO
-    return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength)/* * phase_rayleigh(theta)*/ * outerIntegral;
+    float theta = dot(dist, u_LightDirection) / length(dist);
+    return SUN_BRIGHTNESS * scatterCoef_rayleigh(wavelength) * phase_rayleigh(theta) * outerIntegral;
 }
 
 float inScatter_rayleigh_doIntersection(float wavelength, vec3 pointOnCeiling) {
