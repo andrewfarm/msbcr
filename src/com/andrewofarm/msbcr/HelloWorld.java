@@ -31,7 +31,7 @@ public class HelloWorld {
     private static final float ATMOSPHERE_WIDTH = 0.2f;
     private static final float ATMOSPHERE_CEILING = GLOBE_RADIUS + ATMOSPHERE_WIDTH;
     private static final float SEA_LEVEL = 0.5f;
-    private static final float TERRAIN_SCALE = 0.5f;
+    private static final float TERRAIN_SCALE = 0.75f;
 
     private float lightX = -1, lightY = 0, lightZ = 0;
 
@@ -70,7 +70,7 @@ public class HelloWorld {
     private static final float GEOMAGNETIC_POLE_LONGITUDE = 0.1681f;
     private static final float AURORA_POLAR_ANGLE = 0.3f;
     private static final float AURORA_LOWER_BOUND = GLOBE_RADIUS + 0.01f;
-    private static final float AURORA_UPPER_BOUND = GLOBE_RADIUS + 0.1f;
+    private static final float AURORA_UPPER_BOUND = GLOBE_RADIUS + 0.075f;
 
     private Matrix4f auroraModelMatrix = new Matrix4f();
 
@@ -117,6 +117,10 @@ public class HelloWorld {
 
     private ScreenGeometry screenGeometry = new ScreenGeometry();
     private ScreenShaderProgram screenShaderProgram;
+
+    private boolean hdr = true;
+    private SimpleScreenShaderProgram simpleScreenShaderProgram;
+    private HDRScreenShaderProgram hdrScreenShaderProgram;
 
     private int starfieldTexture;
     private int sunTexture;
@@ -186,6 +190,10 @@ public class HelloWorld {
                         break;
                     case GLFW_KEY_ESCAPE:
                         geostationary = !geostationary;
+                        break;
+                    case GLFW_KEY_H:
+                        hdr = !hdr;
+                        screenShaderProgram = hdr ? hdrScreenShaderProgram : simpleScreenShaderProgram;
                         break;
                 }
             } else if (action == GLFW_RELEASE) {
@@ -292,7 +300,9 @@ public class HelloWorld {
         atmosphereCeilingShaderProgram = new AtmosphereCeilingShaderProgram();
         auroraShaderProgram = new AuroraShaderProgram();
 
-        screenShaderProgram = new HDRScreenShaderProgram();
+        simpleScreenShaderProgram = new SimpleScreenShaderProgram();
+        hdrScreenShaderProgram = new HDRScreenShaderProgram();
+        screenShaderProgram = hdr ? hdrScreenShaderProgram : simpleScreenShaderProgram;
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -501,6 +511,7 @@ public class HelloWorld {
 
         glDisable(GL_CULL_FACE);
         glDepthMask(false); //perform depth tests, but don't write to the depth buffer
+        glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         cloudShaderProgram.useProgram();
         cloudShaderProgram.setMvpMatrix(mvpMatrix);
@@ -513,7 +524,7 @@ public class HelloWorld {
         cloudShaderProgram.setGlobeRadius(GLOBE_RADIUS);
         cloudShaderProgram.setAtmosphereWidth(ATMOSPHERE_WIDTH);
         cloudShaderProgram.setNoisePhase(cloudsNoisePhase);
-//        cloudLayer1.draw(cloudShaderProgram);
+        cloudLayer1.draw(cloudShaderProgram);
         glDepthMask(true);
 
         //draw aurora

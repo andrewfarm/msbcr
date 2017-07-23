@@ -33,12 +33,12 @@ void main() {
         totalLight += (1.0 - AMBIENT_STRENGTH) * directionalStrength;
     }
     vec4 surfaceColor = vec4((texColor * totalLight).rgb, 1.0);
-    if (texture2D(u_DisplacementMapUnit, v_TextureCoords).r < u_SeaLevel) {
+//    if (texture2D(u_DisplacementMapUnit, v_TextureCoords).r < u_SeaLevel) {
         gl_FragColor = surfaceColor;
-    } else {
-        float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   surfaceColor.r, v_Position);
-        float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, surfaceColor.g, v_Position);
-        float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  surfaceColor.b, v_Position);
-        gl_FragColor = vec4(r, g, b, surfaceColor.a);
-    }
+//    } else {
+//        float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   surfaceColor.r, v_Position);
+//        float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, surfaceColor.g, v_Position);
+//        float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  surfaceColor.b, v_Position);
+//        gl_FragColor = vec4(r, g, b, surfaceColor.a);
+//    }
 }

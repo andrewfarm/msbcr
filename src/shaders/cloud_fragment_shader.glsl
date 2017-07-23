@@ -37,9 +37,8 @@ void main() {
         totalLight += (1.0 - AMBIENT_STRENGTH) * directionalStrength;
     }
 
-    vec4 surfaceColor = vec4(vec3(totalLight), noise);
-    float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   surfaceColor.r, v_Position);
-    float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, surfaceColor.g, v_Position);
-    float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  surfaceColor.b, v_Position);
-    gl_FragColor = vec4(r, g, b, surfaceColor.a);
+    float r = surfaceScatter_rayleigh(WAVELENGTH_RED,   totalLight, v_Position);
+    float g = surfaceScatter_rayleigh(WAVELENGTH_GREEN, totalLight, v_Position);
+    float b = surfaceScatter_rayleigh(WAVELENGTH_BLUE,  totalLight, v_Position);
+    gl_FragColor = vec4(r, g, b, clamp(noise, 0.0, 1.0));
 }

@@ -1,6 +1,6 @@
 #version 120
 
-#define EXPOSURE 1.0
+#define EXPOSURE 1.5
 
 uniform sampler2D u_TextureUnit;
 
