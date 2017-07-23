@@ -63,6 +63,18 @@ also need to add the following VM argument in order for GLFW to work properly:
 
     -XstartOnFirstThread
 
+## Navigation
+
+  * Scroll to zoom.
+  * Drag to rotate the camera around the globe.
+  * Use arrow keys to change the camera angle.
+  * Use + and - to speed up/slow down the passage of time.
+  * Use esc to toggle between a stationary and geostationary viewpoint.
+  * Use number keys to switch between rendering modes.
+    * 1 - normal
+    * 2 - HDR
+    * 3 - experimental
+
 ## Support
 
 MSBCR has only been tested on macOS. If you encounter any problems building or
@@ -73,6 +85,7 @@ fix it and/or update this documentation.
 
 MSBCR currently has some known issues, including:
 
+  * Incorrect viewport size on non-retina displays
   * Texture split along prime meridian
   * Visible T-junctions along the edges of globe tiles at different levels of
 detail
