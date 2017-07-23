@@ -52,6 +52,8 @@ public class HelloWorld {
     private static final float AURORA_NOISE_PHASE_INCREMENT = 20f;
     private float cloudsNoisePhase = 0;
     private static final float CLOUDS_NOISE_PHASE_INCREMENT = 5f;
+    private float experimentalFilterNoisePhase = 0;
+    private static final float EXPERIMENTAL_FILTER_NOISE_PHASE_INCREMENT = 200f;
 
     private boolean drawRings = false;
 
@@ -117,10 +119,9 @@ public class HelloWorld {
 
     private ScreenGeometry screenGeometry = new ScreenGeometry();
     private ScreenShaderProgram screenShaderProgram;
-
-    private boolean hdr = true;
     private SimpleScreenShaderProgram simpleScreenShaderProgram;
     private HDRScreenShaderProgram hdrScreenShaderProgram;
+    private ExperimentalScreenShaderProgram experimentalScreenShaderProgram;
 
     private int starfieldTexture;
     private int sunTexture;
@@ -191,9 +192,14 @@ public class HelloWorld {
                     case GLFW_KEY_ESCAPE:
                         geostationary = !geostationary;
                         break;
-                    case GLFW_KEY_H:
-                        hdr = !hdr;
-                        screenShaderProgram = hdr ? hdrScreenShaderProgram : simpleScreenShaderProgram;
+                    case GLFW_KEY_1:
+                        screenShaderProgram = simpleScreenShaderProgram;
+                        break;
+                    case GLFW_KEY_2:
+                        screenShaderProgram = hdrScreenShaderProgram;
+                        break;
+                    case GLFW_KEY_3:
+                        screenShaderProgram = experimentalScreenShaderProgram;
                         break;
                 }
             } else if (action == GLFW_RELEASE) {
@@ -302,7 +308,8 @@ public class HelloWorld {
 
         simpleScreenShaderProgram = new SimpleScreenShaderProgram();
         hdrScreenShaderProgram = new HDRScreenShaderProgram();
-        screenShaderProgram = hdr ? hdrScreenShaderProgram : simpleScreenShaderProgram;
+        experimentalScreenShaderProgram = new ExperimentalScreenShaderProgram();
+        screenShaderProgram = hdrScreenShaderProgram;
 
         globeTexture = TextureLoader.loadTexture2D("res/earth-nasa.jpg");
         displacementMap = TextureLoader.loadTexture2D("res/elevation.png");
@@ -374,6 +381,7 @@ public class HelloWorld {
 
         auroraNoisePhase += AURORA_NOISE_PHASE_INCREMENT * timePassage;
         cloudsNoisePhase += CLOUDS_NOISE_PHASE_INCREMENT * timePassage;
+        experimentalFilterNoisePhase += EXPERIMENTAL_FILTER_NOISE_PHASE_INCREMENT;
 
         globeAzimuth += timePassage;
         updateModelMatrix();
@@ -401,6 +409,9 @@ public class HelloWorld {
         glClear(GL_COLOR_BUFFER_BIT);
         screenShaderProgram.useProgram();
         screenShaderProgram.setTexture(screenTexture);
+        if (screenShaderProgram instanceof ExperimentalScreenShaderProgram) {
+            ((ExperimentalScreenShaderProgram) screenShaderProgram).setNoisePhase(experimentalFilterNoisePhase);
+        }
         screenGeometry.draw(screenShaderProgram);
 
         glfwSwapBuffers(window); // swap the color buffers
