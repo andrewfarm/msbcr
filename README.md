@@ -7,13 +7,14 @@ By Andrew Farm
 
 ## Introduction
 
-MSBCR is a real-time 3D world renderer. It is written in Java using
+MSBCR is a real-time 3D globe renderer. It is written in Java using
 [LWJGL](http://lwjgl.org/).
 
-The name is an acronym for _Mid Seier's Blatant Civilization Ripoff_. However,
-the project goals have changed greatly since the beginning and is meant to be a
-3D world renderer rather than a strategy game based on the works of the good
-people at Firaxis.
+## Features
+  * Exaggerated terrain using displacement map and normal map
+  * Shadows
+  * Animated clouds and auroras using Perlin noise
+  * Atmospheric Rayleigh scattering
 
 ## License
 
@@ -69,7 +70,7 @@ also need to add the following VM argument in order for GLFW to work properly:
   * Drag to rotate the camera around the globe.
   * Use arrow keys to change the camera angle.
   * Use + and - to speed up/slow down the passage of time.
-  * Use esc to toggle between a stationary and geostationary viewpoint.
+  * Use esc to toggle between a heliostationary and geostationary viewpoint.
   * Use number keys to switch between rendering modes.
     * 1 - normal
     * 2 - HDR
@@ -78,17 +79,15 @@ also need to add the following VM argument in order for GLFW to work properly:
 ## Support
 
 MSBCR has only been tested on macOS. If you encounter any problems building or
-running MSBCR, please submit an issue detailing the problem so I can promptly
-fix it and/or update this documentation.
+running MSBCR, please submit an issue detailing the problem.
 
 ## Issues
 
 MSBCR currently has some known issues, including:
 
   * Incorrect viewport size on non-retina displays
-  * Texture split along prime meridian
-  * Visible T-junctions along the edges of globe tiles at different levels of
-detail
-  * Poor performance rendering the atmosphere when zoomed in
-  * Dark spots along coastlines
+  * Texture glitch along prime meridian
+  * Visible T-junctions along the edges of globe tiles at different levels of detail
+  * Decreased performance rendering the atmosphere when zoomed in
+  * Dark spots along coastlines at low levels of detail
   * Subtle lighting artifacts and occasional shadow acne
