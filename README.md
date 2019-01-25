@@ -3,7 +3,7 @@
 By Andrew Farm  
 [http://www.andrewofarm.com/](http://www.andrewofarm.com/)
 
-![Screenshot](MSBCR.png)
+![MSBCR.png](MSBCR.png)
 
 ## Introduction
 
@@ -15,6 +15,29 @@ MSBCR is a real-time 3D globe renderer. It is written in Java using
   * Shadows
   * Animated clouds and auroras using Perlin noise
   * Atmospheric Rayleigh scattering
+
+## Gallery
+
+(Note: the gif framerates are lower than that of the program)
+
+![Planet](http://andrewofarm.com/images/projects/msbcr/planet.gif)
+![Aurora Borealis](http://andrewofarm.com/images/projects/msbcr/auroraborealis.gif)
+![Europe](http://andrewofarm.com/images/projects/msbcr/europe.gif)
+![Andes](http://andrewofarm.com/images/projects/msbcr/andes.gif)
+![Alaska](http://andrewofarm.com/images/projects/msbcr/alaska.gif)
+![Eastern North America](http://andrewofarm.com/images/projects/msbcr/easternna.gif)
+
+## Navigation
+
+  * Scroll to zoom.
+  * Drag to rotate the camera around the globe.
+  * Use arrow keys to change the camera angle.
+  * Use + and - to speed up/slow down the passage of time.
+  * Use esc to toggle between a heliostationary and geostationary viewpoint.
+  * Use number keys to switch between rendering modes.
+    * 1 - normal
+    * 2 - HDR
+    * 3 - experimental
 
 ## License
 
@@ -63,18 +86,6 @@ On some platforms, GLFW uses the X Window System. If this is the case, you will
 also need to add the following VM argument in order for GLFW to work properly:
 
     -XstartOnFirstThread
-
-## Navigation
-
-  * Scroll to zoom.
-  * Drag to rotate the camera around the globe.
-  * Use arrow keys to change the camera angle.
-  * Use + and - to speed up/slow down the passage of time.
-  * Use esc to toggle between a heliostationary and geostationary viewpoint.
-  * Use number keys to switch between rendering modes.
-    * 1 - normal
-    * 2 - HDR
-    * 3 - experimental
 
 ## Support
 
