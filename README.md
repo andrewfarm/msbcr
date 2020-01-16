@@ -51,7 +51,7 @@ MSBCR requires Java 8 and JDK 1.8.
 MSBCR uses LWJGL 3.1.2 as a Java wrapper around OpenGL. The required LWJGL
 binaries are included in this repository in the lwjgl/ directory.
 
-If you for some strange reason choose instead to download LWJGL from
+If you choose instead to download LWJGL from
 [lwjgl.org](http://lwjgl.org/), MSBCR uses these components:
 
   * LWJGL core
@@ -97,8 +97,8 @@ running MSBCR, please submit an issue detailing the problem.
 MSBCR currently has some known issues, including:
 
   * Incorrect viewport size on non-retina displays
-  * Texture glitch along prime meridian
-  * Visible T-junctions along the edges of globe tiles at different levels of detail
-  * Decreased performance rendering the atmosphere when zoomed in
+  * Texture glitch along prime meridian (can be fixed by splitting textures into a cubemap)
+  * Visible T-junctions along the edges of globe tiles at different levels of detail (can be fixed with tile skirts)
+  * Decreased performance rendering the atmosphere when zoomed in (shader can be optimized with a lookup table)
   * Dark spots along coastlines at low levels of detail
   * Subtle lighting artifacts and occasional shadow acne
