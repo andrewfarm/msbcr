@@ -11,7 +11,7 @@ MSBCR is a real-time 3D globe renderer. It is written in Java using
 [LWJGL](http://lwjgl.org/).
 
 ## Features
-  * Exaggerated terrain using displacement map and normal map
+  * Exaggerated terrain using displacement map and normal map on adaptive level-of-detail geometry
   * Shadows
   * Animated clouds and auroras using Perlin noise
   * Atmospheric Rayleigh scattering
